@@ -2,9 +2,11 @@
 #include "Log.h"
 #include "Utils.h"
 
-#include "Environment.h"
-
-EnvironmentDisplay::EnvironmentDisplay() : mInputLayout(NULL)
+EnvironmentDisplay::EnvironmentDisplay() : mInputLayout(NULL),
+    mRoomVB(NULL),
+    mRoomIB(NULL),
+    mBlockVB(NULL),
+    mBlockIB(NULL)
 {
 
 }
@@ -32,6 +34,7 @@ bool EnvironmentDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tec
     float bottom[3] = {1.0f, 0.0f, 0.0f};
     float middle[3] = {0.0f, 1.0f, 0.0f};
     float top[3] = {0.0f, 0.0f, 1.0f};
+    float wall[3] = {1.0f, 0.0f, 1.0f};
 
     float start = 0.0f;
 
@@ -63,12 +66,21 @@ bool EnvironmentDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tec
 		{ XMFLOAT3(start, start, +0.1f), top },
 		{ XMFLOAT3(start, +0.3f, +0.1f), top },
 		{ XMFLOAT3(+0.1f, +0.3f, +0.1f), top },
-		{ XMFLOAT3(+0.1f, start, +0.1f), top }
+		{ XMFLOAT3(+0.1f, start, +0.1f), top },
+
+        { XMFLOAT3(start, start, start), wall },
+		{ XMFLOAT3(start, +0.5f, start), wall },
+		{ XMFLOAT3(+0.1f, +0.5f, start), wall },
+		{ XMFLOAT3(+0.1f, start, start), wall },
+		{ XMFLOAT3(start, start, +0.1f), wall },
+		{ XMFLOAT3(start, +0.5f, +0.1f), wall },
+		{ XMFLOAT3(+0.1f, +0.5f, +0.1f), wall },
+		{ XMFLOAT3(+0.1f, start, +0.1f), wall }
     };
 
     D3D11_BUFFER_DESC vbd;
     vbd.Usage = D3D11_USAGE_IMMUTABLE;
-    vbd.ByteWidth = sizeof(EnvVertex) * 24;
+    vbd.ByteWidth = sizeof(EnvVertex) * 32;
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vbd.CPUAccessFlags = 0;
     vbd.MiscFlags = 0;
@@ -76,7 +88,7 @@ bool EnvironmentDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tec
     D3D11_SUBRESOURCE_DATA vinitData;
     vinitData.pSysMem = vertices;
 
-    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mEnvVB))){
+    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mBlockVB))){
         return false;
     }
 
@@ -143,11 +155,31 @@ bool EnvironmentDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tec
 		// top face
 		17, 21, 22,
 		17, 22, 18,
+
+        // front face
+		24, 25, 26,
+		24, 26, 27,
+
+		// back face
+		28, 30, 29,
+		28, 31, 30,
+
+		// left face
+		28, 29, 25,
+		28, 25, 24,
+
+		// right face
+		27, 26, 30,
+		27, 30, 31,
+
+		// top face
+		25, 29, 30,
+		25, 30, 26,
 	};
 
 	D3D11_BUFFER_DESC ibd;
     ibd.Usage = D3D11_USAGE_IMMUTABLE;
-    ibd.ByteWidth = sizeof(UINT) * 90;
+    ibd.ByteWidth = sizeof(UINT) * 120;
     ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
     ibd.CPUAccessFlags = 0;
     ibd.MiscFlags = 0;
@@ -155,7 +187,268 @@ bool EnvironmentDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tec
     D3D11_SUBRESOURCE_DATA iinitData;
     iinitData.pSysMem = indices;
 
-    if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mEnvIB))){
+    if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mBlockIB))){
+        return false;
+    }
+
+    return true;
+}
+
+bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room& room )
+{
+    //Room sides are made up of 4 rectangles that could surround a door
+    //Top is a single rectangle
+
+    ReleaseCOM( mRoomIB );
+    ReleaseCOM( mRoomVB );
+
+    float backStart = 0.0f;
+    float halfWidth = ( static_cast<float>(room.getWidth()) * 0.1f ) / 2.0f;
+    float halfDepth = ( static_cast<float>(room.getDepth()) * 0.1f ) / 2.0f;
+    float halfHeight = ( static_cast<float>(room.getHeight() + 1) * 0.1f ) / 2.0f;
+
+    float fullWidth = halfWidth * 2.0f;
+    float fullHeight = halfHeight * 2.0f;
+    float fullDepth = halfDepth * 2.0f;
+
+    float frontStart = fullDepth;
+
+    float wallColor[4] = { 1.0f, 1.0f, 0.0f };
+
+    float frontDoor[4] = { 0.0f, halfHeight, 0.0f, halfHeight };
+    float backDoor[4] = { 0.0f, halfHeight, 0.0f, halfHeight };
+    float leftDoor[4] = { 0.0f, halfHeight, 0.0f, halfHeight };
+    float rightDoor[4] = { 0.0f, halfHeight, 0.0f, halfHeight };
+
+    //Get the height and location
+    float h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Front ) + 1) * 0.1f;
+    float l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Front )) * 0.1f;
+
+    if( l >= 0.1f ){ //There is no door if h is 0
+        backDoor[0] = l; backDoor[2] = l + 0.1f;
+        backDoor[1] = h; backDoor[3] = h + 0.3f;
+    }
+
+    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Left ) + 1) * 0.1f;
+    l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Left )) * 0.1f;
+
+    if( l >= 0.1f ){ //There is no door if h is 0
+        rightDoor[0] = l; rightDoor[2] = l + 0.1f;
+        rightDoor[1] = h; rightDoor[3] = h + 0.3f;
+    }
+
+    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Back ) + 1) * 0.1f;
+    l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Back )) * 0.1f;
+
+    if( l >= 0.1f ){ //There is no door if h is 0
+        frontDoor[0] = l; frontDoor[2] = l + 0.1f;
+        frontDoor[1] = h; frontDoor[3] = h + 0.3f;
+    }
+
+    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Right ) + 1) * 0.1f;
+    l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Right )) * 0.1f;
+
+    if( l >= 0.1f ){ //There is no door if h is 0
+        leftDoor[0] = l; leftDoor[2] = l + 0.1f;
+        leftDoor[1] = h; leftDoor[3] = h + 0.3f;
+    }
+
+    EnvVertex vertices[] =
+    {
+        //Back Face 
+        //Bottom Strip
+        { XMFLOAT3(backStart, backStart, backStart), wallColor },
+		{ XMFLOAT3(backStart, backDoor[1], backStart), wallColor },
+        { XMFLOAT3(fullWidth, backDoor[1], backStart), wallColor },
+        { XMFLOAT3(fullWidth, backStart, backStart), wallColor },
+
+        //Top Strip
+        { XMFLOAT3(backStart, backDoor[3], backStart), wallColor },
+		{ XMFLOAT3(backStart, fullHeight, backStart), wallColor },
+        { XMFLOAT3(fullWidth, fullHeight, backStart), wallColor },
+        { XMFLOAT3(fullWidth, backDoor[3], backStart), wallColor },
+
+        //Door
+        { XMFLOAT3(backDoor[2], backDoor[1], backStart), wallColor },
+		{ XMFLOAT3(backDoor[2], backDoor[3], backStart), wallColor },
+        { XMFLOAT3(backDoor[0], backDoor[3], backStart), wallColor },
+        { XMFLOAT3(backDoor[0], backDoor[1], backStart), wallColor },
+
+        
+        //Right Face
+        //Bottom Strip
+        { XMFLOAT3(backStart, backStart, frontStart), wallColor },
+		{ XMFLOAT3(backStart, rightDoor[1], frontStart), wallColor },
+        { XMFLOAT3(backStart, rightDoor[1], backStart), wallColor },
+        { XMFLOAT3(backStart, backStart, backStart), wallColor },
+
+        //Top Strip
+        { XMFLOAT3(backStart, rightDoor[3], frontStart), wallColor },
+		{ XMFLOAT3(backStart, fullHeight, frontStart), wallColor },
+        { XMFLOAT3(backStart, fullHeight, backStart), wallColor },
+        { XMFLOAT3(backStart, rightDoor[3], backStart), wallColor },
+
+        //Door
+        { XMFLOAT3(backStart, rightDoor[1], rightDoor[0]), wallColor },
+		{ XMFLOAT3(backStart, rightDoor[3], rightDoor[0]), wallColor },
+        { XMFLOAT3(backStart, rightDoor[3], rightDoor[2]), wallColor },
+        { XMFLOAT3(backStart, rightDoor[1], rightDoor[2]), wallColor },
+
+
+        //Front Face 
+        //Bottom Strip
+        { XMFLOAT3(backStart, backStart, frontStart), wallColor },
+		{ XMFLOAT3(backStart, backDoor[1], frontStart), wallColor },
+        { XMFLOAT3(fullWidth, backDoor[1], frontStart), wallColor },
+        { XMFLOAT3(fullWidth, backStart, frontStart), wallColor },
+
+        //Top Strip
+        { XMFLOAT3(backStart, backDoor[3], frontStart), wallColor },
+		{ XMFLOAT3(backStart, fullHeight, frontStart), wallColor },
+        { XMFLOAT3(fullWidth, fullHeight, frontStart), wallColor },
+        { XMFLOAT3(fullWidth, backDoor[3], frontStart), wallColor },
+
+        //Door
+        { XMFLOAT3(backDoor[2], backDoor[1], frontStart), wallColor },
+		{ XMFLOAT3(backDoor[2], backDoor[3], frontStart), wallColor },
+        { XMFLOAT3(backDoor[0], backDoor[3], frontStart), wallColor },
+        { XMFLOAT3(backDoor[0], backDoor[1], frontStart), wallColor },
+
+        //Left Face
+        //Bottom Strip
+        { XMFLOAT3(fullWidth, backStart, frontStart), wallColor },
+		{ XMFLOAT3(fullWidth, leftDoor[1], frontStart), wallColor },
+        { XMFLOAT3(fullWidth, leftDoor[1], backStart), wallColor },
+        { XMFLOAT3(fullWidth, backStart, backStart), wallColor },
+
+        //Top Strip
+        { XMFLOAT3(fullWidth, leftDoor[3], frontStart), wallColor },
+		{ XMFLOAT3(fullWidth, fullHeight, frontStart), wallColor },
+        { XMFLOAT3(fullWidth, fullHeight, backStart), wallColor },
+        { XMFLOAT3(fullWidth, leftDoor[3], backStart), wallColor },
+
+        //Door
+        { XMFLOAT3(fullWidth, leftDoor[1], leftDoor[0]), wallColor },
+		{ XMFLOAT3(fullWidth, leftDoor[3], leftDoor[0]), wallColor },
+        { XMFLOAT3(fullWidth, leftDoor[3], leftDoor[2]), wallColor },
+        { XMFLOAT3(fullWidth, leftDoor[1], leftDoor[2]), wallColor },
+    };
+
+    D3D11_BUFFER_DESC vbd;
+    vbd.Usage = D3D11_USAGE_IMMUTABLE;
+    vbd.ByteWidth = sizeof(EnvVertex) * ( (16 * 4) + 4);
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vbd.CPUAccessFlags = 0;
+    vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+    D3D11_SUBRESOURCE_DATA vinitData;
+    vinitData.pSysMem = vertices;
+
+    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mRoomVB))){
+        return false;
+    }
+
+#define ROOM_INDICIES ( ( 4 * (3 * 8) ) )
+
+    UINT indices[ ROOM_INDICIES ];
+
+    UINT v = 0;
+    int s = 0;
+
+    //Gen indices for each side
+    for(int i = 0; i < ROOM_INDICIES; ){
+        //Bottom Section
+        if( s < 2 ){
+            indices[i] = v; indices[i+1] = v + 2; indices[i+2] = v + 1;
+            indices[i+3] = v; indices[i+4] = v + 3; indices[i+5] = v + 2;
+        }else{ //We need to gen indices in a different direction
+            indices[i] = v; indices[i+1] = v + 1; indices[i+2] = v + 2;
+            indices[i+3] = v; indices[i+4] = v + 2; indices[i+5] = v + 3;
+        }
+
+        v += 4;
+        i += 6;
+
+        //Top Section
+        if( s < 2 ){
+            indices[i] = v;
+            indices[i+1] = v + 2;
+            indices[i+2] = v + 1;
+
+            indices[i+3] = v;
+            indices[i+4] = v + 3;
+            indices[i+5] = v + 2;
+        }else{
+            indices[i] = v;
+            indices[i+1] = v + 1;
+            indices[i+2] = v + 2;
+
+            indices[i+3] = v;
+            indices[i+4] = v + 2;
+            indices[i+5] = v + 3;
+        }
+
+        v += 4;
+        i += 6;
+
+        //Left Middle Strip
+        if( s < 2 ){
+            indices[i] = v; 
+            indices[i+1] = v - 1;
+            indices[i+2] = v + 1;
+
+            indices[i+3] = v;
+            indices[i+4] = v - 6;
+            indices[i+5] = v - 1;
+        }else{
+            indices[i] = v; 
+            indices[i+1] = v + 1;
+            indices[i+2] = v - 1;
+
+            indices[i+3] = v;
+            indices[i+4] = v - 1;
+            indices[i+5] = v - 6;
+        }
+
+        //v += 4;
+        i += 6;
+
+        //Right Middle Strip
+        if( s < 2 ){
+            indices[i] = v + 2; 
+            indices[i+1] = v - 7;
+            indices[i+2] = v + 3;
+
+            indices[i+3] = v + 2;
+            indices[i+4] = v - 4;
+            indices[i+5] = v - 7;
+        }else{
+            indices[i] = v + 2; 
+            indices[i+1] = v + 3;
+            indices[i+2] = v - 7;
+
+            indices[i+3] = v + 2;
+            indices[i+4] = v - 7;
+            indices[i+5] = v - 4;
+        }
+
+        v += 4;
+        i += 6;
+
+        s++;
+    }
+
+    D3D11_BUFFER_DESC ibd;
+    ibd.Usage = D3D11_USAGE_IMMUTABLE;
+    ibd.ByteWidth = sizeof(UINT) * ROOM_INDICIES;
+    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    ibd.CPUAccessFlags = 0;
+    ibd.MiscFlags = 0;
+	ibd.StructureByteStride = 0;
+    D3D11_SUBRESOURCE_DATA iinitData;
+    iinitData.pSysMem = indices;
+
+    if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mRoomIB))){
         return false;
     }
 
@@ -165,6 +458,10 @@ bool EnvironmentDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tec
 void EnvironmentDisplay::clear()
 {
     ReleaseCOM( mInputLayout );
+    ReleaseCOM( mBlockVB );
+    ReleaseCOM( mBlockIB );
+    ReleaseCOM( mRoomVB );
+    ReleaseCOM( mRoomIB );
 }
 
 void EnvironmentDisplay::draw( ID3D11DeviceContext* device, Environment& env, ID3DX11Effect* fx, ID3DX11EffectTechnique* tech )
@@ -172,11 +469,11 @@ void EnvironmentDisplay::draw( ID3D11DeviceContext* device, Environment& env, ID
     device->IASetInputLayout( mInputLayout );
     device->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-    device->IASetIndexBuffer( mEnvIB, DXGI_FORMAT_R32_UINT, 0 );
+    device->IASetIndexBuffer( mBlockIB, DXGI_FORMAT_R32_UINT, 0 );
 
     UINT stride = sizeof(EnvVertex);
     UINT offset = 0;
-    device->IASetVertexBuffers(0, 1, &mEnvVB, &stride, &offset);
+    device->IASetVertexBuffers(0, 1, &mBlockVB, &stride, &offset);
     XMMATRIX world = XMMatrixIdentity();
     XMMATRIX viewProj = XMMatrixIdentity();
     XMMATRIX worldViewProj = XMMatrixIdentity();
@@ -198,5 +495,18 @@ void EnvironmentDisplay::draw( ID3D11DeviceContext* device, Environment& env, ID
                 device->DrawIndexed(30, ( env.getRoom().getBlockHeight(i, j) * 30 ), 0);
             }
         }
+    }
+
+    world = XMMatrixIdentity();
+
+    worldViewProj = world * viewProj;
+    mfxViewProj->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
+
+    device->IASetIndexBuffer( mRoomIB, DXGI_FORMAT_R32_UINT, 0 );
+    device->IASetVertexBuffers(0, 1, &mRoomVB, &stride, &offset);
+
+    for(UINT p = 0; p < techDesc.Passes; ++p){
+        tech->GetPassByIndex(p)->Apply(0, device);
+        device->DrawIndexed(ROOM_INDICIES, 0, 0);
     }
 }

@@ -20,6 +20,8 @@ public:
     inline ID3DX11EffectTechnique* getTechnique();
     inline ID3DX11Effect* getFX();
 
+    inline EnvironmentDisplay& getEnvDis();
+
 protected:
 
     ID3DX11Effect* mFX;
@@ -30,5 +32,7 @@ protected:
 
 inline ID3DX11EffectTechnique* WorldDisplay::getTechnique(){return mTech;}
 inline ID3DX11Effect* WorldDisplay::getFX(){return mFX;}
+
+inline EnvironmentDisplay& WorldDisplay::getEnvDis(){return mEnvDisplay;}
 
 #endif

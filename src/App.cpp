@@ -9,7 +9,26 @@ App::App()
 
 void App::handleInput( RAWINPUT* input )
 {
+    if (input->header.dwType== RIM_TYPEKEYBOARD){
+        USHORT VKey = input->data.keyboard.VKey;
 
+        float camSpeed = 0.25f;
+
+        bool keyUp = input->data.keyboard.Flags & RI_KEY_BREAK;
+
+        switch( VKey ){
+        case VK_SPACE:
+            {
+                WorldGenerator worldGen;
+                mWorld.getEnv().getRoom().clear();
+                mWorld.getEnv().getRoom().init( 16, 16, 6 );
+                
+                worldGen.genRoom( mWorld.getEnv().getRoom() );
+                mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );
+            }
+            break;
+        }
+    }
 }
 
 int App::run( HINSTANCE hInstance, int nCmdShow )
@@ -55,7 +74,7 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 			}
 			else
 			{
-				Sleep(100);
+				Sleep(10);
 			}
         }
     }
@@ -142,10 +161,12 @@ bool App::init( )
         return false;
     }
 
-    mWorld.getEnv().getRoom().init( 16, 16, 3 );
+    mWorld.getEnv().getRoom().init( 16, 16, 6 );
 
     WorldGenerator worldGen;
     worldGen.genRoom( mWorld.getEnv().getRoom() );
+
+    mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );
 
     return true;
 }

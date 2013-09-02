@@ -1,6 +1,8 @@
 #ifndef ENVIRONMENT_DISPLAY_H
 #define ENVIRONMENT_DISPLAY_H
 
+#include "Environment.h"
+
 #include <D3D11.h>
 #include <windows.h>
 #include <xnamath.h>
@@ -12,8 +14,6 @@ struct EnvVertex{
     XMFLOAT4 color;
 };
 
-class Environment;
-
 class EnvironmentDisplay{
 public:
 
@@ -24,12 +24,17 @@ public:
 
     void draw( ID3D11DeviceContext* device, Environment& env, ID3DX11Effect* fx, ID3DX11EffectTechnique* tech );
 
+    bool createRoomMesh( ID3D11Device* device, Environment::Room& room );
+
 protected:
 
     ID3D11InputLayout* mInputLayout;
 
-    ID3D11Buffer* mEnvVB;
-    ID3D11Buffer* mEnvIB;
+    ID3D11Buffer* mBlockVB;
+    ID3D11Buffer* mBlockIB;
+
+    ID3D11Buffer* mRoomVB;
+    ID3D11Buffer* mRoomIB;
 };
 
 #endif

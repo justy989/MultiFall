@@ -6,11 +6,6 @@
 #define ENV_ROOM_MAX_HEIGHT 8
 #define ENV_ROOM_MAX_EXIT_HEIGHT 3
 
-#define ENV_ROOM_EXIT_UP 0
-#define ENV_ROOM_EXIT_LEFT 1
-#define ENV_ROOM_EXIT_DOWN 2
-#define ENV_ROOM_EXIT_RIGHT 3
-
 class Environment{
 public:
 
@@ -23,6 +18,13 @@ public:
 
         //Holds an exit in a room
         struct Exit{
+            enum Side{
+                Front,
+                Left,
+                Back,
+                Right
+            };
+
             byte height; //How high the door is
             byte location; //The x or y location based the side the door is on
         };
@@ -49,7 +51,7 @@ public:
         void clear();
 
         //set the exit
-        void setExit( byte side, byte height, byte location );
+        void setExit( Exit::Side side, byte height, byte location );
 
         //set a block
         void setBlock( byte i, byte j, byte height, Block::RampDirection ramp );
@@ -61,10 +63,10 @@ public:
         byte getBlockHeight( byte i, byte j );
 
         //Get the height of an exit
-        byte getExitHeight( byte side );
+        byte getExitHeight( Exit::Side side );
 
         //Get the location of an exit
-        byte getExitLocation( byte side );
+        byte getExitLocation( Exit::Side side );
 
         inline byte getWidth();
         inline byte getDepth();

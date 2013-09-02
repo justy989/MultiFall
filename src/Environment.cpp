@@ -64,10 +64,10 @@ void Environment::Room::clear()
     }
 }
 
-void Environment::Room::setExit( byte side, byte height, byte location )
+void Environment::Room::setExit( Exit::Side side, byte height, byte location )
 {
     assert( height <= ENV_ROOM_MAX_EXIT_HEIGHT );
-    assert( side <= ENV_ROOM_EXIT_RIGHT );
+    assert( side <= Exit::Side::Right );
 
     mExits[side].height = height;
     mExits[side].location = location;
@@ -98,16 +98,16 @@ byte Environment::Room::getBlockHeight( byte i, byte j )
     return mBlocks[i][j].height;
 }
 
-byte Environment::Room::getExitHeight( byte side )
+byte Environment::Room::getExitHeight( Exit::Side  side )
 {
-    assert( side <= ENV_ROOM_EXIT_RIGHT );
+    assert( side <= Exit::Side::Right );
 
     return mExits[side].height;
 }
 
-byte Environment::Room::getExitLocation( byte side )
+byte Environment::Room::getExitLocation( Exit::Side side )
 {
-    assert( side <= ENV_ROOM_EXIT_RIGHT );
+    assert( side <= Exit::Side::Right );
 
     return mExits[side].location;
 }
