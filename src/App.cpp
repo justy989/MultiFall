@@ -2,6 +2,8 @@
 #include "Log.h"
 #include "Utils.h"
 
+#include "WorldGenerator.h"
+
 App::App()
 {}
 
@@ -140,6 +142,11 @@ bool App::init( )
         return false;
     }
 
+    mWorld.getEnv().getRoom().init( 16, 16, 3 );
+
+    WorldGenerator worldGen;
+    worldGen.genRoom( mWorld.getEnv().getRoom() );
+
     return true;
 }
 
@@ -159,22 +166,22 @@ void App::draw( )
     //Set VB, IA, Textures etc...
 
 	// Set constants
-	//XMMATRIX world = XMLoadFloat4x4(&mWorld);
+	XMMATRIX world = XMMatrixTranslation( 0.3f, 0.3f, 0.0f );
     XMMATRIX view  = XMLoadFloat4x4(&mCamera.getView());
     XMMATRIX proj  = XMLoadFloat4x4(&mCamera.getProj());
-	XMMATRIX worldViewProj = view * proj;
+	XMMATRIX ViewProj = world * view * proj;
 
-	ID3DX11EffectMatrixVariable* mfxWorldViewProj = mWorldDisplay.getFX()->GetVariableByName("gWorldViewProj")->AsMatrix();
-	mfxWorldViewProj->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
+	ID3DX11EffectMatrixVariable* mfxViewProj = mWorldDisplay.getFX()->GetVariableByName("gWorldViewProj")->AsMatrix();
+	mfxViewProj->SetMatrix(reinterpret_cast<float*>(&ViewProj));
 
     D3DX11_TECHNIQUE_DESC techDesc;
     mWorldDisplay.getTechnique()->GetDesc( &techDesc );
 
-    for(UINT p = 0; p < techDesc.Passes; ++p)
-    {
-        mWorldDisplay.getTechnique()->GetPassByIndex(p)->Apply(0, mWindow.getDeviceConext());
+    for(UINT p = 0; p < techDesc.Passes; ++p){
+        mWorldDisplay.getTechnique()->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
         
 		//Draw Indexed Primitives
+        mWorldDisplay.draw( mWindow.getDeviceContext(), mWorld );
     }
 
     mWindow.getSwapChain()->Present(0, 0);

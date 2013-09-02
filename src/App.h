@@ -6,6 +6,7 @@
 #include "Camera.h"
 
 #include "WorldDisplay.h"
+#include "World.h"
 
 #include <d3dx11effect.h>
 
@@ -36,6 +37,7 @@ protected:
     Camera mCamera;
 
     WorldDisplay mWorldDisplay;
+    World mWorld;
 };
 
 #endif

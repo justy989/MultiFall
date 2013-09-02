@@ -41,7 +41,7 @@ public:
 
 	inline float getAspectRatio();
     inline ID3D11Device* getDevice();
-    inline ID3D11DeviceContext* getDeviceConext();
+    inline ID3D11DeviceContext* getDeviceContext();
     inline IDXGISwapChain* getSwapChain();
     inline bool isPaused();
     inline bool isMinimized();
@@ -89,7 +89,7 @@ protected:
 
 inline float DX11Window::getAspectRatio(){return mWindowWidth / mWindowHeight;}
 inline ID3D11Device* DX11Window::getDevice(){return md3dDevice;}
-inline ID3D11DeviceContext* DX11Window::getDeviceConext(){return md3dImmediateContext;}
+inline ID3D11DeviceContext* DX11Window::getDeviceContext(){return md3dImmediateContext;}
 inline IDXGISwapChain* DX11Window::getSwapChain(){return mSwapChain;}
 inline bool DX11Window::isPaused(){return mIsPaused;}
 inline bool DX11Window::isMinimized(){return mIsMinimized;}

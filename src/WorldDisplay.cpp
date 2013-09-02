@@ -3,6 +3,8 @@
 #include "Log.h"
 #include "Utils.h"
 
+#include "World.h"
+
 #include <D3DX11.h>
 
 WorldDisplay::WorldDisplay() : mFX(NULL),
@@ -63,9 +65,9 @@ bool WorldDisplay::init( ID3D11Device* device )
     return true;
 }
 
-void WorldDisplay::draw( ID3D11Device* device, World& world )
+void WorldDisplay::draw( ID3D11DeviceContext* device, World& world )
 {
-    //mEnvDisplay.draw( device, world.getEnvironment() );
+    mEnvDisplay.draw( device, world.getEnv(), mFX, mTech );
 }
 
 void WorldDisplay::clear()

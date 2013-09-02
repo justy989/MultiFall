@@ -13,7 +13,7 @@ public:
 
     bool init( ID3D11Device* device );
 
-    void draw( ID3D11Device* device, World& world );
+    void draw( ID3D11DeviceContext* device, World& world );
 
     void clear();
 

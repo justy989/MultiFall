@@ -12,6 +12,8 @@ struct EnvVertex{
     XMFLOAT4 color;
 };
 
+class Environment;
+
 class EnvironmentDisplay{
 public:
 
@@ -20,9 +22,14 @@ public:
     bool init( ID3D11Device* device, ID3DX11EffectTechnique* tech );
     void clear();
 
+    void draw( ID3D11DeviceContext* device, Environment& env, ID3DX11Effect* fx, ID3DX11EffectTechnique* tech );
+
 protected:
 
     ID3D11InputLayout* mInputLayout;
+
+    ID3D11Buffer* mEnvVB;
+    ID3D11Buffer* mEnvIB;
 };
 
 #endif
