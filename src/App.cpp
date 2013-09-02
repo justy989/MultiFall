@@ -5,11 +5,24 @@
 #include "WorldGenerator.h"
 
 App::App()
-{}
+{
+    camKeyDown[0] = false;
+    camKeyDown[1] = false;
+    camKeyDown[2] = false;
+    camKeyDown[3] = false;
+}
 
 void App::handleInput( RAWINPUT* input )
 {
-    if (input->header.dwType== RIM_TYPEKEYBOARD){
+    if (input->header.dwType== RIM_TYPEMOUSE){
+        //Mouse position on window
+        long mx = input->data.mouse.lLastX;
+        long my = input->data.mouse.lLastY;
+
+        mCamera.modPitch( (float)(mx) * 0.001f );
+        mCamera.modYaw( (float)(my) * -0.001f );
+
+    }else if (input->header.dwType== RIM_TYPEKEYBOARD){
         USHORT VKey = input->data.keyboard.VKey;
 
         float camSpeed = 0.25f;
@@ -26,6 +39,20 @@ void App::handleInput( RAWINPUT* input )
                 worldGen.genRoom( mWorld.getEnv().getRoom() );
                 mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );
             }
+            break;
+        case 'A':
+            camKeyDown[0] = !keyUp;
+            break;
+        case 'D':
+            camKeyDown[1] = !keyUp;
+            break;
+        case 'W':
+            camKeyDown[2] = !keyUp;
+            break;
+        case 'S':
+            camKeyDown[3] = !keyUp;
+            break;
+        default:
             break;
         }
     }
@@ -65,6 +92,16 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 
             if( !mWindow.isPaused() && mTimer.getTimeElapsed() > LIMIT_60_FPS )
 			{
+                if( camKeyDown[0] ){
+                    mCamera.moveForwardBack( 0.03f );
+                }else if( camKeyDown[1] ){
+                    mCamera.moveForwardBack( -0.03f );
+                }else if( camKeyDown[2] ){
+                    mCamera.moveLeftRight( 0.03f );
+                }else if( camKeyDown[3] ){
+                    mCamera.moveLeftRight( -0.03f );
+                }
+
                 mCamera.update( mWindow.getAspectRatio() );
 
 				update();	

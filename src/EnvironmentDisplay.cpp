@@ -6,7 +6,10 @@ EnvironmentDisplay::EnvironmentDisplay() : mInputLayout(NULL),
     mRoomVB(NULL),
     mRoomIB(NULL),
     mBlockVB(NULL),
-    mBlockIB(NULL)
+    mBlockIB(NULL),
+    mHeightInterval( 0.3f ),
+    mBlockDimension( 0.1f ),
+    mDoorHeight( 0.2f )
 {
 
 }
@@ -42,40 +45,40 @@ bool EnvironmentDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tec
     EnvVertex vertices[] =
     {
 		{ XMFLOAT3(start, start, start), bottom },
-		{ XMFLOAT3(start, +0.1f, start), bottom },
-		{ XMFLOAT3(+0.1f, +0.1f, start), bottom },
-		{ XMFLOAT3(+0.1f, start, start), bottom },
-		{ XMFLOAT3(start, start, +0.1f), bottom },
-		{ XMFLOAT3(start, +0.1f, +0.1f), bottom },
-		{ XMFLOAT3(+0.1f, +0.1f, +0.1f), bottom },
-		{ XMFLOAT3(+0.1f, start, +0.1f), bottom },
+		{ XMFLOAT3(start, mHeightInterval, start), bottom },
+		{ XMFLOAT3(mBlockDimension, mHeightInterval, start), bottom },
+		{ XMFLOAT3(mBlockDimension, start, start), bottom },
+		{ XMFLOAT3(start, start, mBlockDimension), bottom },
+		{ XMFLOAT3(start, mHeightInterval, mBlockDimension), bottom },
+		{ XMFLOAT3(mBlockDimension, mHeightInterval, mBlockDimension), bottom },
+		{ XMFLOAT3(mBlockDimension, start, mBlockDimension), bottom },
 
         { XMFLOAT3(start, start, start), middle },
-		{ XMFLOAT3(start, +0.2f, start), middle },
-		{ XMFLOAT3(+0.1f, +0.2f, start), middle },
-		{ XMFLOAT3(+0.1f, start, start), middle },
-		{ XMFLOAT3(start, start, +0.1f), middle },
-		{ XMFLOAT3(start, +0.2f, +0.1f), middle },
-		{ XMFLOAT3(+0.1f, +0.2f, +0.1f), middle },
-		{ XMFLOAT3(+0.1f, start, +0.1f), middle },
+		{ XMFLOAT3(start, 2.0f * mHeightInterval, start), middle },
+		{ XMFLOAT3(mBlockDimension, 2.0f * mHeightInterval, start), middle },
+		{ XMFLOAT3(mBlockDimension, start, start), middle },
+		{ XMFLOAT3(start, start, mBlockDimension), middle },
+		{ XMFLOAT3(start, 2.0f * mHeightInterval, mBlockDimension), middle },
+		{ XMFLOAT3(mBlockDimension, 2.0f * mHeightInterval, mBlockDimension), middle },
+		{ XMFLOAT3(mBlockDimension, start, mBlockDimension), middle },
 
         { XMFLOAT3(start, start, start), top },
-		{ XMFLOAT3(start, +0.3f, start), top },
-		{ XMFLOAT3(+0.1f, +0.3f, start), top },
-		{ XMFLOAT3(+0.1f, start, start), top },
-		{ XMFLOAT3(start, start, +0.1f), top },
-		{ XMFLOAT3(start, +0.3f, +0.1f), top },
-		{ XMFLOAT3(+0.1f, +0.3f, +0.1f), top },
-		{ XMFLOAT3(+0.1f, start, +0.1f), top },
+		{ XMFLOAT3(start, 3.0f * mHeightInterval, start), top },
+		{ XMFLOAT3(mBlockDimension, 3.0f * mHeightInterval, start), top },
+		{ XMFLOAT3(mBlockDimension, start, start), top },
+		{ XMFLOAT3(start, start, mBlockDimension), top },
+		{ XMFLOAT3(start, 3.0f * mHeightInterval, mBlockDimension), top },
+		{ XMFLOAT3(mBlockDimension, 3.0f * mHeightInterval, mBlockDimension), top },
+		{ XMFLOAT3(mBlockDimension, start, mBlockDimension), top },
 
         { XMFLOAT3(start, start, start), wall },
-		{ XMFLOAT3(start, +0.5f, start), wall },
-		{ XMFLOAT3(+0.1f, +0.5f, start), wall },
-		{ XMFLOAT3(+0.1f, start, start), wall },
-		{ XMFLOAT3(start, start, +0.1f), wall },
-		{ XMFLOAT3(start, +0.5f, +0.1f), wall },
-		{ XMFLOAT3(+0.1f, +0.5f, +0.1f), wall },
-		{ XMFLOAT3(+0.1f, start, +0.1f), wall }
+		{ XMFLOAT3(start, 4.0f * mHeightInterval, start), wall },
+		{ XMFLOAT3(mBlockDimension, 4.0f * mHeightInterval, start), wall },
+		{ XMFLOAT3(mBlockDimension, start, start), wall },
+		{ XMFLOAT3(start, start, mBlockDimension), wall },
+		{ XMFLOAT3(start, 4.0f * mHeightInterval, mBlockDimension), wall },
+		{ XMFLOAT3(mBlockDimension, 4.0f * mHeightInterval, mBlockDimension), wall },
+		{ XMFLOAT3(mBlockDimension, start, mBlockDimension), wall }
     };
 
     D3D11_BUFFER_DESC vbd;
@@ -203,9 +206,9 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
     ReleaseCOM( mRoomVB );
 
     float backStart = 0.0f;
-    float halfWidth = ( static_cast<float>(room.getWidth()) * 0.1f ) / 2.0f;
-    float halfDepth = ( static_cast<float>(room.getDepth()) * 0.1f ) / 2.0f;
-    float halfHeight = ( static_cast<float>(room.getHeight() + 1) * 0.1f ) / 2.0f;
+    float halfWidth = ( static_cast<float>(room.getWidth()) * mBlockDimension ) / 2.0f;
+    float halfDepth = ( static_cast<float>(room.getDepth()) * mBlockDimension ) / 2.0f;
+    float halfHeight = ( static_cast<float>(room.getHeight() + 1) * mHeightInterval ) / 2.0f;
 
     float fullWidth = halfWidth * 2.0f;
     float fullHeight = halfHeight * 2.0f;
@@ -221,36 +224,36 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
     float rightDoor[4] = { 0.0f, halfHeight, 0.0f, halfHeight };
 
     //Get the height and location
-    float h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Front ) + 1) * 0.1f;
-    float l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Front )) * 0.1f;
+    float h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Front ) + 1) * mHeightInterval;
+    float l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Front )) * mBlockDimension;
 
     if( l >= 0.1f ){ //There is no door if h is 0
-        backDoor[0] = l; backDoor[2] = l + 0.1f;
-        backDoor[1] = h; backDoor[3] = h + 0.3f;
+        backDoor[0] = l; backDoor[2] = l + mBlockDimension;
+        backDoor[1] = h; backDoor[3] = h + mDoorHeight;
     }
 
-    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Left ) + 1) * 0.1f;
-    l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Left )) * 0.1f;
+    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Left ) + 1) * mHeightInterval;
+    l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Left )) * mBlockDimension;
 
     if( l >= 0.1f ){ //There is no door if h is 0
-        rightDoor[0] = l; rightDoor[2] = l + 0.1f;
-        rightDoor[1] = h; rightDoor[3] = h + 0.3f;
+        rightDoor[0] = l; rightDoor[2] = l + mBlockDimension;
+        rightDoor[1] = h; rightDoor[3] = h + mDoorHeight;
     }
 
-    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Back ) + 1) * 0.1f;
-    l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Back )) * 0.1f;
+    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Back ) + 1) * mHeightInterval;
+    l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Back )) * mBlockDimension;
 
     if( l >= 0.1f ){ //There is no door if h is 0
-        frontDoor[0] = l; frontDoor[2] = l + 0.1f;
-        frontDoor[1] = h; frontDoor[3] = h + 0.3f;
+        frontDoor[0] = l; frontDoor[2] = l + mBlockDimension;
+        frontDoor[1] = h; frontDoor[3] = h + mDoorHeight;
     }
 
-    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Right ) + 1) * 0.1f;
-    l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Right )) * 0.1f;
+    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Right ) + 1) * mHeightInterval;
+    l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Right )) * mBlockDimension;
 
     if( l >= 0.1f ){ //There is no door if h is 0
-        leftDoor[0] = l; leftDoor[2] = l + 0.1f;
-        leftDoor[1] = h; leftDoor[3] = h + 0.3f;
+        leftDoor[0] = l; leftDoor[2] = l + mBlockDimension;
+        leftDoor[1] = h; leftDoor[3] = h + mDoorHeight;
     }
 
     EnvVertex vertices[] =

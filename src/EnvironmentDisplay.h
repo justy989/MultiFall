@@ -26,6 +26,10 @@ public:
 
     bool createRoomMesh( ID3D11Device* device, Environment::Room& room );
 
+    inline void setBlockDimension( float b );
+    inline void setHeightInterval( float h );
+    inline void setDoorHeight( float d );
+
 protected:
 
     ID3D11InputLayout* mInputLayout;
@@ -35,6 +39,14 @@ protected:
 
     ID3D11Buffer* mRoomVB;
     ID3D11Buffer* mRoomIB;
+
+    float mHeightInterval;
+    float mBlockDimension;
+    float mDoorHeight;
 };
+
+inline void EnvironmentDisplay::setHeightInterval( float h ){mHeightInterval = h;}
+inline void EnvironmentDisplay::setDoorHeight( float d ){mDoorHeight = d;}
+inline void EnvironmentDisplay::setBlockDimension( float b ){mBlockDimension = b;}
 
 #endif

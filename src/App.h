@@ -37,7 +37,11 @@ protected:
     Camera mCamera;
 
     WorldDisplay mWorldDisplay;
+
     World mWorld;
+
+    //Tmp
+    bool camKeyDown[4];
 };
 
 #endif
