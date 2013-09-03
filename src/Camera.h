@@ -9,17 +9,27 @@ public:
 
     Camera();
 
+    //Update the matricies based on changes in camera position and rotation
     void update( float aspectRatio );
+
+    //Change the pitch
+    inline void modPitch( float p );
+
+    //Change the yaw
+    inline void modYaw( float y );
+
+    //Move forward or back based on whether d is positive or negative
+    inline void moveForwardBack( float d );
+
+    //Move left or right based on whether d is positive or negative
+    inline void moveLeftRight( float d );
+
+    //Accessors
 
     inline const XMFLOAT4X4& getView();
     inline const XMFLOAT4X4& getProj();
 
     inline XMFLOAT4& getPosition();
-    inline void modPitch( float p );
-    inline void modYaw( float y );
-
-    inline void moveForwardBack( float d );
-    inline void moveLeftRight( float d );
 
 protected:
 

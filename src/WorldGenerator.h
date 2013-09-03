@@ -9,9 +9,11 @@ public:
 
     WorldGenerator();
 
+    //Generate a room's exits and floor layout
     void genRoom( Environment::Room& room );
 
 protected:
+
     Random mRand;
 };
 

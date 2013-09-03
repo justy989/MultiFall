@@ -3,6 +3,7 @@
 
 #include "Utils.h"
 
+#define ENV_ROOM_EXIT_COUNT 4
 #define ENV_ROOM_MAX_HEIGHT 8
 #define ENV_ROOM_MAX_EXIT_HEIGHT 3
 
@@ -40,8 +41,10 @@ public:
                 Right
             };
 
-            byte ramp;
-            byte height;
+            byte ramp; //is this a ramp? If so, what kind?
+            byte height; //Height of the floor at this block
+            byte id; //ID for potential tiling
+            byte padding; //Just padding
         };
 
         //initialize a room to certain dimensions
@@ -80,7 +83,7 @@ public:
 
         Block** mBlocks;
 
-        Exit mExits[4];
+        Exit mExits[ENV_ROOM_EXIT_COUNT];
     };
 
     Environment();

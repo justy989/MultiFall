@@ -22,12 +22,19 @@ public:
 
     EnvironmentDisplay();
 
+    //Init Environment Display by setting the input layout
     bool init( ID3D11Device* device, ID3DX11EffectTechnique* tech );
+
+    //Clear all vertex and index buffers
     void clear();
 
+    //Draw the last room mesh that was created
     void draw( ID3D11DeviceContext* device, Environment& env, ID3DX11Effect* fx, ID3DX11EffectTechnique* tech );
 
+    //Create and save a mesh from a room
     bool createRoomMesh( ID3D11Device* device, Environment::Room& room );
+
+    //Accessors
 
     inline void setBlockDimension( float b );
     inline void setHeightInterval( float h );
@@ -64,12 +71,12 @@ protected:
     ID3D11Buffer* mWaterVB;
     ID3D11Buffer* mWaterIB;
 
-    int mRoomSize;
-    int mWallIndices;
+    int mRoomSize; //Size of the room in Blocks
+    int mWallIndices; //How many wall indices need to be drawn
 
-    float mHeightInterval;
-    float mBlockDimension;
-    float mDoorHeight;
+    float mHeightInterval; //Height between levels
+    float mBlockDimension; //Block width and height
+    float mDoorHeight; //Door height
 };
 
 inline void EnvironmentDisplay::setHeightInterval( float h ){mHeightInterval = h;}

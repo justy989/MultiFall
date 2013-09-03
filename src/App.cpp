@@ -17,10 +17,11 @@ App::App()
 void App::handleInput( RAWINPUT* input )
 {
     if (input->header.dwType== RIM_TYPEMOUSE){
-        //Mouse position on window
+        //Mouse change since the last input received
         long mx = input->data.mouse.lLastX;
         long my = input->data.mouse.lLastY;
 
+        //0.001f is hardcoded, but we should use a sensitivity configuration setting
         mCamera.modPitch( (float)(mx) * 0.001f );
         mCamera.modYaw( (float)(my) * -0.001f );
 
@@ -52,7 +53,7 @@ void App::handleInput( RAWINPUT* input )
         case 'S':
             camKeyDown[3] = !keyUp;
             break;
-        case 'P':
+        case 'P': //Toggle wireframe
             {
                 if( keyUp ){
                     break;
@@ -82,43 +83,13 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
         return 1;
     }
 
-    if( !mWindow.init( L"MultiFall", 1280, 1024, hInstance, nCmdShow, this ) ){
+    if( !mWindow.init( L"MultiFall", 800, 600, hInstance, nCmdShow, this ) ){
         return 1;
     }
 
     if( !init() ){
         return 1;
     }
-
-    D3D11_RASTERIZER_DESC rasterDesc;
-
-     // Setup the raster description which will determine how and what polygons will be drawn.
-     rasterDesc.AntialiasedLineEnable = false;
-     rasterDesc.CullMode = D3D11_CULL_BACK;
-     rasterDesc.DepthBias = 0;
-     rasterDesc.DepthBiasClamp = 0.0f;
-     rasterDesc.DepthClipEnable = true;
-     rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
-     rasterDesc.FrontCounterClockwise = false;
-     rasterDesc.MultisampleEnable = false;
-     rasterDesc.ScissorEnable = false;
-     rasterDesc.SlopeScaledDepthBias = 0.0f;
-
-     mWindow.getDevice()->CreateRasterizerState(&rasterDesc, &mWireFrameRS);
-
-     // Setup the raster description which will determine how and what polygons will be drawn.
-     rasterDesc.AntialiasedLineEnable = false;
-     rasterDesc.CullMode = D3D11_CULL_BACK;
-     rasterDesc.DepthBias = 0;
-     rasterDesc.DepthBiasClamp = 0.0f;
-     rasterDesc.DepthClipEnable = true;
-     rasterDesc.FillMode = D3D11_FILL_SOLID;
-     rasterDesc.FrontCounterClockwise = false;
-     rasterDesc.MultisampleEnable = false;
-     rasterDesc.ScissorEnable = false;
-     rasterDesc.SlopeScaledDepthBias = 0.0f;
-
-     mWindow.getDevice()->CreateRasterizerState(&rasterDesc, &mFillRS);
     
     mTimer.start();
 
@@ -161,88 +132,47 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
         }
     }
 
+    LOG_INFO << "Goodbye cruel world of MultiFall" << LOG_ENDL;
 	return (int)msg.wParam;
 }
 
 bool App::init( )
 {
-    /*
-    float color[3] = {1.0f, 1.0f, 1.0f};
-
-    //Fill in vertex and index buffers
-    EnvVertex vertices[] =
-    {
-		{ XMFLOAT3(-1.0f, -1.0f, -1.0f), color },
-		{ XMFLOAT3(-1.0f, +1.0f, -1.0f), color },
-		{ XMFLOAT3(+1.0f, +1.0f, -1.0f), color },
-		{ XMFLOAT3(+1.0f, -1.0f, -1.0f), color },
-		{ XMFLOAT3(-1.0f, -1.0f, +1.0f), color },
-		{ XMFLOAT3(-1.0f, +1.0f, +1.0f), color },
-		{ XMFLOAT3(+1.0f, +1.0f, +1.0f), color },
-		{ XMFLOAT3(+1.0f, -1.0f, +1.0f), color }
-    };
-
-    D3D11_BUFFER_DESC vbd;
-    vbd.Usage = D3D11_USAGE_IMMUTABLE;
-    vbd.ByteWidth = sizeof(EnvVertex) * 8;
-    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vbd.CPUAccessFlags = 0;
-    vbd.MiscFlags = 0;
-	vbd.StructureByteStride = 0;
-    D3D11_SUBRESOURCE_DATA vinitData;
-    vinitData.pSysMem = vertices;
-
-    if(FAILED(mWindow.getDevice()->CreateBuffer(&vbd, &vinitData, &mEnvVB))){
-        return false;
-    }*/
-
-	// Create the index buffer
-    /*
-	UINT indices[] = {
-		// front face
-		0, 1, 2,
-		0, 2, 3,
-
-		// back face
-		4, 6, 5,
-		4, 7, 6,
-
-		// left face
-		4, 5, 1,
-		4, 1, 0,
-
-		// right face
-		3, 2, 6,
-		3, 6, 7,
-
-		// top face
-		1, 5, 6,
-		1, 6, 2,
-
-		// bottom face
-		4, 0, 3, 
-		4, 3, 7
-	};
-
-	D3D11_BUFFER_DESC ibd;
-    ibd.Usage = D3D11_USAGE_IMMUTABLE;
-    ibd.ByteWidth = sizeof(UINT) * 36;
-    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    ibd.CPUAccessFlags = 0;
-    ibd.MiscFlags = 0;
-	ibd.StructureByteStride = 0;
-    D3D11_SUBRESOURCE_DATA iinitData;
-    iinitData.pSysMem = indices;
-
-    if(FAILED(mWindow.getDevice()->CreateBuffer(&ibd, &iinitData, &mEnvIB))){
-        return false;
-    }
-    */
-
     if( !mWorldDisplay.init( mWindow.getDevice() ) ){
         return false;
     }
 
+    D3D11_RASTERIZER_DESC rasterDesc;
+
+    // Setup the raster description which will determine how and what polygons will be drawn.
+    rasterDesc.AntialiasedLineEnable = false;
+    rasterDesc.CullMode = D3D11_CULL_BACK;
+    rasterDesc.DepthBias = 0;
+    rasterDesc.DepthBiasClamp = 0.0f;
+    rasterDesc.DepthClipEnable = true;
+    rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
+    rasterDesc.FrontCounterClockwise = false;
+    rasterDesc.MultisampleEnable = false;
+    rasterDesc.ScissorEnable = false;
+    rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+    mWindow.getDevice()->CreateRasterizerState(&rasterDesc, &mWireFrameRS);
+
+    // Setup the raster description which will determine how and what polygons will be drawn.
+    rasterDesc.AntialiasedLineEnable = false;
+    rasterDesc.CullMode = D3D11_CULL_BACK;
+    rasterDesc.DepthBias = 0;
+    rasterDesc.DepthBiasClamp = 0.0f;
+    rasterDesc.DepthClipEnable = true;
+    rasterDesc.FillMode = D3D11_FILL_SOLID;
+    rasterDesc.FrontCounterClockwise = false;
+    rasterDesc.MultisampleEnable = false;
+    rasterDesc.ScissorEnable = false;
+    rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+    mWindow.getDevice()->CreateRasterizerState(&rasterDesc, &mFillRS);
+
+    //TMP Stuff
     WorldGenerator worldGen;
     worldGen.genRoom( mWorld.getEnv().getRoom() );
 
@@ -274,5 +204,5 @@ void App::draw( )
 
 void App::clear( )
 {
-
+    mWorldDisplay.clear();
 }

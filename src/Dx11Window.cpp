@@ -15,13 +15,14 @@ MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return gdx11Wndow->mainWndProc(hwnd, msg, wParam, lParam);
 }
 
-DX11Window::DX11Window()
-    : mhAppInst(NULL),
+DX11Window::DX11Window() : 
+    mhAppInst(NULL),
 	mWindowCaption(L"D3D11 Application"),
 	md3dDriverType(D3D_DRIVER_TYPE_HARDWARE),
+    //md3dDriverType(D3D_DRIVER_TYPE_REFERENCE), //So justin can run at work
 	mWindowWidth(800),
 	mWindowHeight(600),
-    mWindowRefreshRate(120),
+    mWindowRefreshRate(60),
 	mEnable4xMsaa(false),
 	mhMainWnd(NULL),
 	mIsPaused(false),
@@ -96,6 +97,8 @@ void DX11Window::clear( )
 
 	ReleaseCOM(md3dImmediateContext);
 	ReleaseCOM(md3dDevice);
+
+    LOG_INFO << "Direct3D 11 device and Window Released." << LOG_ENDL;
 }
 
 bool DX11Window::initWindow()
@@ -141,7 +144,6 @@ bool DX11Window::initWindow()
 bool DX11Window::initDirect3D()
 {
     // Create the device and device context.
-
 	UINT createDeviceFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)  
     createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
@@ -159,14 +161,12 @@ bool DX11Window::initDirect3D()
 			&featureLevel,
 			&md3dImmediateContext);
 
-	if( FAILED(hr) )
-	{
+	if( FAILED(hr) ){
 		LOG_ERRO << "D3D11CreateDevice Failed." << LOG_ENDL;
 		return false;
 	}
 
-	if( featureLevel != D3D_FEATURE_LEVEL_11_0 )
-	{
+	if( featureLevel != D3D_FEATURE_LEVEL_11_0 ){
 		LOG_ERRO << "Direct3D Feature Level 11 unsupported by this system." << LOG_ENDL;
 		return false;
 	}
@@ -180,18 +180,9 @@ bool DX11Window::initDirect3D()
 	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
-	// Use 4X MSAA? 
-	if( mEnable4xMsaa )
-	{
-		sd.SampleDesc.Count   = 4;
-		sd.SampleDesc.Quality = m4xMsaaQuality-1;
-	}
-	// No MSAA
-	else
-	{
-		sd.SampleDesc.Count   = 1;
-		sd.SampleDesc.Quality = 0;
-	}
+    //Disable multisampling for now
+	sd.SampleDesc.Count   = 1; 
+	sd.SampleDesc.Quality = 0;
 
 	sd.BufferUsage  = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	sd.BufferCount  = 1;
@@ -215,6 +206,7 @@ bool DX11Window::initDirect3D()
         return false;
     }
 
+    //Create the swap chain!
 	if(FAILED((dxgiFactory->CreateSwapChain(md3dDevice, &sd, &mSwapChain)))){
         LOG_ERRO << "Failed to Create SwapChain from device" << LOG_ENDL;
         return false;
@@ -253,6 +245,7 @@ bool DX11Window::initInputDevices()
         return false;
     }
 
+    LOG_INFO << "Registered Mouse and Keyboard Successfully." << LOG_ENDL;
     return true;
 }
 
@@ -297,18 +290,9 @@ bool DX11Window::onResize()
 	depthStencilDesc.ArraySize = 1;
 	depthStencilDesc.Format    = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
-	// Use 4X MSAA? --must match swap chain MSAA values.
-	if( mEnable4xMsaa )
-	{
-		depthStencilDesc.SampleDesc.Count   = 4;
-		depthStencilDesc.SampleDesc.Quality = m4xMsaaQuality-1;
-	}
-	// No MSAA
-	else
-	{
-		depthStencilDesc.SampleDesc.Count   = 1;
-		depthStencilDesc.SampleDesc.Quality = 0;
-	}
+    //Disable multisampling for now
+	depthStencilDesc.SampleDesc.Count   = 1;
+	depthStencilDesc.SampleDesc.Quality = 0;
 
 	depthStencilDesc.Usage          = D3D11_USAGE_DEFAULT;
 	depthStencilDesc.BindFlags      = D3D11_BIND_DEPTH_STENCIL;

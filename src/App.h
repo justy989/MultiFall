@@ -15,8 +15,10 @@ public:
 
     App();
 
+    //handle input from the dx11 window
     virtual void handleInput( RAWINPUT* input );
 
+    //run the application
     int run( HINSTANCE hInstance, int nCmdShow );
 
 protected:

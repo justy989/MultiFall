@@ -41,6 +41,8 @@ bool EnvironmentDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tec
 
 bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room& room )
 {
+    //Create the different parts of the room separately so they can be textured separately
+
     if( !createFrameMesh( device, room ) ){
         return false;
     }
@@ -53,13 +55,13 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
         return false;
     }
 
+    LOG_INFO << "Room Mesh has been generated" << LOG_ENDL;
     return true;
 }
 
 void EnvironmentDisplay::createSurfaceNormal( EnvVertex* a, EnvVertex* b, EnvVertex* c)
 {
 	XMFLOAT3 normal;
-	///
 
 	XMVECTOR v1 = XMLoadFloat3(&XMFLOAT3(a->position.x, a->position.y, a->position.z));
 	XMVECTOR v2 = XMLoadFloat3(&XMFLOAT3(b->position.x, b->position.y, b->position.z));
@@ -69,6 +71,7 @@ void EnvironmentDisplay::createSurfaceNormal( EnvVertex* a, EnvVertex* b, EnvVer
 	n = XMVector3Normalize(n);
 	XMStoreFloat3(&normal, n);
 
+    //Side effect, a, b, and c have their normals set
 	a->normal = normal;
 	b->normal = normal;
 	c->normal = normal;
@@ -88,6 +91,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
 
     int v = 0;
 
+    //TMP Colors to set floors to based on level
     float floorColors[4][4] = {
         {1.0f, 0.0f, 0.0f, 1.0f}, 
         {0.0f, 1.0f, 0.0f, 1.0f}, 
@@ -95,9 +99,11 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
         {1.0f, 0.0f, 1.0f, 1.0f}
     };
 
+    //Generate floor blocks based on height
     for(int i = 0; i < room.getWidth(); i++){
         for(int j = 0; j < room.getDepth(); j++){
             
+            //Front left
             verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
             verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
             verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
@@ -108,6 +114,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
 
             v++;
 
+            //Front right
             verts[ v ].position.x = verts[ v - 1 ].position.x + mBlockDimension;
             verts[ v ].position.y = verts[ v - 1 ].position.y;
             verts[ v ].position.z = verts[ v - 1 ].position.z;
@@ -115,6 +122,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
 
             v++;
 
+            //Back left
             verts[ v ].position.x = verts[ v - 2 ].position.x;
             verts[ v ].position.y = verts[ v - 2 ].position.y;
             verts[ v ].position.z = verts[ v - 2 ].position.z + mBlockDimension;
@@ -122,6 +130,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
 
             v++;
 
+            //Back right
             verts[ v ].position.x = verts[ v - 3 ].position.x + mBlockDimension;
             verts[ v ].position.y = verts[ v - 3 ].position.y;
             verts[ v ].position.z = verts[ v - 3 ].position.z + mBlockDimension;
@@ -129,6 +138,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
 
             v++;
 
+            //Generate the normals
 			createSurfaceNormal(&verts[v-4], &verts[v-2], &verts[v-3]);
 			createSurfaceNormal(&verts[v-3], &verts[v-2], &verts[v-1]);
         }
@@ -154,6 +164,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
 
     int index = 0;
 
+    //Generate indices corresponding to generated verts
     for(int i = 0; i < room.getWidth(); i++){
         for(int j = 0; j < room.getDepth(); j++){
             inds[v] = index;
@@ -179,6 +190,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
     D3D11_SUBRESOURCE_DATA iinitData;
     iinitData.pSysMem = inds;
 
+    //Create VB
     if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mFloorIB))){
         LOG_ERRO << "Unable to allocate index buffer for room frame" << LOG_INFO;
         return false;
@@ -212,7 +224,6 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
 
             if( nextI >= 0 ){
                 if( room.getBlockHeight( i, j ) > room.getBlockHeight( nextI, nextJ ) ){
-                    //Make Wall
                     verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
                     verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
                     verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
@@ -251,12 +262,12 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                 }
             }
 
+            //Make Right wall
             nextI = i + 1;
             nextJ = j;
 
             if( nextI < room.getWidth() ){
                 if( room.getBlockHeight( i, j ) > room.getBlockHeight( nextI, nextJ ) ){
-                    //Make Wall
                     verts[ v ].position.x = static_cast<float>(i) * mBlockDimension + mBlockDimension;
                     verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
                     verts[ v ].position.z = static_cast<float>(j) * mBlockDimension + mBlockDimension;
@@ -295,12 +306,12 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                 }
             }
 
+            //Make Front Wall
             nextI = i;
             nextJ = j - 1;
 
             if( nextJ >= 0 ){
                 if( room.getBlockHeight( i, j ) > room.getBlockHeight( nextI, nextJ ) ){
-                    //Make Wall
                     verts[ v ].position.x = static_cast<float>(i) * mBlockDimension + mBlockDimension;
                     verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
                     verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
@@ -339,12 +350,12 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                 }
             }
 
+            //Make back wall
             nextI = i;
             nextJ = j + 1;
 
             if( nextJ < room.getDepth() ){
                 if( room.getBlockHeight( i, j ) > room.getBlockHeight( nextI, nextJ ) ){
-                    //Make Wall
                     verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
                     verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
                     verts[ v ].position.z = static_cast<float>(j) * mBlockDimension + mBlockDimension;
@@ -468,7 +479,8 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     float h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Front ) ) * mHeightInterval;
     float l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Front )) * mBlockDimension;
 
-    if( l >= 0.1f ){ //There is no door if h is 0
+    //If there is no location, then there is no door!
+    if( l >= mHeightInterval ){
         backDoor[0] = l; backDoor[2] = l + mBlockDimension;
         backDoor[1] = h; backDoor[3] = h + mDoorHeight;
     }
@@ -476,7 +488,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Left )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Left )) * mBlockDimension;
 
-    if( l >= 0.1f ){ //There is no door if h is 0
+    if( l >= mHeightInterval ){
         rightDoor[0] = l; rightDoor[2] = l + mBlockDimension;
         rightDoor[1] = h; rightDoor[3] = h + mDoorHeight;
     }
@@ -484,7 +496,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Back )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Back )) * mBlockDimension;
 
-    if( l >= 0.1f ){ //There is no door if h is 0
+    if( l >= mHeightInterval ){
         frontDoor[0] = l; frontDoor[2] = l + mBlockDimension;
         frontDoor[1] = h; frontDoor[3] = h + mDoorHeight;
     }
@@ -492,7 +504,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Right )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Right )) * mBlockDimension;
 
-    if( l >= 0.1f ){ //There is no door if h is 0
+    if( l >= mHeightInterval ){
         leftDoor[0] = l; leftDoor[2] = l + mBlockDimension;
         leftDoor[1] = h; leftDoor[3] = h + mDoorHeight;
     }
@@ -653,7 +665,6 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
             indices[i+5] = v - 6;
         }
 
-        //v += 4;
         i += 6;
 
         //Right Middle Strip
@@ -708,6 +719,8 @@ void EnvironmentDisplay::clear()
     ReleaseCOM( mFloorIB );
     ReleaseCOM( mWallsVB );
     ReleaseCOM( mWallsVB );
+
+    LOG_INFO << "Room Mesh Cleared" << LOG_ENDL;
 }
 
 void EnvironmentDisplay::draw( ID3D11DeviceContext* device, Environment& env, ID3DX11Effect* fx, ID3DX11EffectTechnique* tech )
@@ -724,16 +737,19 @@ void EnvironmentDisplay::draw( ID3D11DeviceContext* device, Environment& env, ID
     for(ushort p = 0; p < techDesc.Passes; ++p){
         tech->GetPassByIndex(p)->Apply(0, device);
 
+        //Draw the floor
         device->IASetIndexBuffer( mFloorIB, DXGI_FORMAT_R16_UINT, 0 );
         device->IASetVertexBuffers(0, 1, &mFloorVB, &stride, &offset);
 
         device->DrawIndexed(6 * mRoomSize, 0, 0);
 
+        //Draw the walls
         device->IASetIndexBuffer( mWallsIB, DXGI_FORMAT_R16_UINT, 0 );
         device->IASetVertexBuffers(0, 1, &mWallsVB, &stride, &offset);
 
         device->DrawIndexed(mWallIndices, 0, 0);
 
+        //Draw the frame
         device->IASetIndexBuffer( mFrameIB, DXGI_FORMAT_R16_UINT, 0 );
         device->IASetVertexBuffers(0, 1, &mFrameVB, &stride, &offset);
 

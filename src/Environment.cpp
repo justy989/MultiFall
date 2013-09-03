@@ -58,7 +58,7 @@ void Environment::Room::clear()
         mBlocks = 0;
     }
 
-    for(byte i = 0; i < 4; i++){
+    for(byte i = 0; i < ENV_ROOM_EXIT_COUNT; i++){
         mExits[i].height = 0;
         mExits[i].location = 0;
     }
