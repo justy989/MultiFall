@@ -21,7 +21,7 @@ DX11Window::DX11Window()
 	md3dDriverType(D3D_DRIVER_TYPE_HARDWARE),
 	mWindowWidth(800),
 	mWindowHeight(600),
-    mWindowRefreshRate(60),
+    mWindowRefreshRate(120),
 	mEnable4xMsaa(false),
 	mhMainWnd(NULL),
 	mIsPaused(false),

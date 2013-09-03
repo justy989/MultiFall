@@ -501,81 +501,81 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     {
         //Back Face 
         //Bottom Strip
-        { XMFLOAT3(backStart, backStart, backStart), wallColor },
-		{ XMFLOAT3(backStart, backDoor[1], backStart), wallColor },
-        { XMFLOAT3(fullWidth, backDoor[1], backStart), wallColor },
-        { XMFLOAT3(fullWidth, backStart, backStart), wallColor },
+        { XMFLOAT3(backStart, backStart, backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+		{ XMFLOAT3(backStart, backDoor[1], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(fullWidth, backDoor[1], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(fullWidth, backStart, backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
 
         //Top Strip
-        { XMFLOAT3(backStart, backDoor[3], backStart), wallColor },
-		{ XMFLOAT3(backStart, fullHeight, backStart), wallColor },
-        { XMFLOAT3(fullWidth, fullHeight, backStart), wallColor },
-        { XMFLOAT3(fullWidth, backDoor[3], backStart), wallColor },
+        { XMFLOAT3(backStart, backDoor[3], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+		{ XMFLOAT3(backStart, fullHeight, backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(fullWidth, fullHeight, backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(fullWidth, backDoor[3], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
 
         //Door
-        { XMFLOAT3(backDoor[2], backDoor[1], backStart), wallColor },
-		{ XMFLOAT3(backDoor[2], backDoor[3], backStart), wallColor },
-        { XMFLOAT3(backDoor[0], backDoor[3], backStart), wallColor },
-        { XMFLOAT3(backDoor[0], backDoor[1], backStart), wallColor },
+        { XMFLOAT3(backDoor[2], backDoor[1], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+		{ XMFLOAT3(backDoor[2], backDoor[3], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(backDoor[0], backDoor[3], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(backDoor[0], backDoor[1], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
 
         
         //Right Face
         //Bottom Strip
-        { XMFLOAT3(backStart, backStart, frontStart), wallColor },
-		{ XMFLOAT3(backStart, rightDoor[1], frontStart), wallColor },
-        { XMFLOAT3(backStart, rightDoor[1], backStart), wallColor },
-        { XMFLOAT3(backStart, backStart, backStart), wallColor },
+        { XMFLOAT3(backStart, backStart, frontStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(backStart, rightDoor[1], frontStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(backStart, rightDoor[1], backStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(backStart, backStart, backStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
 
         //Top Strip
-        { XMFLOAT3(backStart, rightDoor[3], frontStart), wallColor },
-		{ XMFLOAT3(backStart, fullHeight, frontStart), wallColor },
-        { XMFLOAT3(backStart, fullHeight, backStart), wallColor },
-        { XMFLOAT3(backStart, rightDoor[3], backStart), wallColor },
+        { XMFLOAT3(backStart, rightDoor[3], frontStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+		{ XMFLOAT3(backStart, fullHeight, frontStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(backStart, fullHeight, backStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(backStart, rightDoor[3], backStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
 
         //Door
-        { XMFLOAT3(backStart, rightDoor[1], rightDoor[0]), wallColor },
-		{ XMFLOAT3(backStart, rightDoor[3], rightDoor[0]), wallColor },
-        { XMFLOAT3(backStart, rightDoor[3], rightDoor[2]), wallColor },
-        { XMFLOAT3(backStart, rightDoor[1], rightDoor[2]), wallColor },
+        { XMFLOAT3(backStart, rightDoor[1], rightDoor[0]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+		{ XMFLOAT3(backStart, rightDoor[3], rightDoor[0]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(backStart, rightDoor[3], rightDoor[2]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(backStart, rightDoor[1], rightDoor[2]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
 
 
         //Front Face 
         //Bottom Strip
-        { XMFLOAT3(backStart, backStart, frontStart), wallColor },
-		{ XMFLOAT3(backStart, backDoor[1], frontStart), wallColor },
-        { XMFLOAT3(fullWidth, backDoor[1], frontStart), wallColor },
-        { XMFLOAT3(fullWidth, backStart, frontStart), wallColor },
+        { XMFLOAT3(backStart, backStart, frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(backStart, backDoor[1], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(fullWidth, backDoor[1], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(fullWidth, backStart, frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
 
         //Top Strip
-        { XMFLOAT3(backStart, backDoor[3], frontStart), wallColor },
-		{ XMFLOAT3(backStart, fullHeight, frontStart), wallColor },
-        { XMFLOAT3(fullWidth, fullHeight, frontStart), wallColor },
-        { XMFLOAT3(fullWidth, backDoor[3], frontStart), wallColor },
+        { XMFLOAT3(backStart, backDoor[3], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(backStart, fullHeight, frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(fullWidth, fullHeight, frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(fullWidth, backDoor[3], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
 
         //Door
-        { XMFLOAT3(backDoor[2], backDoor[1], frontStart), wallColor },
-		{ XMFLOAT3(backDoor[2], backDoor[3], frontStart), wallColor },
-        { XMFLOAT3(backDoor[0], backDoor[3], frontStart), wallColor },
-        { XMFLOAT3(backDoor[0], backDoor[1], frontStart), wallColor },
+        { XMFLOAT3(backDoor[2], backDoor[1], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(backDoor[2], backDoor[3], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(backDoor[0], backDoor[3], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(backDoor[0], backDoor[1], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
 
         //Left Face
         //Bottom Strip
-        { XMFLOAT3(fullWidth, backStart, frontStart), wallColor },
-		{ XMFLOAT3(fullWidth, leftDoor[1], frontStart), wallColor },
-        { XMFLOAT3(fullWidth, leftDoor[1], backStart), wallColor },
-        { XMFLOAT3(fullWidth, backStart, backStart), wallColor },
+        { XMFLOAT3(fullWidth, backStart, frontStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(fullWidth, leftDoor[1], frontStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(fullWidth, leftDoor[1], backStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(fullWidth, backStart, backStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
 
         //Top Strip
-        { XMFLOAT3(fullWidth, leftDoor[3], frontStart), wallColor },
-		{ XMFLOAT3(fullWidth, fullHeight, frontStart), wallColor },
-        { XMFLOAT3(fullWidth, fullHeight, backStart), wallColor },
-        { XMFLOAT3(fullWidth, leftDoor[3], backStart), wallColor },
+        { XMFLOAT3(fullWidth, leftDoor[3], frontStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(fullWidth, fullHeight, frontStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(fullWidth, fullHeight, backStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(fullWidth, leftDoor[3], backStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
 
         //Door
-        { XMFLOAT3(fullWidth, leftDoor[1], leftDoor[0]), wallColor },
-		{ XMFLOAT3(fullWidth, leftDoor[3], leftDoor[0]), wallColor },
-        { XMFLOAT3(fullWidth, leftDoor[3], leftDoor[2]), wallColor },
-        { XMFLOAT3(fullWidth, leftDoor[1], leftDoor[2]), wallColor },
+        { XMFLOAT3(fullWidth, leftDoor[1], leftDoor[0]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(fullWidth, leftDoor[3], leftDoor[0]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(fullWidth, leftDoor[3], leftDoor[2]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(fullWidth, leftDoor[1], leftDoor[2]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
     };
 
     D3D11_BUFFER_DESC vbd;

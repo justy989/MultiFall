@@ -43,15 +43,16 @@ float4 PS(VertexOut pin) : SV_Target
 	float lightIntensity;
 	float3 lightDir;
 	
-	lightDir = float3(0.2f,-0.1f,0);
+	lightDir = float3(0.2f,-0.1f,0.075f);
 	lightDir = normalize(lightDir);
 	
 	// Calculate the amount of light on this pixel.
     lightIntensity = dot(pin.Normal, lightDir);
 	
+	[flatten]
 	if(lightIntensity > 0)
 	{
-		pin.Color = lightIntensity * pin.Color;
+		pin.Color = 0.9f * lightIntensity * pin.Color;
 	}
 	
     return pin.Color;
