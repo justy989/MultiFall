@@ -11,7 +11,7 @@ WorldGenerator::WorldGenerator()
 void WorldGenerator::genRoom( Environment::Room& room )
 {
     room.clear();
-    room.init( mRand.gen( 8, 32), mRand.gen( 8, 32 ), mRand.gen( 4, 8 ) );
+    room.init( mRand.gen( 8, 32), mRand.gen( 8, 32 ), mRand.gen( ENV_ROOM_MAX_EXIT_HEIGHT + 1, 8 ) );
 
     //Gen exits
     int numExits = mRand.gen(2, 4);
@@ -107,7 +107,7 @@ void WorldGenerator::genRoom( Environment::Room& room )
             CLAMP(end, 0, room.getDepth() - 1);
 
             for(; startY <= end; startY++){
-                room.setBlock(startX, startY, 3, Environment::Room::Block::RampDirection::None );
+                room.setBlock(startX, startY, room.getHeight(), Environment::Room::Block::RampDirection::None );
             }
         }else{
             end = startX + len;
@@ -115,7 +115,7 @@ void WorldGenerator::genRoom( Environment::Room& room )
             CLAMP(end, 0, room.getWidth() - 1);
 
             for(; startX <= end; startX++){
-                room.setBlock(startX, startY, 3, Environment::Room::Block::RampDirection::None );
+                room.setBlock(startX, startY, room.getHeight(), Environment::Room::Block::RampDirection::None );
             }
         }
     }

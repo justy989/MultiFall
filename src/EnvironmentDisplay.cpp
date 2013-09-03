@@ -92,16 +92,20 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
     int v = 0;
 
     //TMP Colors to set floors to based on level
-    float floorColors[4][4] = {
+    float floorColors[3][4] = {
         {1.0f, 0.0f, 0.0f, 1.0f}, 
         {0.0f, 1.0f, 0.0f, 1.0f}, 
-        {0.0f, 0.0f, 1.0f, 1.0f}, 
-        {1.0f, 0.0f, 1.0f, 1.0f}
+        {0.0f, 0.0f, 1.0f, 1.0f}
     };
 
     //Generate floor blocks based on height
     for(int i = 0; i < room.getWidth(); i++){
         for(int j = 0; j < room.getDepth(); j++){
+
+            //Don't generate a floor the same height as the ceiling, no one will see it silly!
+            if( room.getBlockHeight(i, j) == room.getHeight() ){
+                continue;
+            }
             
             //Front left
             verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
@@ -460,7 +464,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     float backStart = 0.0f;
     float halfWidth = ( static_cast<float>(room.getWidth()) * mBlockDimension ) / 2.0f;
     float halfDepth = ( static_cast<float>(room.getDepth()) * mBlockDimension ) / 2.0f;
-    float halfHeight = ( static_cast<float>(room.getHeight() + 1) * mHeightInterval ) / 2.0f;
+    float halfHeight = ( static_cast<float>(room.getHeight()) * mHeightInterval ) / 2.0f;
 
     float fullWidth = halfWidth * 2.0f;
     float fullHeight = halfHeight * 2.0f;
@@ -480,7 +484,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     float l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Front )) * mBlockDimension;
 
     //If there is no location, then there is no door!
-    if( l >= mHeightInterval ){
+    if( l >= mBlockDimension ){
         backDoor[0] = l; backDoor[2] = l + mBlockDimension;
         backDoor[1] = h; backDoor[3] = h + mDoorHeight;
     }
@@ -488,7 +492,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Left )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Left )) * mBlockDimension;
 
-    if( l >= mHeightInterval ){
+    if( l >= mBlockDimension ){
         rightDoor[0] = l; rightDoor[2] = l + mBlockDimension;
         rightDoor[1] = h; rightDoor[3] = h + mDoorHeight;
     }
@@ -496,7 +500,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Back )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Back )) * mBlockDimension;
 
-    if( l >= mHeightInterval ){
+    if( l >= mBlockDimension ){
         frontDoor[0] = l; frontDoor[2] = l + mBlockDimension;
         frontDoor[1] = h; frontDoor[3] = h + mDoorHeight;
     }
@@ -504,7 +508,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Right )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Right )) * mBlockDimension;
 
-    if( l >= mHeightInterval ){
+    if( l >= mBlockDimension ){
         leftDoor[0] = l; leftDoor[2] = l + mBlockDimension;
         leftDoor[1] = h; leftDoor[3] = h + mDoorHeight;
     }
@@ -588,6 +592,12 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
 		{ XMFLOAT3(fullWidth, leftDoor[3], leftDoor[0]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
         { XMFLOAT3(fullWidth, leftDoor[3], leftDoor[2]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
         { XMFLOAT3(fullWidth, leftDoor[1], leftDoor[2]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+
+        //Ceiling
+		{ XMFLOAT3(fullWidth, fullHeight, 0.0f), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
+        { XMFLOAT3(0.0f, fullHeight, 0.0f), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
+        { XMFLOAT3(0.0f, fullHeight, fullDepth), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
+        { XMFLOAT3(fullWidth, fullHeight, fullDepth), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
     };
 
     D3D11_BUFFER_DESC vbd;
@@ -609,9 +619,10 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
 
     ushort v = 0;
     int s = 0;
+    int i = 0;
 
     //Gen indices for each side
-    for(int i = 0; i < ROOM_INDEX_COUNT; ){
+    for(;i < ROOM_INDEX_COUNT - 6; ){
         //Bottom Section
         if( s < 2 ){
             indices[i] = v; indices[i+1] = v + 2; indices[i+2] = v + 1;
@@ -691,6 +702,15 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
 
         s++;
     }
+
+    //Set the ceiling indicies
+    indices[i] = v;
+    indices[i+1] = v + 2;
+    indices[i+2] = v + 1;
+
+    indices[i+3] = v;
+    indices[i+4] = v + 3;
+    indices[i+5] = v + 2;
 
     D3D11_BUFFER_DESC ibd;
     ibd.Usage = D3D11_USAGE_IMMUTABLE;

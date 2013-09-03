@@ -9,7 +9,7 @@
 
 #include <d3dx11effect.h>
 
-#define ROOM_INDEX_COUNT (4 * 6 * 4)
+#define ROOM_INDEX_COUNT ( (4 * 6 * 4) + 6 )
 
 struct EnvVertex{
     XMFLOAT3 position;

@@ -5,7 +5,7 @@
 
 #define ENV_ROOM_EXIT_COUNT 4
 #define ENV_ROOM_MAX_HEIGHT 8
-#define ENV_ROOM_MAX_EXIT_HEIGHT 3
+#define ENV_ROOM_MAX_EXIT_HEIGHT 2
 
 class Environment{
 public:
