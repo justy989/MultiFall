@@ -10,6 +10,8 @@ App::App()
     camKeyDown[1] = false;
     camKeyDown[2] = false;
     camKeyDown[3] = false;
+
+    wireframe = false;
 }
 
 void App::handleInput( RAWINPUT* input )
@@ -33,8 +35,6 @@ void App::handleInput( RAWINPUT* input )
         case VK_SPACE:
             {
                 WorldGenerator worldGen;
-                mWorld.getEnv().getRoom().clear();
-                mWorld.getEnv().getRoom().init( 16, 16, 6 );
                 
                 worldGen.genRoom( mWorld.getEnv().getRoom() );
                 mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );
@@ -51,6 +51,21 @@ void App::handleInput( RAWINPUT* input )
             break;
         case 'S':
             camKeyDown[3] = !keyUp;
+            break;
+        case 'P':
+            {
+                if( keyUp ){
+                    break;
+                }
+
+                wireframe = !wireframe;
+
+                if( wireframe ){
+                    mWindow.getDeviceContext()->RSSetState( mWireFrameRS );
+                }else{
+                    mWindow.getDeviceContext()->RSSetState( mFillRS );
+                }
+            }
             break;
         default:
             break;
@@ -75,6 +90,36 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
         return 1;
     }
 
+    D3D11_RASTERIZER_DESC rasterDesc;
+
+     // Setup the raster description which will determine how and what polygons will be drawn.
+     rasterDesc.AntialiasedLineEnable = false;
+     rasterDesc.CullMode = D3D11_CULL_BACK;
+     rasterDesc.DepthBias = 0;
+     rasterDesc.DepthBiasClamp = 0.0f;
+     rasterDesc.DepthClipEnable = true;
+     rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
+     rasterDesc.FrontCounterClockwise = false;
+     rasterDesc.MultisampleEnable = false;
+     rasterDesc.ScissorEnable = false;
+     rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+     mWindow.getDevice()->CreateRasterizerState(&rasterDesc, &mWireFrameRS);
+
+     // Setup the raster description which will determine how and what polygons will be drawn.
+     rasterDesc.AntialiasedLineEnable = false;
+     rasterDesc.CullMode = D3D11_CULL_BACK;
+     rasterDesc.DepthBias = 0;
+     rasterDesc.DepthBiasClamp = 0.0f;
+     rasterDesc.DepthClipEnable = true;
+     rasterDesc.FillMode = D3D11_FILL_SOLID;
+     rasterDesc.FrontCounterClockwise = false;
+     rasterDesc.MultisampleEnable = false;
+     rasterDesc.ScissorEnable = false;
+     rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+     mWindow.getDevice()->CreateRasterizerState(&rasterDesc, &mFillRS);
+    
     mTimer.start();
 
 	while(msg.message != WM_QUIT)
@@ -198,8 +243,6 @@ bool App::init( )
         return false;
     }
 
-    mWorld.getEnv().getRoom().init( 16, 16, 6 );
-
     WorldGenerator worldGen;
     worldGen.genRoom( mWorld.getEnv().getRoom() );
 
@@ -217,31 +260,15 @@ void App::draw( )
 {
     mWindow.clearBDS();
 
-    //Set vertex layout
-	//mWindow.getDeviceConext()->IASetInputLayout(mInputLayout);
-    //mWindow.getDeviceConext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    //Set VB, IA, Textures etc...
-
 	// Set constants
-	XMMATRIX world = XMMatrixTranslation( 0.3f, 0.3f, 0.0f );
     XMMATRIX view  = XMLoadFloat4x4(&mCamera.getView());
     XMMATRIX proj  = XMLoadFloat4x4(&mCamera.getProj());
-	XMMATRIX ViewProj = world * view * proj;
+	XMMATRIX viewProj = view * proj;
 
 	ID3DX11EffectMatrixVariable* mfxViewProj = mWorldDisplay.getFX()->GetVariableByName("gWorldViewProj")->AsMatrix();
-	mfxViewProj->SetMatrix(reinterpret_cast<float*>(&ViewProj));
+	mfxViewProj->SetMatrix(reinterpret_cast<float*>(&viewProj));
 
-    D3DX11_TECHNIQUE_DESC techDesc;
-    mWorldDisplay.getTechnique()->GetDesc( &techDesc );
-
-    for(UINT p = 0; p < techDesc.Passes; ++p){
-        mWorldDisplay.getTechnique()->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
-        
-		//Draw Indexed Primitives
-        mWorldDisplay.draw( mWindow.getDeviceContext(), mWorld );
-    }
-
+    mWorldDisplay.draw( mWindow.getDeviceContext(), mWorld );
     mWindow.getSwapChain()->Present(0, 0);
 }
 

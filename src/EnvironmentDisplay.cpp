@@ -3,10 +3,12 @@
 #include "Utils.h"
 
 EnvironmentDisplay::EnvironmentDisplay() : mInputLayout(NULL),
-    mRoomVB(NULL),
-    mRoomIB(NULL),
-    mBlockVB(NULL),
-    mBlockIB(NULL),
+    mFrameVB(NULL),
+    mFrameIB(NULL),
+    mFloorVB(NULL),
+    mFloorIB(NULL),
+    mWallsVB(NULL),
+    mWallsIB(NULL),
     mHeightInterval( 0.3f ),
     mBlockDimension( 0.1f ),
     mDoorHeight( 0.2f )
@@ -33,177 +35,380 @@ bool EnvironmentDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tec
             return false;
     }
 
-    //Fill Vertex and Index Buffers
-    float bottom[3] = {1.0f, 0.0f, 0.0f};
-    float middle[3] = {0.0f, 1.0f, 0.0f};
-    float top[3] = {0.0f, 0.0f, 1.0f};
-    float wall[3] = {1.0f, 0.0f, 1.0f};
+    return true;
+}
 
-    float start = 0.0f;
-
-    //Fill in vertex and index buffers
-    EnvVertex vertices[] =
-    {
-		{ XMFLOAT3(start, start, start), bottom },
-		{ XMFLOAT3(start, mHeightInterval, start), bottom },
-		{ XMFLOAT3(mBlockDimension, mHeightInterval, start), bottom },
-		{ XMFLOAT3(mBlockDimension, start, start), bottom },
-		{ XMFLOAT3(start, start, mBlockDimension), bottom },
-		{ XMFLOAT3(start, mHeightInterval, mBlockDimension), bottom },
-		{ XMFLOAT3(mBlockDimension, mHeightInterval, mBlockDimension), bottom },
-		{ XMFLOAT3(mBlockDimension, start, mBlockDimension), bottom },
-
-        { XMFLOAT3(start, start, start), middle },
-		{ XMFLOAT3(start, 2.0f * mHeightInterval, start), middle },
-		{ XMFLOAT3(mBlockDimension, 2.0f * mHeightInterval, start), middle },
-		{ XMFLOAT3(mBlockDimension, start, start), middle },
-		{ XMFLOAT3(start, start, mBlockDimension), middle },
-		{ XMFLOAT3(start, 2.0f * mHeightInterval, mBlockDimension), middle },
-		{ XMFLOAT3(mBlockDimension, 2.0f * mHeightInterval, mBlockDimension), middle },
-		{ XMFLOAT3(mBlockDimension, start, mBlockDimension), middle },
-
-        { XMFLOAT3(start, start, start), top },
-		{ XMFLOAT3(start, 3.0f * mHeightInterval, start), top },
-		{ XMFLOAT3(mBlockDimension, 3.0f * mHeightInterval, start), top },
-		{ XMFLOAT3(mBlockDimension, start, start), top },
-		{ XMFLOAT3(start, start, mBlockDimension), top },
-		{ XMFLOAT3(start, 3.0f * mHeightInterval, mBlockDimension), top },
-		{ XMFLOAT3(mBlockDimension, 3.0f * mHeightInterval, mBlockDimension), top },
-		{ XMFLOAT3(mBlockDimension, start, mBlockDimension), top },
-
-        { XMFLOAT3(start, start, start), wall },
-		{ XMFLOAT3(start, 4.0f * mHeightInterval, start), wall },
-		{ XMFLOAT3(mBlockDimension, 4.0f * mHeightInterval, start), wall },
-		{ XMFLOAT3(mBlockDimension, start, start), wall },
-		{ XMFLOAT3(start, start, mBlockDimension), wall },
-		{ XMFLOAT3(start, 4.0f * mHeightInterval, mBlockDimension), wall },
-		{ XMFLOAT3(mBlockDimension, 4.0f * mHeightInterval, mBlockDimension), wall },
-		{ XMFLOAT3(mBlockDimension, start, mBlockDimension), wall }
-    };
-
-    D3D11_BUFFER_DESC vbd;
-    vbd.Usage = D3D11_USAGE_IMMUTABLE;
-    vbd.ByteWidth = sizeof(EnvVertex) * 32;
-    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vbd.CPUAccessFlags = 0;
-    vbd.MiscFlags = 0;
-	vbd.StructureByteStride = 0;
-    D3D11_SUBRESOURCE_DATA vinitData;
-    vinitData.pSysMem = vertices;
-
-    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mBlockVB))){
+bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room& room )
+{
+    if( !createFrameMesh( device, room ) ){
         return false;
     }
 
-	// Create the index buffer
-	UINT indices[] = {
-		// front face
-		0, 1, 2,
-		0, 2, 3,
+    if( !createFloorMesh( device, room ) ){
+        return false;
+    }
 
-		// back face
-		4, 6, 5,
-		4, 7, 6,
-
-		// left face
-		4, 5, 1,
-		4, 1, 0,
-
-		// right face
-		3, 2, 6,
-		3, 6, 7,
-
-		// top face
-		1, 5, 6,
-		1, 6, 2,
-
-
-        // front face
-		8, 9, 10,
-		8, 10, 11,
-
-		// back face
-		12, 14, 13,
-		12, 15, 14,
-
-		// left face
-		12, 13, 9,
-		12, 9, 8,
-
-		// right face
-		11, 10, 14,
-		11, 14, 15,
-
-		// top face
-		9, 13, 14,
-		9, 14, 10,
-
-
-        // front face
-		16, 17, 18,
-		16, 18, 19,
-
-		// back face
-		20, 22, 21,
-		20, 23, 22,
-
-		// left face
-		20, 21, 17,
-		20, 17, 16,
-
-		// right face
-		19, 18, 22,
-		19, 22, 23,
-
-		// top face
-		17, 21, 22,
-		17, 22, 18,
-
-        // front face
-		24, 25, 26,
-		24, 26, 27,
-
-		// back face
-		28, 30, 29,
-		28, 31, 30,
-
-		// left face
-		28, 29, 25,
-		28, 25, 24,
-
-		// right face
-		27, 26, 30,
-		27, 30, 31,
-
-		// top face
-		25, 29, 30,
-		25, 30, 26,
-	};
-
-	D3D11_BUFFER_DESC ibd;
-    ibd.Usage = D3D11_USAGE_IMMUTABLE;
-    ibd.ByteWidth = sizeof(UINT) * 120;
-    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    ibd.CPUAccessFlags = 0;
-    ibd.MiscFlags = 0;
-	ibd.StructureByteStride = 0;
-    D3D11_SUBRESOURCE_DATA iinitData;
-    iinitData.pSysMem = indices;
-
-    if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mBlockIB))){
+    if( !createWallsMesh( device, room ) ){
         return false;
     }
 
     return true;
 }
 
-bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room& room )
+bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Room& room )
+{
+    ReleaseCOM( mFloorVB );
+    ReleaseCOM( mFloorIB );
+
+    mRoomSize = room.getWidth() * room.getDepth();
+
+    EnvVertex* verts = new EnvVertex[ 4 * mRoomSize ];
+    ushort* inds = new ushort[ 6 * mRoomSize ];
+
+    int v = 0;
+
+    float floorColors[4][4] = {
+        {1.0f, 0.0f, 0.0f, 1.0f}, 
+        {0.0f, 1.0f, 0.0f, 1.0f}, 
+        {0.0f, 0.0f, 1.0f, 1.0f}, 
+        {1.0f, 0.0f, 1.0f, 1.0f}
+    };
+
+    for(int i = 0; i < room.getWidth(); i++){
+        for(int j = 0; j < room.getDepth(); j++){
+            
+            verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
+            verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
+            verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
+            verts[ v ].color.x = floorColors[ room.getBlockHeight(i, j) ][0];
+            verts[ v ].color.y = floorColors[ room.getBlockHeight(i, j) ][1];
+            verts[ v ].color.z = floorColors[ room.getBlockHeight(i, j) ][2];
+            verts[ v ].color.w = floorColors[ room.getBlockHeight(i, j) ][3];
+
+            v++;
+
+            verts[ v ].position.x = verts[ v - 1 ].position.x + mBlockDimension;
+            verts[ v ].position.y = verts[ v - 1 ].position.y;
+            verts[ v ].position.z = verts[ v - 1 ].position.z;
+            verts[ v ].color = verts[ v - 1 ].color;
+
+            v++;
+
+            verts[ v ].position.x = verts[ v - 2 ].position.x;
+            verts[ v ].position.y = verts[ v - 2 ].position.y;
+            verts[ v ].position.z = verts[ v - 2 ].position.z + mBlockDimension;
+            verts[ v ].color = verts[ v - 2 ].color;
+
+            v++;
+
+            verts[ v ].position.x = verts[ v - 3 ].position.x + mBlockDimension;
+            verts[ v ].position.y = verts[ v - 3 ].position.y;
+            verts[ v ].position.z = verts[ v - 3 ].position.z + mBlockDimension;
+            verts[ v ].color = verts[ v - 3 ].color;
+
+            v++;
+        }
+    }
+
+    D3D11_BUFFER_DESC vbd;
+    vbd.Usage = D3D11_USAGE_IMMUTABLE;
+    vbd.ByteWidth = sizeof(EnvVertex) * (mRoomSize * 4);
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vbd.CPUAccessFlags = 0;
+    vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+    D3D11_SUBRESOURCE_DATA vinitData;
+    vinitData.pSysMem = verts;
+
+    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mFloorVB))){
+        LOG_ERRO << "Unable to allocate Vertex buffer for room floor" << LOG_INFO;
+        return false;
+    }
+
+    //Reusing tmp variable for indexing index buffer!
+    v = 0;
+
+    int index = 0;
+
+    for(int i = 0; i < room.getWidth(); i++){
+        for(int j = 0; j < room.getDepth(); j++){
+            inds[v] = index;
+            inds[v+1] = index + 2;
+            inds[v+2] = index + 1;
+
+            inds[v+3] = index + 1;
+            inds[v+4] = index + 2;
+            inds[v+5] = index + 3;
+
+            v += 6;
+            index += 4;
+        }
+    }
+
+    D3D11_BUFFER_DESC ibd;
+    ibd.Usage = D3D11_USAGE_IMMUTABLE;
+    ibd.ByteWidth = sizeof(ushort) * mRoomSize * 6;
+    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    ibd.CPUAccessFlags = 0;
+    ibd.MiscFlags = 0;
+	ibd.StructureByteStride = 0;
+    D3D11_SUBRESOURCE_DATA iinitData;
+    iinitData.pSysMem = inds;
+
+    if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mFloorIB))){
+        LOG_ERRO << "Unable to allocate index buffer for room frame" << LOG_INFO;
+        return false;
+    }
+
+    delete[] verts;
+    delete[] inds;
+
+    return true;
+}
+
+bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Room& room )
+{
+    ReleaseCOM( mWallsIB );
+    ReleaseCOM( mWallsVB );
+
+    int v = 0;
+    int indexCount = 0;
+    int vertexCount = 0;
+
+    EnvVertex* verts = new EnvVertex[ 4 * 4 * mRoomSize ];
+
+    float wallColor[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
+
+    for(int i = 0; i < room.getWidth(); i++){
+        for(int j = 0; j < room.getDepth(); j++){ 
+
+            //Make Left Wall
+            int nextI = i - 1;
+            int nextJ = j;
+
+            if( nextI >= 0 ){
+                if( room.getBlockHeight( i, j ) > room.getBlockHeight( nextI, nextJ ) ){
+                    //Make Wall
+                    verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
+                    verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
+                    verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
+                    verts[ v ].color.x = wallColor[0];
+                    verts[ v ].color.y = wallColor[1];
+                    verts[ v ].color.z = wallColor[2];
+
+                    v++;
+
+                    verts[ v ].position.x = verts[ v - 1 ].position.x;
+                    verts[ v ].position.y = verts[ v - 1 ].position.y;
+                    verts[ v ].position.z = verts[ v - 1 ].position.z + mBlockDimension;
+                    verts[ v ].color = verts[ v - 1 ].color;
+
+                    v++;
+
+                    verts[ v ].position.x = verts[ v - 2 ].position.x;
+                    verts[ v ].position.y = 0.0f;
+                    verts[ v ].position.z = verts[ v - 2 ].position.z;
+                    verts[ v ].color = verts[ v - 2 ].color;
+
+                    v++;
+
+                    verts[ v ].position.x = verts[ v - 3 ].position.x;
+                    verts[ v ].position.y = 0.0f;
+                    verts[ v ].position.z = verts[ v - 3 ].position.z + mBlockDimension;
+                    verts[ v ].color = verts[ v - 3 ].color;
+
+                    v++;
+
+                    vertexCount += 4;
+                    indexCount += 6;
+                }
+            }
+
+            nextI = i + 1;
+            nextJ = j;
+
+            if( nextI < room.getWidth() ){
+                if( room.getBlockHeight( i, j ) > room.getBlockHeight( nextI, nextJ ) ){
+                    //Make Wall
+                    verts[ v ].position.x = static_cast<float>(i) * mBlockDimension + mBlockDimension;
+                    verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
+                    verts[ v ].position.z = static_cast<float>(j) * mBlockDimension + mBlockDimension;
+                    verts[ v ].color.x = wallColor[0];
+                    verts[ v ].color.y = wallColor[1];
+                    verts[ v ].color.z = wallColor[2];
+
+                    v++;
+                    
+                    verts[ v ].position.x = verts[ v - 1 ].position.x;
+                    verts[ v ].position.y = verts[ v - 1 ].position.y;
+                    verts[ v ].position.z = verts[ v - 1 ].position.z - mBlockDimension;
+                    verts[ v ].color = verts[ v - 1 ].color;
+
+                    v++;
+
+                    verts[ v ].position.x = verts[ v - 2 ].position.x;
+                    verts[ v ].position.y = 0.0f;
+                    verts[ v ].position.z = verts[ v - 2 ].position.z;
+                    verts[ v ].color = verts[ v - 2 ].color;
+
+                    v++;
+
+                    verts[ v ].position.x = verts[ v - 3 ].position.x;
+                    verts[ v ].position.y = 0.0f;
+                    verts[ v ].position.z = verts[ v - 3 ].position.z - mBlockDimension;
+                    verts[ v ].color = verts[ v - 3 ].color;
+
+                    v++;
+
+                    vertexCount += 4;
+                    indexCount += 6;
+                }
+            }
+
+            nextI = i;
+            nextJ = j - 1;
+
+            if( nextJ >= 0 ){
+                if( room.getBlockHeight( i, j ) > room.getBlockHeight( nextI, nextJ ) ){
+                    //Make Wall
+                    verts[ v ].position.x = static_cast<float>(i) * mBlockDimension + mBlockDimension;
+                    verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
+                    verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
+                    verts[ v ].color.x = wallColor[0];
+                    verts[ v ].color.y = wallColor[1];
+                    verts[ v ].color.z = wallColor[2];
+
+                    v++;
+                    
+                    verts[ v ].position.x = verts[ v - 1 ].position.x - mBlockDimension;
+                    verts[ v ].position.y = verts[ v - 1 ].position.y;
+                    verts[ v ].position.z = verts[ v - 1 ].position.z;
+                    verts[ v ].color = verts[ v - 1 ].color;
+
+                    v++;
+
+                    verts[ v ].position.x = verts[ v - 2 ].position.x;
+                    verts[ v ].position.y = 0.0f;
+                    verts[ v ].position.z = verts[ v - 2 ].position.z;
+                    verts[ v ].color = verts[ v - 2 ].color;
+
+                    v++;
+
+                    verts[ v ].position.x = verts[ v - 3 ].position.x - mBlockDimension;
+                    verts[ v ].position.y = 0.0f;
+                    verts[ v ].position.z = verts[ v - 3 ].position.z;
+                    verts[ v ].color = verts[ v - 3 ].color;
+
+                    v++;
+
+                    vertexCount += 4;
+                    indexCount += 6;
+                }
+            }
+
+            nextI = i;
+            nextJ = j + 1;
+
+            if( nextJ < room.getDepth() ){
+                if( room.getBlockHeight( i, j ) > room.getBlockHeight( nextI, nextJ ) ){
+                    //Make Wall
+                    verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
+                    verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
+                    verts[ v ].position.z = static_cast<float>(j) * mBlockDimension + mBlockDimension;
+                    verts[ v ].color.x = wallColor[0];
+                    verts[ v ].color.y = wallColor[1];
+                    verts[ v ].color.z = wallColor[2];
+
+                    v++;
+                    
+                    verts[ v ].position.x = verts[ v - 1 ].position.x + mBlockDimension;
+                    verts[ v ].position.y = verts[ v - 1 ].position.y;
+                    verts[ v ].position.z = verts[ v - 1 ].position.z;
+                    verts[ v ].color = verts[ v - 1 ].color;
+
+                    v++;
+
+                    verts[ v ].position.x = verts[ v - 2 ].position.x;
+                    verts[ v ].position.y = 0.0f;
+                    verts[ v ].position.z = verts[ v - 2 ].position.z;
+                    verts[ v ].color = verts[ v - 2 ].color;
+
+                    v++;
+
+                    verts[ v ].position.x = verts[ v - 3 ].position.x + mBlockDimension;
+                    verts[ v ].position.y = 0.0f;
+                    verts[ v ].position.z = verts[ v - 3 ].position.z;
+                    verts[ v ].color = verts[ v - 3 ].color;
+
+                    v++;
+
+                    vertexCount += 4;
+                    indexCount += 6;
+                }
+            }
+        }
+    }
+
+    D3D11_BUFFER_DESC vbd;
+    vbd.Usage = D3D11_USAGE_IMMUTABLE;
+    vbd.ByteWidth = sizeof(EnvVertex) * vertexCount;
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vbd.CPUAccessFlags = 0;
+    vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+    D3D11_SUBRESOURCE_DATA vinitData;
+    vinitData.pSysMem = verts;
+
+    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mWallsVB))){
+        LOG_ERRO << "Unable to allocate Vertex buffer for room walls" << LOG_INFO;
+        return false;
+    }
+
+    ushort* inds = new ushort[ indexCount ];
+
+    v = 0;
+    int index = 0;
+
+    for(; v < indexCount;){
+        inds[v] = index;
+        inds[v+1] = index + 2;
+        inds[v+2] = index + 1;
+
+        inds[v+3] = index + 1;
+        inds[v+4] = index + 2;
+        inds[v+5] = index + 3;
+
+        v += 6;
+        index += 4;
+    }
+
+    D3D11_BUFFER_DESC ibd;
+    ibd.Usage = D3D11_USAGE_IMMUTABLE;
+    ibd.ByteWidth = sizeof(ushort) * indexCount;
+    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    ibd.CPUAccessFlags = 0;
+    ibd.MiscFlags = 0;
+	ibd.StructureByteStride = 0;
+    D3D11_SUBRESOURCE_DATA iinitData;
+    iinitData.pSysMem = inds;
+
+    if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mWallsIB))){
+        LOG_ERRO << "Unable to allocate index buffer for room walls" << LOG_INFO;
+        return false;
+    }
+
+    mWallIndices = indexCount;
+
+    return true;
+}
+
+bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Room& room )
 {
     //Room sides are made up of 4 rectangles that could surround a door
     //Top is a single rectangle
 
-    ReleaseCOM( mRoomIB );
-    ReleaseCOM( mRoomVB );
+    ReleaseCOM( mFrameIB );
+    ReleaseCOM( mFrameVB );
 
     float backStart = 0.0f;
     float halfWidth = ( static_cast<float>(room.getWidth()) * mBlockDimension ) / 2.0f;
@@ -224,7 +429,7 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
     float rightDoor[4] = { 0.0f, halfHeight, 0.0f, halfHeight };
 
     //Get the height and location
-    float h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Front ) + 1) * mHeightInterval;
+    float h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Front ) ) * mHeightInterval;
     float l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Front )) * mBlockDimension;
 
     if( l >= 0.1f ){ //There is no door if h is 0
@@ -232,7 +437,7 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
         backDoor[1] = h; backDoor[3] = h + mDoorHeight;
     }
 
-    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Left ) + 1) * mHeightInterval;
+    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Left )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Left )) * mBlockDimension;
 
     if( l >= 0.1f ){ //There is no door if h is 0
@@ -240,7 +445,7 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
         rightDoor[1] = h; rightDoor[3] = h + mDoorHeight;
     }
 
-    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Back ) + 1) * mHeightInterval;
+    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Back )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Back )) * mBlockDimension;
 
     if( l >= 0.1f ){ //There is no door if h is 0
@@ -248,7 +453,7 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
         frontDoor[1] = h; frontDoor[3] = h + mDoorHeight;
     }
 
-    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Right ) + 1) * mHeightInterval;
+    h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Right )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Right )) * mBlockDimension;
 
     if( l >= 0.1f ){ //There is no door if h is 0
@@ -339,7 +544,7 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
 
     D3D11_BUFFER_DESC vbd;
     vbd.Usage = D3D11_USAGE_IMMUTABLE;
-    vbd.ByteWidth = sizeof(EnvVertex) * ( (16 * 4) + 4);
+    vbd.ByteWidth = sizeof(EnvVertex) * ( (12 * 4) + 4);
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vbd.CPUAccessFlags = 0;
     vbd.MiscFlags = 0;
@@ -347,19 +552,18 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
     D3D11_SUBRESOURCE_DATA vinitData;
     vinitData.pSysMem = vertices;
 
-    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mRoomVB))){
+    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mFrameVB))){
+        LOG_ERRO << "Unable to allocate Vertex buffer for room frame" << LOG_INFO;
         return false;
     }
 
-#define ROOM_INDICIES ( ( 4 * (3 * 8) ) )
+    ushort indices[ ROOM_INDEX_COUNT ];
 
-    UINT indices[ ROOM_INDICIES ];
-
-    UINT v = 0;
+    ushort v = 0;
     int s = 0;
 
     //Gen indices for each side
-    for(int i = 0; i < ROOM_INDICIES; ){
+    for(int i = 0; i < ROOM_INDEX_COUNT; ){
         //Bottom Section
         if( s < 2 ){
             indices[i] = v; indices[i+1] = v + 2; indices[i+2] = v + 1;
@@ -443,7 +647,7 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
 
     D3D11_BUFFER_DESC ibd;
     ibd.Usage = D3D11_USAGE_IMMUTABLE;
-    ibd.ByteWidth = sizeof(UINT) * ROOM_INDICIES;
+    ibd.ByteWidth = sizeof(ushort) * ROOM_INDEX_COUNT;
     ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
     ibd.CPUAccessFlags = 0;
     ibd.MiscFlags = 0;
@@ -451,7 +655,8 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
     D3D11_SUBRESOURCE_DATA iinitData;
     iinitData.pSysMem = indices;
 
-    if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mRoomIB))){
+    if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mFrameIB))){
+        LOG_ERRO << "Unable to allocate index buffer for room frame" << LOG_INFO;
         return false;
     }
 
@@ -461,10 +666,12 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
 void EnvironmentDisplay::clear()
 {
     ReleaseCOM( mInputLayout );
-    ReleaseCOM( mBlockVB );
-    ReleaseCOM( mBlockIB );
-    ReleaseCOM( mRoomVB );
-    ReleaseCOM( mRoomIB );
+    ReleaseCOM( mFrameVB );
+    ReleaseCOM( mFrameIB );
+    ReleaseCOM( mFloorVB );
+    ReleaseCOM( mFloorIB );
+    ReleaseCOM( mWallsVB );
+    ReleaseCOM( mWallsVB );
 }
 
 void EnvironmentDisplay::draw( ID3D11DeviceContext* device, Environment& env, ID3DX11Effect* fx, ID3DX11EffectTechnique* tech )
@@ -472,44 +679,28 @@ void EnvironmentDisplay::draw( ID3D11DeviceContext* device, Environment& env, ID
     device->IASetInputLayout( mInputLayout );
     device->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-    device->IASetIndexBuffer( mBlockIB, DXGI_FORMAT_R32_UINT, 0 );
-
     UINT stride = sizeof(EnvVertex);
     UINT offset = 0;
-    device->IASetVertexBuffers(0, 1, &mBlockVB, &stride, &offset);
-    XMMATRIX world = XMMatrixIdentity();
-    XMMATRIX viewProj = XMMatrixIdentity();
-    XMMATRIX worldViewProj = XMMatrixIdentity();
-
-    ID3DX11EffectMatrixVariable* mfxViewProj = fx->GetVariableByName("gWorldViewProj")->AsMatrix();
-    mfxViewProj->GetMatrix( (float*)&viewProj );
 
     D3DX11_TECHNIQUE_DESC techDesc;
     tech->GetDesc( &techDesc );
 
-    for(byte i = 0; i < env.getRoom().getWidth(); i++){
-        for(byte j = 0; j < env.getRoom().getDepth(); j++){
-            world = XMMatrixTranslation( i * 0.1f, 0.0f, j * 0.1f );
-            worldViewProj = world * viewProj;
-            mfxViewProj->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
-
-            for(UINT p = 0; p < techDesc.Passes; ++p){
-                tech->GetPassByIndex(p)->Apply(0, device);
-                device->DrawIndexed(30, ( env.getRoom().getBlockHeight(i, j) * 30 ), 0);
-            }
-        }
-    }
-
-    world = XMMatrixIdentity();
-
-    worldViewProj = world * viewProj;
-    mfxViewProj->SetMatrix(reinterpret_cast<float*>(&worldViewProj));
-
-    device->IASetIndexBuffer( mRoomIB, DXGI_FORMAT_R32_UINT, 0 );
-    device->IASetVertexBuffers(0, 1, &mRoomVB, &stride, &offset);
-
-    for(UINT p = 0; p < techDesc.Passes; ++p){
+    for(ushort p = 0; p < techDesc.Passes; ++p){
         tech->GetPassByIndex(p)->Apply(0, device);
-        device->DrawIndexed(ROOM_INDICIES, 0, 0);
+
+        device->IASetIndexBuffer( mFloorIB, DXGI_FORMAT_R16_UINT, 0 );
+        device->IASetVertexBuffers(0, 1, &mFloorVB, &stride, &offset);
+
+        device->DrawIndexed(6 * mRoomSize, 0, 0);
+
+        device->IASetIndexBuffer( mWallsIB, DXGI_FORMAT_R16_UINT, 0 );
+        device->IASetVertexBuffers(0, 1, &mWallsVB, &stride, &offset);
+
+        device->DrawIndexed(mWallIndices, 0, 0);
+
+        device->IASetIndexBuffer( mFrameIB, DXGI_FORMAT_R16_UINT, 0 );
+        device->IASetVertexBuffers(0, 1, &mFrameVB, &stride, &offset);
+
+        device->DrawIndexed(ROOM_INDEX_COUNT, 0, 0);
     }
 }

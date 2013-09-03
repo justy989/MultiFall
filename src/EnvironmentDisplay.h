@@ -9,6 +9,8 @@
 
 #include <d3dx11effect.h>
 
+#define ROOM_INDEX_COUNT (4 * 6 * 4)
+
 struct EnvVertex{
     XMFLOAT3 position;
     XMFLOAT4 color;
@@ -32,13 +34,36 @@ public:
 
 protected:
 
+    bool createFrameMesh( ID3D11Device* device, Environment::Room& room );
+    bool createFloorMesh( ID3D11Device* device, Environment::Room& room );
+    bool createWallsMesh( ID3D11Device* device, Environment::Room& room );
+
+protected:
+
     ID3D11InputLayout* mInputLayout;
 
-    ID3D11Buffer* mBlockVB;
-    ID3D11Buffer* mBlockIB;
+    //The frame of the room, including doors
+    ID3D11Buffer* mFrameVB;
+    ID3D11Buffer* mFrameIB;
 
-    ID3D11Buffer* mRoomVB;
-    ID3D11Buffer* mRoomIB;
+    //The floor that the player walks on, at every height
+    ID3D11Buffer* mFloorVB;
+    ID3D11Buffer* mFloorIB;
+
+    //Walls placed at Height differences
+    ID3D11Buffer* mWallsVB;
+    ID3D11Buffer* mWallsIB;
+
+    //Starts between floors
+    ID3D11Buffer* mStairsVB;
+    ID3D11Buffer* mStairsIB;
+
+    //Water
+    ID3D11Buffer* mWaterVB;
+    ID3D11Buffer* mWaterIB;
+
+    int mRoomSize;
+    int mWallIndices;
 
     float mHeightInterval;
     float mBlockDimension;

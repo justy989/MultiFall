@@ -16,7 +16,7 @@ Camera::Camera() :
 }
 
 void Camera::update( float aspectRatio ){
-    XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*3.14159f, aspectRatio, 0.1f, 10.0f);
+    XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f*3.14159f, aspectRatio, 0.1f, 20.0f);
 	XMStoreFloat4x4(&mProj, P);
 
     XMVECTOR defaultForward = XMVectorSet( 1.0f, 0.0f, 0.0f, 1.0f );
@@ -65,7 +65,7 @@ void Camera::update( float aspectRatio ){
     mMove.w = 1.0f;
 
 	camTarget = position + camTarget;	
-        
+    
     XMMATRIX V = XMMatrixLookAtLH( position, camTarget, camUp );
     XMStoreFloat4x4(&mView, V);
 

@@ -10,8 +10,11 @@ WorldGenerator::WorldGenerator()
 
 void WorldGenerator::genRoom( Environment::Room& room )
 {
+    room.clear();
+    room.init( mRand.gen( 8, 32), mRand.gen( 8, 32 ), mRand.gen( 4, 8 ) );
+
     //Gen exits
-    int numExits = 4;//mRand.gen(2, 4);
+    int numExits = mRand.gen(2, 4);
     int sides[] = { 0, 1, 2, 3 };
 
     //Randomize the list of sides

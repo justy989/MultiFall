@@ -359,6 +359,11 @@ LRESULT CALLBACK DX11Window::mainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 			mIsPaused = false;
 		}
 		return 0;
+    case WM_KEYDOWN:
+        if( LOWORD(wParam) == VK_ESCAPE ){
+            PostQuitMessage(0);
+        }
+        break;
 
     case WM_INPUT:
         {

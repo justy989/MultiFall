@@ -42,6 +42,10 @@ protected:
 
     //Tmp
     bool camKeyDown[4];
+    bool wireframe;
+
+    ID3D11RasterizerState* mFillRS;
+    ID3D11RasterizerState* mWireFrameRS;
 };
 
 #endif
