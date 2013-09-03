@@ -22,14 +22,15 @@ bool EnvironmentDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tec
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{"COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 
 	//Create the input layout
     D3DX11_PASS_DESC passDesc;
     tech->GetPassByIndex(0)->GetDesc( &passDesc );
 
-    if(FAILED(device->CreateInputLayout(vertexDesc, 2, passDesc.pIAInputSignature, 
+    if(FAILED(device->CreateInputLayout(vertexDesc, 3, passDesc.pIAInputSignature, 
 		passDesc.IAInputSignatureSize, &mInputLayout))){
             LOG_ERRO << "Failed to create Environment Vertex Input Layout" << LOG_ENDL;
             return false;
@@ -53,6 +54,26 @@ bool EnvironmentDisplay::createRoomMesh( ID3D11Device* device, Environment::Room
     }
 
     return true;
+}
+
+void EnvironmentDisplay::createSurfaceNormal( EnvVertex* a, EnvVertex* b, EnvVertex* c)
+{
+	XMFLOAT3 normal;
+	///
+
+	XMVECTOR v1 = XMLoadFloat3(&XMFLOAT3(a->position.x, a->position.y, a->position.z));
+	XMVECTOR v2 = XMLoadFloat3(&XMFLOAT3(b->position.x, b->position.y, b->position.z));
+	XMVECTOR v3 = XMLoadFloat3(&XMFLOAT3(c->position.x, c->position.y, c->position.z));
+	XMVECTOR n  = XMVector3Cross(XMVectorSubtract(v2 ,v1), XMVectorSubtract(v3 ,v1));
+
+	n = XMVector3Normalize(n);
+	XMStoreFloat3(&normal, n);
+
+	a->normal = normal;
+	b->normal = normal;
+	c->normal = normal;
+
+	//LOG_INFO<<(double)normal.x<<" "<<(double)normal.y<<" "<<(double)normal.z<<LOG_ENDL;
 }
 
 bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Room& room )
@@ -107,6 +128,9 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
             verts[ v ].color = verts[ v - 3 ].color;
 
             v++;
+
+			createSurfaceNormal(&verts[v-4], &verts[v-2], &verts[v-3]);
+			createSurfaceNormal(&verts[v-3], &verts[v-2], &verts[v-1]);
         }
     }
 
@@ -221,6 +245,9 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
 
                     vertexCount += 4;
                     indexCount += 6;
+
+					createSurfaceNormal(&verts[v-4], &verts[v-2], &verts[v-3]);
+					createSurfaceNormal(&verts[v-3], &verts[v-2], &verts[v-1]);
                 }
             }
 
@@ -262,6 +289,9 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
 
                     vertexCount += 4;
                     indexCount += 6;
+
+					createSurfaceNormal(&verts[v-4], &verts[v-2], &verts[v-3]);
+					createSurfaceNormal(&verts[v-3], &verts[v-2], &verts[v-1]);
                 }
             }
 
@@ -303,6 +333,9 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
 
                     vertexCount += 4;
                     indexCount += 6;
+
+					createSurfaceNormal(&verts[v-4], &verts[v-2], &verts[v-3]);
+					createSurfaceNormal(&verts[v-3], &verts[v-2], &verts[v-1]);
                 }
             }
 
@@ -344,6 +377,9 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
 
                     vertexCount += 4;
                     indexCount += 6;
+
+					createSurfaceNormal(&verts[v-4], &verts[v-2], &verts[v-3]);
+					createSurfaceNormal(&verts[v-3], &verts[v-2], &verts[v-1]);
                 }
             }
         }

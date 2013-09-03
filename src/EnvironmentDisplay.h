@@ -14,6 +14,7 @@
 struct EnvVertex{
     XMFLOAT3 position;
     XMFLOAT4 color;
+	XMFLOAT3 normal;
 };
 
 class EnvironmentDisplay{
@@ -37,6 +38,7 @@ protected:
     bool createFrameMesh( ID3D11Device* device, Environment::Room& room );
     bool createFloorMesh( ID3D11Device* device, Environment::Room& room );
     bool createWallsMesh( ID3D11Device* device, Environment::Room& room );
+	void createSurfaceNormal(EnvVertex* a, EnvVertex* b, EnvVertex* c); 
 
 protected:
 

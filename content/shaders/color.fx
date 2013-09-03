@@ -7,18 +7,21 @@
 cbuffer cbPerObject
 {
 	float4x4 gWorldViewProj; 
+	float4x4 gWorld;
 };
 
 struct VertexIn
 {
 	float3 PosL  : POSITION;
     float4 Color : COLOR;
+	float3 Normal : NORMAL;
 };
 
 struct VertexOut
 {
 	float4 PosH  : SV_POSITION;
     float4 Color : COLOR;
+	float3 Normal : NORMAL;
 };
 
 VertexOut VS(VertexIn vin)
@@ -29,13 +32,28 @@ VertexOut VS(VertexIn vin)
 	vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
 	
 	// Just pass vertex color into the pixel shader.
-    vout.Color = vin.Color;
-    
+    vout.Color = vin.Color;    
+	vout.Normal = vin.Normal;
+	
     return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
+	float lightIntensity;
+	float3 lightDir;
+	
+	lightDir = float3(0.2f,-0.1f,0);
+	lightDir = normalize(lightDir);
+	
+	// Calculate the amount of light on this pixel.
+    lightIntensity = dot(pin.Normal, lightDir);
+	
+	if(lightIntensity > 0)
+	{
+		pin.Color = lightIntensity * pin.Color;
+	}
+	
     return pin.Color;
 }
 
