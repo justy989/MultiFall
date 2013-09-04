@@ -31,8 +31,12 @@ void WorldGenerator::genRoom( Environment::Room& room )
     //for(int i = 0; i < numExits; i++){
     for(int i = 0; i < numExits; i++){
         //Use the random list of sides, gen a height, then gen a location if the side is even, use the depth, else use the width
-        room.setExit( (Environment::Room::Exit::Side)(sides[i]), mRand.gen(0, ENV_ROOM_MAX_EXIT_HEIGHT), mRand.gen( 1, (sides[i] % 2) ? room.getDepth() : room.getWidth() ) );
+        room.setExit( (Environment::Room::Exit::Side)(sides[i]), mRand.gen(0, ENV_ROOM_MAX_EXIT_HEIGHT+1), mRand.gen( 1, (sides[i] % 2) ? room.getDepth() : room.getWidth() ) );
 
+    }
+
+    //Loop again using the exit heights that were generated to raise the floors
+    for(int i = 0; i < numExits; i++){
         int side = i;
         int shareWidth = mRand.gen( 1, areaShare / 2 );
         int shareHeight = (areaShare / shareWidth) + 1;
