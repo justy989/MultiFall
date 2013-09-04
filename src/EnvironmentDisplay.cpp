@@ -1030,7 +1030,7 @@ void EnvironmentDisplay::clear()
     ReleaseCOM( mFloorVB );
     ReleaseCOM( mFloorIB );
     ReleaseCOM( mWallsVB );
-    ReleaseCOM( mWallsVB );
+    ReleaseCOM( mWallsIB );
     ReleaseCOM( mRampWallsVB );
 
     LOG_INFO << "Room Mesh Cleared" << LOG_ENDL;
