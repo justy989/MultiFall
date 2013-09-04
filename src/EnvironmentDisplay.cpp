@@ -549,7 +549,10 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                 verts[ v ].color = verts[ v - 2 ].color;
 
                 v++;
-                
+
+                createSurfaceNormal( verts + v - 6, verts + v - 5, verts + v - 4 ); 
+                createSurfaceNormal( verts + v - 3, verts + v - 2, verts + v - 1 ); 
+
                 vertexCount += 6;
                 mRampCount++;
             }else if( room.getBlockRamp(i,j) == Environment::Room::Block::RampDirection::Back ){
@@ -598,6 +601,9 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                 verts[ v ].color = verts[ v - 2 ].color;
 
                 v++;
+
+                createSurfaceNormal( verts + v - 6, verts + v - 5, verts + v - 4 ); 
+                createSurfaceNormal( verts + v - 3, verts + v - 2, verts + v - 1 ); 
 
                 vertexCount += 6;
                 mRampCount++;
@@ -648,6 +654,9 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
 
                 v++;
 
+                createSurfaceNormal( verts + v - 6, verts + v - 5, verts + v - 4 ); 
+                createSurfaceNormal( verts + v - 3, verts + v - 2, verts + v - 1 ); 
+
                 vertexCount += 6;
                 mRampCount++;
             }else if( room.getBlockRamp(i,j) == Environment::Room::Block::RampDirection::Right ){
@@ -696,6 +705,9 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                 verts[ v ].color = verts[ v - 2 ].color;
 
                 v++;
+
+                createSurfaceNormal( verts + v - 6, verts + v - 5, verts + v - 4 ); 
+                createSurfaceNormal( verts + v - 3, verts + v - 2, verts + v - 1 ); 
 
                 vertexCount += 6;
                 mRampCount++;
