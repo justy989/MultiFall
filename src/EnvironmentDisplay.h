@@ -63,6 +63,8 @@ protected:
     ID3D11Buffer* mWallsVB;
     ID3D11Buffer* mWallsIB;
 
+    ID3D11Buffer* mRampWallsVB;
+
     //Starts between floors
     ID3D11Buffer* mStairsVB;
     ID3D11Buffer* mStairsIB;
@@ -73,10 +75,12 @@ protected:
 
     int mRoomSize; //Size of the room in Blocks
     int mWallIndices; //How many wall indices need to be drawn
+    int mRampCount; //How many ramps are there?
 
     float mHeightInterval; //Height between levels
     float mBlockDimension; //Block width and height
     float mDoorHeight; //Door height
+    float mDoorWidth;
 };
 
 inline void EnvironmentDisplay::setHeightInterval( float h ){mHeightInterval = h;}

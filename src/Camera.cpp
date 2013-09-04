@@ -18,8 +18,7 @@ Camera::Camera() :
 
 void Camera::update( float aspectRatio ){
 
-    float radianFOV = (mFOV / 180.0f);
-    radianFOV *= 3.14159f;
+    float radianFOV = (mFOV / 180.0f) * 3.14159f;
 
     XMMATRIX P = XMMatrixPerspectiveFovLH(radianFOV, aspectRatio, 0.1f, 20.0f);
 	XMStoreFloat4x4(&mProj, P);

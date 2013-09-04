@@ -35,9 +35,9 @@ public:
             //Direction ramp is pointing and the height is the bottom of the ramp, is none if not a ramp
             enum RampDirection{
                 None,
-                Up,
+                Front,
                 Left,
-                Down,
+                Back,
                 Right
             };
 

@@ -9,9 +9,12 @@ EnvironmentDisplay::EnvironmentDisplay() : mInputLayout(NULL),
     mFloorIB(NULL),
     mWallsVB(NULL),
     mWallsIB(NULL),
+    mRampWallsVB(NULL),
     mHeightInterval( 0.3f ),
-    mBlockDimension( 0.1f ),
-    mDoorHeight( 0.2f )
+    mBlockDimension( 0.3f ),
+    mDoorHeight( 0.25f ),
+    mDoorWidth( 0.1f ),
+    mRampCount( 0 )
 {
 
 }
@@ -92,21 +95,22 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
     int v = 0;
 
     //TMP Colors to set floors to based on level
-    float floorColors[3][4] = {
+    float floorColors[4][4] = {
         {1.0f, 0.0f, 0.0f, 1.0f}, 
         {0.0f, 1.0f, 0.0f, 1.0f}, 
-        {0.0f, 0.0f, 1.0f, 1.0f}
+        {0.0f, 0.0f, 1.0f, 1.0f},
+        {1.0f, 1.0f, 1.0f, 1.0f},
     };
 
     //Generate floor blocks based on height
     for(int i = 0; i < room.getWidth(); i++){
         for(int j = 0; j < room.getDepth(); j++){
 
-            //Don't generate a floor the same height as the ceiling, no one will see it silly!
+            //Don't generate a floor that is a ramp or the same height as the ceiling, no one will see it silly!
             if( room.getBlockHeight(i, j) == room.getHeight() ){
                 continue;
             }
-            
+
             //Front left
             verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
             verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
@@ -141,6 +145,38 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
             verts[ v ].color = verts[ v - 3 ].color;
 
             v++;
+
+            if( room.getBlockRamp(i, j) ){
+                verts[ v - 4 ].color.x = floorColors[3][0];
+                verts[ v - 4 ].color.y = floorColors[3][1];
+                verts[ v - 4 ].color.z = floorColors[3][2];
+                verts[ v - 4 ].color.w = floorColors[3][3];
+
+                verts[ v - 3 ].color = verts[ v - 4 ].color;
+                verts[ v - 2 ].color = verts[ v - 4 ].color;
+                verts[ v - 1 ].color = verts[ v - 4 ].color;
+            }
+
+            switch( room.getBlockRamp(i, j) ){
+            case Environment::Room::Block::RampDirection::Front:
+                verts[ v - 1 ].position.y += mHeightInterval;
+                verts[ v - 2 ].position.y += mHeightInterval;
+                break;
+            case Environment::Room::Block::RampDirection::Back:
+                verts[ v - 3 ].position.y += mHeightInterval;
+                verts[ v - 4 ].position.y += mHeightInterval;
+                break;
+            case Environment::Room::Block::RampDirection::Left:
+                verts[ v - 1 ].position.y += mHeightInterval;
+                verts[ v - 3 ].position.y += mHeightInterval;
+                break;
+            case Environment::Room::Block::RampDirection::Right:
+                verts[ v - 2 ].position.y += mHeightInterval;
+                verts[ v - 4 ].position.y += mHeightInterval;
+                break;
+            default:
+                break;
+            }
 
             //Generate the normals
 			createSurfaceNormal(&verts[v-4], &verts[v-2], &verts[v-3]);
@@ -211,6 +247,8 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
     ReleaseCOM( mWallsIB );
     ReleaseCOM( mWallsVB );
 
+    ReleaseCOM( mRampWallsVB );
+
     int v = 0;
     int indexCount = 0;
     int vertexCount = 0;
@@ -228,8 +266,9 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
 
             if( nextI >= 0 ){
                 if( room.getBlockHeight( i, j ) > room.getBlockHeight( nextI, nextJ ) ){
+
                     verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
-                    verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
+                    verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval ;
                     verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
                     verts[ v ].color.x = wallColor[0];
                     verts[ v ].color.y = wallColor[1];
@@ -450,6 +489,235 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
 
     mWallIndices = indexCount;
 
+    mRampCount = 0;
+    indexCount = 0;
+    vertexCount = 0;
+
+    delete[] inds;
+    delete[] verts;
+
+    verts = new EnvVertex[ mRoomSize * 6 ];
+
+    v = 0;
+
+    for(int i = 0; i < room.getWidth(); i++){
+        for(int j = 0; j < room.getDepth(); j++){
+
+            if( room.getBlockRamp(i,j) == Environment::Room::Block::RampDirection::Front ){
+                verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
+                verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
+                verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
+                verts[ v ].color.x = wallColor[0];
+                verts[ v ].color.y = wallColor[1];
+                verts[ v ].color.z = wallColor[2];
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 1 ].position.x;
+                verts[ v ].position.y = verts[ v - 1 ].position.y;
+                verts[ v ].position.z = verts[ v - 1 ].position.z + mBlockDimension;
+                verts[ v ].color = verts[ v - 1 ].color;
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 2 ].position.x;
+                verts[ v ].position.y = verts[ v - 2 ].position.y + mHeightInterval;
+                verts[ v ].position.z = verts[ v - 2 ].position.z + mBlockDimension;
+                verts[ v ].color = verts[ v - 2 ].color;
+
+                v++;
+
+                verts[ v ].position.x = static_cast<float>(i) * mBlockDimension + mBlockDimension;
+                verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
+                verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
+                verts[ v ].color.x = wallColor[0];
+                verts[ v ].color.y = wallColor[1];
+                verts[ v ].color.z = wallColor[2];
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 1 ].position.x;
+                verts[ v ].position.y = verts[ v - 1 ].position.y + mHeightInterval;
+                verts[ v ].position.z = verts[ v - 1 ].position.z + mBlockDimension;
+                verts[ v ].color = verts[ v - 1 ].color;
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 2 ].position.x;
+                verts[ v ].position.y = verts[ v - 2 ].position.y;
+                verts[ v ].position.z = verts[ v - 2 ].position.z + mBlockDimension;
+                verts[ v ].color = verts[ v - 2 ].color;
+
+                v++;
+                
+                vertexCount += 6;
+                mRampCount++;
+            }else if( room.getBlockRamp(i,j) == Environment::Room::Block::RampDirection::Back ){
+                verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
+                verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval + mHeightInterval;
+                verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
+                verts[ v ].color.x = wallColor[0];
+                verts[ v ].color.y = wallColor[1];
+                verts[ v ].color.z = wallColor[2];
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 1 ].position.x;
+                verts[ v ].position.y = verts[ v - 1 ].position.y - mHeightInterval;
+                verts[ v ].position.z = verts[ v - 1 ].position.z;
+                verts[ v ].color = verts[ v - 1 ].color;
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 2 ].position.x;
+                verts[ v ].position.y = verts[ v - 2 ].position.y - mHeightInterval;
+                verts[ v ].position.z = verts[ v - 2 ].position.z + mBlockDimension;
+                verts[ v ].color = verts[ v - 2 ].color;
+
+                v++;
+
+                verts[ v ].position.x = static_cast<float>(i) * mBlockDimension + mBlockDimension;
+                verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval + mHeightInterval;
+                verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
+                verts[ v ].color.x = wallColor[0];
+                verts[ v ].color.y = wallColor[1];
+                verts[ v ].color.z = wallColor[2];
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 1 ].position.x;
+                verts[ v ].position.y = verts[ v - 1 ].position.y - mHeightInterval;
+                verts[ v ].position.z = verts[ v - 1 ].position.z + mBlockDimension;
+                verts[ v ].color = verts[ v - 1 ].color;
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 2 ].position.x;
+                verts[ v ].position.y = verts[ v - 2 ].position.y - mHeightInterval;
+                verts[ v ].position.z = verts[ v - 2 ].position.z;
+                verts[ v ].color = verts[ v - 2 ].color;
+
+                v++;
+
+                vertexCount += 6;
+                mRampCount++;
+            }else if( room.getBlockRamp(i,j) == Environment::Room::Block::RampDirection::Left ){
+                verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
+                verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
+                verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
+                verts[ v ].color.x = wallColor[0];
+                verts[ v ].color.y = wallColor[1];
+                verts[ v ].color.z = wallColor[2];
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 1 ].position.x + mBlockDimension;
+                verts[ v ].position.y = verts[ v - 1 ].position.y + mHeightInterval;
+                verts[ v ].position.z = verts[ v - 1 ].position.z;
+                verts[ v ].color = verts[ v - 1 ].color;
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 2 ].position.x + mBlockDimension;
+                verts[ v ].position.y = verts[ v - 2 ].position.y;
+                verts[ v ].position.z = verts[ v - 2 ].position.z;
+                verts[ v ].color = verts[ v - 2 ].color;
+
+                v++;
+
+                verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
+                verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
+                verts[ v ].position.z = static_cast<float>(j) * mBlockDimension + mBlockDimension;
+                verts[ v ].color.x = wallColor[0];
+                verts[ v ].color.y = wallColor[1];
+                verts[ v ].color.z = wallColor[2];
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 1 ].position.x + mBlockDimension;
+                verts[ v ].position.y = verts[ v - 1 ].position.y;
+                verts[ v ].position.z = verts[ v - 1 ].position.z;
+                verts[ v ].color = verts[ v - 1 ].color;
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 2 ].position.x + mBlockDimension;
+                verts[ v ].position.y = verts[ v - 2 ].position.y + mHeightInterval;
+                verts[ v ].position.z = verts[ v - 2 ].position.z;
+                verts[ v ].color = verts[ v - 2 ].color;
+
+                v++;
+
+                vertexCount += 6;
+                mRampCount++;
+            }else if( room.getBlockRamp(i,j) == Environment::Room::Block::RampDirection::Right ){
+                verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
+                verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval + mHeightInterval;
+                verts[ v ].position.z = static_cast<float>(j) * mBlockDimension + mBlockDimension;
+                verts[ v ].color.x = wallColor[0];
+                verts[ v ].color.y = wallColor[1];
+                verts[ v ].color.z = wallColor[2];
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 1 ].position.x;
+                verts[ v ].position.y = verts[ v - 1 ].position.y - mHeightInterval;
+                verts[ v ].position.z = verts[ v - 1 ].position.z;
+                verts[ v ].color = verts[ v - 1 ].color;
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 2 ].position.x + mBlockDimension;
+                verts[ v ].position.y = verts[ v - 2 ].position.y - mHeightInterval;
+                verts[ v ].position.z = verts[ v - 2 ].position.z;
+                verts[ v ].color = verts[ v - 2 ].color;
+
+                v++;
+
+                verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
+                verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval + mHeightInterval;
+                verts[ v ].position.z = static_cast<float>(j) * mBlockDimension;
+                verts[ v ].color.x = wallColor[0];
+                verts[ v ].color.y = wallColor[1];
+                verts[ v ].color.z = wallColor[2];
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 1 ].position.x + mBlockDimension;
+                verts[ v ].position.y = verts[ v - 1 ].position.y - mHeightInterval;
+                verts[ v ].position.z = verts[ v - 1 ].position.z;
+                verts[ v ].color = verts[ v - 1 ].color;
+
+                v++;
+
+                verts[ v ].position.x = verts[ v - 2 ].position.x;
+                verts[ v ].position.y = verts[ v - 2 ].position.y - mHeightInterval;
+                verts[ v ].position.z = verts[ v - 2 ].position.z;
+                verts[ v ].color = verts[ v - 2 ].color;
+
+                v++;
+
+                vertexCount += 6;
+                mRampCount++;
+            }
+        }
+    }
+
+    vbd.Usage = D3D11_USAGE_IMMUTABLE;
+    vbd.ByteWidth = sizeof(EnvVertex) * vertexCount;
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vbd.CPUAccessFlags = 0;
+    vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+    vinitData.pSysMem = verts;
+
+    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mRampWallsVB))){
+        LOG_ERRO << "Unable to allocate Vertex buffer for room walls" << LOG_INFO;
+        return false;
+    }
+    
+    delete[] verts;
+
     return true;
 }
 
@@ -485,7 +753,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
 
     //If there is no location, then there is no door!
     if( l >= mBlockDimension ){
-        backDoor[0] = l; backDoor[2] = l + mBlockDimension;
+        backDoor[0] = l; backDoor[2] = l + mDoorWidth;
         backDoor[1] = h; backDoor[3] = h + mDoorHeight;
     }
 
@@ -493,7 +761,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Left )) * mBlockDimension;
 
     if( l >= mBlockDimension ){
-        rightDoor[0] = l; rightDoor[2] = l + mBlockDimension;
+        rightDoor[0] = l; rightDoor[2] = l + mDoorWidth;
         rightDoor[1] = h; rightDoor[3] = h + mDoorHeight;
     }
 
@@ -501,7 +769,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Back )) * mBlockDimension;
 
     if( l >= mBlockDimension ){
-        frontDoor[0] = l; frontDoor[2] = l + mBlockDimension;
+        frontDoor[0] = l; frontDoor[2] = l + mDoorWidth;
         frontDoor[1] = h; frontDoor[3] = h + mDoorHeight;
     }
 
@@ -509,7 +777,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Right )) * mBlockDimension;
 
     if( l >= mBlockDimension ){
-        leftDoor[0] = l; leftDoor[2] = l + mBlockDimension;
+        leftDoor[0] = l; leftDoor[2] = l + mDoorWidth;
         leftDoor[1] = h; leftDoor[3] = h + mDoorHeight;
     }
 
@@ -757,11 +1025,15 @@ void EnvironmentDisplay::draw( ID3D11DeviceContext* device, Environment& env, ID
     for(ushort p = 0; p < techDesc.Passes; ++p){
         tech->GetPassByIndex(p)->Apply(0, device);
 
-        //Draw the floor
+        //Draw the floor and ramps
         device->IASetIndexBuffer( mFloorIB, DXGI_FORMAT_R16_UINT, 0 );
         device->IASetVertexBuffers(0, 1, &mFloorVB, &stride, &offset);
 
         device->DrawIndexed(6 * mRoomSize, 0, 0);
+
+        //Draw ramp walls separately
+        device->IASetVertexBuffers(0, 1, &mRampWallsVB, &stride, &offset);
+        device->Draw(mRampCount * 6, 0);
 
         //Draw the walls
         device->IASetIndexBuffer( mWallsIB, DXGI_FORMAT_R16_UINT, 0 );

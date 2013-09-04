@@ -32,7 +32,6 @@ void WorldGenerator::genRoom( Environment::Room& room )
     for(int i = 0; i < numExits; i++){
         //Use the random list of sides, gen a height, then gen a location if the side is even, use the depth, else use the width
         room.setExit( (Environment::Room::Exit::Side)(sides[i]), mRand.gen(0, ENV_ROOM_MAX_EXIT_HEIGHT+1), mRand.gen( 1, (sides[i] % 2) ? room.getDepth() : room.getWidth() ) );
-
     }
 
     //Loop again using the exit heights that were generated to raise the floors
@@ -120,6 +119,56 @@ void WorldGenerator::genRoom( Environment::Room& room )
 
             for(; startX <= end; startX++){
                 room.setBlock(startX, startY, room.getHeight(), Environment::Room::Block::RampDirection::None );
+            }
+        }
+    }
+
+    for(byte i = 0; i < room.getWidth(); i++){
+        for( byte j = 0; j < room.getDepth(); j++){
+            //Gen Left Ramps
+            byte nextI = i - 1;
+            byte nextJ = j;
+
+            if( nextI < room.getWidth() ){
+                if( room.getBlockHeight(nextI,nextJ) != room.getHeight() ){
+                    if( room.getBlockHeight(i,j) < room.getBlockHeight(nextI, nextJ) ){
+                        room.setBlock(i, j, room.getBlockHeight(i,j), Environment::Room::Block::RampDirection::Right);
+                    }
+                }
+            }
+
+            nextI = i + 1;
+            nextJ = j;
+
+            if( nextI < room.getWidth() ){
+                if( room.getBlockHeight(nextI,nextJ) != room.getHeight() ){
+                    if( room.getBlockHeight(i,j) < room.getBlockHeight(nextI, nextJ) ){
+                        room.setBlock(i, j, room.getBlockHeight(i,j), Environment::Room::Block::RampDirection::Left);
+                    }
+                }
+            }
+
+            nextI = i;
+            nextJ = j - 1;
+
+
+            if( nextJ < room.getDepth() ){
+                if( room.getBlockHeight(nextI,nextJ) != room.getHeight() ){
+                    if( room.getBlockHeight(i,j) < room.getBlockHeight(nextI, nextJ) ){
+                        room.setBlock(i, j, room.getBlockHeight(i,j), Environment::Room::Block::RampDirection::Back);
+                    }
+                }
+            }
+
+            nextI = i;
+            nextJ = j + 1;
+
+            if( nextJ < room.getDepth() ){
+                if( room.getBlockHeight(nextI,nextJ) != room.getHeight() ){
+                    if( room.getBlockHeight(i,j) < room.getBlockHeight(nextI, nextJ) ){
+                        room.setBlock(i, j, room.getBlockHeight(i,j), Environment::Room::Block::RampDirection::Front);
+                    }
+                }
             }
         }
     }
