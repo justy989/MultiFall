@@ -14,7 +14,9 @@ EnvironmentDisplay::EnvironmentDisplay() : mInputLayout(NULL),
     mBlockDimension( 0.3f ),
     mDoorHeight( 0.25f ),
     mDoorWidth( 0.1f ),
-    mRampCount( 0 )
+    mRampCount( 0 ),
+    mRoomSize( 0 ),
+    mWallIndices( 0 )
 {
 
 }
@@ -256,6 +258,8 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
     EnvVertex* verts = new EnvVertex[ 4 * 4 * mRoomSize ];
 
     float wallColor[4] = { 0.0f, 1.0f, 1.0f, 1.0f };
+
+    mWallIndices = 0;
 
     for(int i = 0; i < room.getWidth(); i++){
         for(int j = 0; j < room.getDepth(); j++){ 
@@ -741,16 +745,21 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     ReleaseCOM( mFrameIB );
     ReleaseCOM( mFrameVB );
 
-    float backStart = 0.0f;
     float halfWidth = ( static_cast<float>(room.getWidth()) * mBlockDimension ) / 2.0f;
     float halfDepth = ( static_cast<float>(room.getDepth()) * mBlockDimension ) / 2.0f;
     float halfHeight = ( static_cast<float>(room.getHeight()) * mHeightInterval ) / 2.0f;
 
-    float fullWidth = halfWidth * 2.0f;
-    float fullHeight = halfHeight * 2.0f;
-    float fullDepth = halfDepth * 2.0f;
+    //float fullWidth = halfWidth * 2.0f;
+    //float fullHeight = halfHeight * 2.0f;
+    //float fullDepth = halfDepth * 2.0f;
 
-    float frontStart = fullDepth;
+    float front = 0.0f;
+    float back = halfDepth * 2.0f;
+    float left = 0.0f;
+    float right = halfWidth * 2.0f;
+
+    float floor = 0.0f;
+    float ceiling = halfHeight * 2.0f;
 
     float wallColor[4] = { 1.0f, 1.0f, 0.0f };
 
@@ -760,124 +769,124 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     float rightDoor[4] = { 0.0f, halfHeight, 0.0f, halfHeight };
 
     //Get the height and location
-    float h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Front ) ) * mHeightInterval;
+    float h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Front )) * mHeightInterval;
     float l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Front )) * mBlockDimension;
 
     //If there is no location, then there is no door!
     if( l >= mBlockDimension ){
-        backDoor[0] = l; backDoor[2] = l + mDoorWidth;
-        backDoor[1] = h; backDoor[3] = h + mDoorHeight;
+        frontDoor[0] = l; frontDoor[2] = l + mDoorWidth;
+        frontDoor[1] = h; frontDoor[3] = h + mDoorHeight;
     }
 
     h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Left )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Left )) * mBlockDimension;
 
     if( l >= mBlockDimension ){
-        rightDoor[0] = l; rightDoor[2] = l + mDoorWidth;
-        rightDoor[1] = h; rightDoor[3] = h + mDoorHeight;
+        leftDoor[0] = l; leftDoor[2] = l + mDoorWidth;
+        leftDoor[1] = h; leftDoor[3] = h + mDoorHeight;
     }
 
     h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Back )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Back )) * mBlockDimension;
 
     if( l >= mBlockDimension ){
-        frontDoor[0] = l; frontDoor[2] = l + mDoorWidth;
-        frontDoor[1] = h; frontDoor[3] = h + mDoorHeight;
+        backDoor[0] = l; backDoor[2] = l + mDoorWidth;
+        backDoor[1] = h; backDoor[3] = h + mDoorHeight;
     }
 
     h = static_cast<float>(room.getExitHeight( Environment::Room::Exit::Right )) * mHeightInterval;
     l = static_cast<float>(room.getExitLocation( Environment::Room::Exit::Right )) * mBlockDimension;
 
     if( l >= mBlockDimension ){
-        leftDoor[0] = l; leftDoor[2] = l + mDoorWidth;
-        leftDoor[1] = h; leftDoor[3] = h + mDoorHeight;
+        rightDoor[0] = l; rightDoor[2] = l + mDoorWidth;
+        rightDoor[1] = h; rightDoor[3] = h + mDoorHeight;
     }
 
     EnvVertex vertices[] =
     {
         //Back Face 
         //Bottom Strip
-        { XMFLOAT3(backStart, backStart, backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
-		{ XMFLOAT3(backStart, backDoor[1], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
-        { XMFLOAT3(fullWidth, backDoor[1], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
-        { XMFLOAT3(fullWidth, backStart, backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(left, floor, back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+		{ XMFLOAT3(left, backDoor[1], back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(right, backDoor[1], back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(right, floor, back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
 
         //Top Strip
-        { XMFLOAT3(backStart, backDoor[3], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
-		{ XMFLOAT3(backStart, fullHeight, backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
-        { XMFLOAT3(fullWidth, fullHeight, backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
-        { XMFLOAT3(fullWidth, backDoor[3], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(left, backDoor[3], back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+		{ XMFLOAT3(left, ceiling, back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(right, ceiling, back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(right, backDoor[3], back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
 
         //Door
-        { XMFLOAT3(backDoor[2], backDoor[1], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
-		{ XMFLOAT3(backDoor[2], backDoor[3], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
-        { XMFLOAT3(backDoor[0], backDoor[3], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
-        { XMFLOAT3(backDoor[0], backDoor[1], backStart), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(backDoor[2], backDoor[1], back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+		{ XMFLOAT3(backDoor[2], backDoor[3], back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(backDoor[0], backDoor[3], back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
+        { XMFLOAT3(backDoor[0], backDoor[1], back), wallColor, XMFLOAT3(0.0f, 0.0f, -1.0f) },
 
         
         //Right Face
         //Bottom Strip
-        { XMFLOAT3(backStart, backStart, frontStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(backStart, rightDoor[1], frontStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
-        { XMFLOAT3(backStart, rightDoor[1], backStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
-        { XMFLOAT3(backStart, backStart, backStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(right, floor, front), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(right, rightDoor[1], front), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(right, rightDoor[1], back), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(right, floor, back), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
 
         //Top Strip
-        { XMFLOAT3(backStart, rightDoor[3], frontStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
-		{ XMFLOAT3(backStart, fullHeight, frontStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
-        { XMFLOAT3(backStart, fullHeight, backStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
-        { XMFLOAT3(backStart, rightDoor[3], backStart), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(right, rightDoor[3], front), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+		{ XMFLOAT3(right, ceiling, front), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(right, ceiling, back), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(right, rightDoor[3], back), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
 
         //Door
-        { XMFLOAT3(backStart, rightDoor[1], rightDoor[0]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
-		{ XMFLOAT3(backStart, rightDoor[3], rightDoor[0]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
-        { XMFLOAT3(backStart, rightDoor[3], rightDoor[2]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
-        { XMFLOAT3(backStart, rightDoor[1], rightDoor[2]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(right, rightDoor[1], rightDoor[2]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+		{ XMFLOAT3(right, rightDoor[3], rightDoor[2]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(right, rightDoor[3], rightDoor[0]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
+        { XMFLOAT3(right, rightDoor[1], rightDoor[0]), wallColor, XMFLOAT3(1.0f, 0.0f, 0.0f)  },
 
 
         //Front Face 
         //Bottom Strip
-        { XMFLOAT3(backStart, backStart, frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(backStart, backDoor[1], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
-        { XMFLOAT3(fullWidth, backDoor[1], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
-        { XMFLOAT3(fullWidth, backStart, frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(left, floor, front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(left, frontDoor[1], front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(right, frontDoor[1], front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(right, floor, front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
 
         //Top Strip
-        { XMFLOAT3(backStart, backDoor[3], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(backStart, fullHeight, frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
-        { XMFLOAT3(fullWidth, fullHeight, frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
-        { XMFLOAT3(fullWidth, backDoor[3], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(left, frontDoor[3], front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(left, ceiling, front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(right, ceiling, front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(right, frontDoor[3], front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
 
         //Door
-        { XMFLOAT3(backDoor[2], backDoor[1], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
-		{ XMFLOAT3(backDoor[2], backDoor[3], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
-        { XMFLOAT3(backDoor[0], backDoor[3], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
-        { XMFLOAT3(backDoor[0], backDoor[1], frontStart), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(frontDoor[2], frontDoor[1], front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+		{ XMFLOAT3(frontDoor[2], frontDoor[3], front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(frontDoor[0], frontDoor[3], front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
+        { XMFLOAT3(frontDoor[0], frontDoor[1], front), wallColor, XMFLOAT3(0.0f, 0.0f, 1.0f) },
 
         //Left Face
         //Bottom Strip
-        { XMFLOAT3(fullWidth, backStart, frontStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(fullWidth, leftDoor[1], frontStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-        { XMFLOAT3(fullWidth, leftDoor[1], backStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-        { XMFLOAT3(fullWidth, backStart, backStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(left, floor, front), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(left, leftDoor[1], front), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(left, leftDoor[1], back), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(left, floor, back), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
 
         //Top Strip
-        { XMFLOAT3(fullWidth, leftDoor[3], frontStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(fullWidth, fullHeight, frontStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-        { XMFLOAT3(fullWidth, fullHeight, backStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-        { XMFLOAT3(fullWidth, leftDoor[3], backStart), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(left, leftDoor[3], front), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(left, ceiling, front), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(left, ceiling, back), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(left, leftDoor[3], back), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
 
         //Door
-        { XMFLOAT3(fullWidth, leftDoor[1], leftDoor[0]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-		{ XMFLOAT3(fullWidth, leftDoor[3], leftDoor[0]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-        { XMFLOAT3(fullWidth, leftDoor[3], leftDoor[2]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-        { XMFLOAT3(fullWidth, leftDoor[1], leftDoor[2]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(left, leftDoor[1], leftDoor[2]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+		{ XMFLOAT3(left, leftDoor[3], leftDoor[2]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(left, leftDoor[3], leftDoor[0]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
+        { XMFLOAT3(left, leftDoor[1], leftDoor[0]), wallColor, XMFLOAT3(-1.0f, 0.0f, 0.0f) },
 
         //Ceiling
-		{ XMFLOAT3(fullWidth, fullHeight, 0.0f), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
-        { XMFLOAT3(0.0f, fullHeight, 0.0f), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
-        { XMFLOAT3(0.0f, fullHeight, fullDepth), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
-        { XMFLOAT3(fullWidth, fullHeight, fullDepth), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
+		{ XMFLOAT3(right, ceiling, 0.0f), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
+        { XMFLOAT3(0.0f, ceiling, 0.0f), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
+        { XMFLOAT3(0.0f, ceiling, back), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
+        { XMFLOAT3(right, ceiling, back), wallColor, XMFLOAT3(0.0f, -1.0f, 0.0f) },
     };
 
     D3D11_BUFFER_DESC vbd;
@@ -904,7 +913,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
     //Gen indices for each side
     for(;i < ROOM_INDEX_COUNT - 6; ){
         //Bottom Section
-        if( s < 2 ){
+        if( s == 1 || s == 2 ){
             indices[i] = v; indices[i+1] = v + 2; indices[i+2] = v + 1;
             indices[i+3] = v; indices[i+4] = v + 3; indices[i+5] = v + 2;
         }else{ //We need to gen indices in a different direction
@@ -916,7 +925,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
         i += 6;
 
         //Top Section
-        if( s < 2 ){
+        if( s == 1 || s == 2 ){
             indices[i] = v;
             indices[i+1] = v + 2;
             indices[i+2] = v + 1;
@@ -937,8 +946,9 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
         v += 4;
         i += 6;
 
+        
         //Left Middle Strip
-        if( s < 2 ){
+        if( s == 1 || s == 2 ){
             indices[i] = v; 
             indices[i+1] = v - 1;
             indices[i+2] = v + 1;
@@ -959,7 +969,7 @@ bool EnvironmentDisplay::createFrameMesh( ID3D11Device* device, Environment::Roo
         i += 6;
 
         //Right Middle Strip
-        if( s < 2 ){
+        if( s == 1 || s == 2 ){
             indices[i] = v + 2; 
             indices[i+1] = v - 7;
             indices[i+2] = v + 3;
@@ -1019,6 +1029,7 @@ void EnvironmentDisplay::clear()
     ReleaseCOM( mFloorIB );
     ReleaseCOM( mWallsVB );
     ReleaseCOM( mWallsVB );
+    ReleaseCOM( mRampWallsVB );
 
     LOG_INFO << "Room Mesh Cleared" << LOG_ENDL;
 }
@@ -1036,7 +1047,6 @@ void EnvironmentDisplay::draw( ID3D11DeviceContext* device, Environment& env, ID
 
     for(ushort p = 0; p < techDesc.Passes; ++p){
         tech->GetPassByIndex(p)->Apply(0, device);
-
         //Draw the floor and ramps
         device->IASetIndexBuffer( mFloorIB, DXGI_FORMAT_R16_UINT, 0 );
         device->IASetVertexBuffers(0, 1, &mFloorVB, &stride, &offset);

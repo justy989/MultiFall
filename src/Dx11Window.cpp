@@ -18,8 +18,8 @@ MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 DX11Window::DX11Window() : 
     mhAppInst(NULL),
 	mWindowCaption(L"D3D11 Application"),
-	md3dDriverType(D3D_DRIVER_TYPE_HARDWARE),
-    //md3dDriverType(D3D_DRIVER_TYPE_REFERENCE), //So justin can run at work
+	//md3dDriverType(D3D_DRIVER_TYPE_HARDWARE),
+    md3dDriverType(D3D_DRIVER_TYPE_REFERENCE), //So justin can run at work
 	mWindowWidth(1280),
 	mWindowHeight(1024),
     mWindowRefreshRate(60),

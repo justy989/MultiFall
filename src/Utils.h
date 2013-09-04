@@ -9,6 +9,8 @@
 
 #define CLAMP(x, min, max) if( x < min ){x = min;} if (x > max){x = max;}
 
+#define BYTE_MAX 255
+
 //Typedefs
 typedef unsigned char byte;
 typedef unsigned short ushort;

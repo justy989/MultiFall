@@ -83,7 +83,7 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
         return 1;
     }
 
-    if( !mWindow.init( L"MultiFall", 800, 600, hInstance, nCmdShow, this ) ){
+    if( !mWindow.init( L"MultiFall", 1280, 1024, hInstance, nCmdShow, this ) ){
         return 1;
     }
 

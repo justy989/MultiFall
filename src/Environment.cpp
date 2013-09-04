@@ -38,7 +38,7 @@ bool Environment::Room::init( byte width, byte depth, byte height )
         mBlocks[i] = new Block[ mDepth ];
 
         for( byte j = 0; j < mDepth; j++){
-            mBlocks[i][j].height = 0;
+            mBlocks[i][j].height = BYTE_MAX;
             mBlocks[i][j].ramp = 0;
         }
     }
