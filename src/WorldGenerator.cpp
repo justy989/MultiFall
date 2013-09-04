@@ -67,7 +67,7 @@ void WorldGenerator::genRoom( Environment::Room& room )
     }
 
     int minArea = 25;
-    int maxArea = 750;
+    int maxArea = 75;
 
     int minWidth = 5;
     int maxWidth = 10;
@@ -97,6 +97,8 @@ void WorldGenerator::genRoom( Environment::Room& room )
         //Generate which divisor to use
         int genWidth = divisors[ mRand.gen( 0, d ) ];
         int genDepth = genArea / genWidth;
+
+        delete[] divisors;
 
         //Find first empty space and fill it with this the generated height
         int genHeight = mRand.gen(0, ENV_ROOM_MAX_EXIT_HEIGHT + 1 );
@@ -149,8 +151,6 @@ void WorldGenerator::genRoom( Environment::Room& room )
                 room.setBlock( i, j, genHeight, Environment::Room::Block::RampDirection::None );
             }
         }
-
-        delete[] divisors;
     }
 
     //TMP

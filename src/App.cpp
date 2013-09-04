@@ -12,6 +12,9 @@ App::App()
     camKeyDown[3] = false;
 
     wireframe = false;
+
+    FPSString[0] = '\0';
+    CameraPosString[0] = '\0';
 }
 
 void App::handleInput( RAWINPUT* input )
@@ -77,6 +80,7 @@ void App::handleInput( RAWINPUT* input )
 int App::run( HINSTANCE hInstance, int nCmdShow )
 {
     MSG msg = {0};
+    float fpsDelay = 0.0f;
 
     //How do we report this if there is no log?!?
     if( !Log::setFilePath("multifall.log") ){
@@ -93,6 +97,8 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
     
     mTimer.start();
 
+    float d = 0.0f; // Delta time per frame
+
 	while(msg.message != WM_QUIT)
 	{
 		// If there are Window messages then process them.
@@ -104,31 +110,42 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 		// Otherwise, do animation/game stuff.
 		else
         {
-            mTimer.stop();
-
-            if( !mWindow.isPaused() && mTimer.getTimeElapsed() > LIMIT_60_FPS )
+            if( !mWindow.isPaused() /*&& mTimer.getTimeElapsed() > LIMIT_60_FPS*/ )
 			{
+                mTimer.start();
+
                 if( camKeyDown[0] ){
-                    mCamera.moveForwardBack( 0.03f );
+                    mCamera.moveForwardBack( 1.03f * d );
                 }else if( camKeyDown[1] ){
-                    mCamera.moveForwardBack( -0.03f );
+                    mCamera.moveForwardBack( -1.03f * d );
                 }else if( camKeyDown[2] ){
-                    mCamera.moveLeftRight( 0.03f );
+                    mCamera.moveLeftRight( 1.03f * d );
                 }else if( camKeyDown[3] ){
-                    mCamera.moveLeftRight( -0.03f );
+                    mCamera.moveLeftRight( -1.03f * d );
                 }
 
                 mCamera.update( mWindow.getAspectRatio() );
 
-				update();	
-				draw();
+                fpsDelay += d;
 
-                mTimer.start();
+                if( fpsDelay > 1.0f ){
+                    sprintf(FPSString, "FPS: %.2f", 1.0f / d );
+                    fpsDelay = 0.0f;
+                }
+
+                sprintf(CameraPosString, "Camera: %.2f, %.2f, %.2f", mCamera.getPosition().x, mCamera.getPosition().y, mCamera.getPosition().z );
+
+				update();
+                draw();
 			}
 			else
 			{
 				Sleep(10);
 			}
+
+            mTimer.stop();
+
+            d = mTimer.getTimeElapsed();
         }
     }
 
@@ -202,7 +219,8 @@ void App::draw( )
 
     mWorldDisplay.draw( mWindow.getDeviceContext(), mWorld );
 
-	mTextManager.DrawString(mWindow.getDeviceContext(), "Hello Multifall", 400,300);
+    mTextManager.DrawString(mWindow.getDeviceContext(), FPSString, 0, 0);
+    mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, 0, 25);
 
     mWindow.getSwapChain()->Present(0, 0);
 }

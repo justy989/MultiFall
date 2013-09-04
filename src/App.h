@@ -50,6 +50,9 @@ protected:
     bool camKeyDown[4];
     bool wireframe;
 
+    char FPSString[128];
+    char CameraPosString[128];
+
     ID3D11RasterizerState* mFillRS;
     ID3D11RasterizerState* mWireFrameRS;
 };

@@ -197,7 +197,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
     vinitData.pSysMem = verts;
 
     if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mFloorVB))){
-        LOG_ERRO << "Unable to allocate Vertex buffer for room floor" << LOG_INFO;
+        LOG_ERRO << "Unable to allocate Vertex buffer for room floors" << LOG_INFO;
         return false;
     }
 
@@ -234,7 +234,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
 
     //Create VB
     if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mFloorIB))){
-        LOG_ERRO << "Unable to allocate index buffer for room frame" << LOG_INFO;
+        LOG_ERRO << "Unable to allocate index buffer for room floors" << LOG_INFO;
         return false;
     }
 
@@ -727,9 +727,11 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
 	vbd.StructureByteStride = 0;
     vinitData.pSysMem = verts;
 
-    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mRampWallsVB))){
-        LOG_ERRO << "Unable to allocate Vertex buffer for room walls" << LOG_INFO;
-        return false;
+    if( mRampCount ){
+        if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mRampWallsVB))){
+            LOG_ERRO << "Unable to allocate Vertex buffer for ramp walls" << LOG_INFO;
+            return false;
+        }
     }
     
     delete[] verts;
