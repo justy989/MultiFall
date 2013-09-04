@@ -8,6 +8,8 @@
 #include "WorldDisplay.h"
 #include "World.h"
 
+#include "TextManager.h"
+
 #include <d3dx11effect.h>
 
 class App : public WMInputHandler{
@@ -41,6 +43,8 @@ protected:
     WorldDisplay mWorldDisplay;
 
     World mWorld;
+
+	TextManager mTextManager;
 
     //Tmp
     bool camKeyDown[4];

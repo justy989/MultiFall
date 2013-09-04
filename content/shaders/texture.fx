@@ -7,43 +7,42 @@
 Texture2D gameFont_ : register( t0 );
 SamplerState colorSampler_ : register( s0 );
 
+cbuffer cbPerObject
+{
+	float4x4 gWorld;
+};
+
 struct VertexIn
 {
-	float3 PosL  : POSITION0;
-    float4 Color : COLOR0;
+	float4 PosL  : POSITION;
+    float4 Color : COLOR;
 	float2 Tex	 : TEXCOORD0;
-	float3 Normal : NORMAL; //only used ofr padding
 };
 
 struct VertexOut
 {
-	float3 PosH  : SV_POSITION;
-    float4 Color : COLOR0;
+	float4 PosH  : SV_POSITION;
+    float4 Color : COLOR;
 	float2 Tex	 : TEXCOORD0;
-	float3 Normal : NORMAL; //only used ofr padding
 };
 
-VertexOut VS(VertexIn vin)
+VertexOut VS_Main(VertexIn vin)
 {
-	VertexOut vout;	
+	VertexOut vout =( VertexOut )0;	
 	
+	//transform to desired screen location
+	float4 pos = mul(vin.PosL, gWorld);
+	vout.PosH = pos;
+
 	// Just pass vertex color into the pixel shader.
     vout.Color = vin.Color;
+	vout.Tex = vin.Tex;
 	
     return vout;
 }
 
-float4 PS(VertexOut pin) : SV_Target
+float4 PS_Main(VertexOut pin) : SV_Target
 {
-	return gameFont_.Sample( colorSampler_, pin.Tex );
-}
-
-technique11 ColorTech
-{
-    pass P0
-    {
-        SetVertexShader( CompileShader( vs_5_0, VS() ) );
-		SetGeometryShader( NULL );
-        SetPixelShader( CompileShader( ps_5_0, PS() ) );
-    }
+	float4 color = gameFont_.Sample( colorSampler_, pin.Tex );
+	return color;
 }

@@ -142,6 +142,8 @@ bool App::init( )
         return false;
     }
 
+	mTextManager.init(mWindow.getDevice());
+
     D3D11_RASTERIZER_DESC rasterDesc;
 
     // Setup the raster description which will determine how and what polygons will be drawn.
@@ -176,7 +178,7 @@ bool App::init( )
     WorldGenerator worldGen;
     worldGen.genRoom( mWorld.getEnv().getRoom() );
 
-    mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );
+    mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );	
 
     return true;
 }
@@ -199,6 +201,9 @@ void App::draw( )
 	mfxViewProj->SetMatrix(reinterpret_cast<float*>(&viewProj));
 
     mWorldDisplay.draw( mWindow.getDeviceContext(), mWorld );
+
+	mTextManager.DrawString(mWindow.getDeviceContext(), "Hello Multifall", 400,300);
+
     mWindow.getSwapChain()->Present(0, 0);
 }
 

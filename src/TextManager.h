@@ -8,7 +8,9 @@
 class TextManager
 {
 public:
-	TextManager(ID3D11DeviceContext* device);
+	TextManager();
+
+	void init(ID3D11Device* device);
 
 	//Draw string directly to the screen
 	void DrawString(ID3D11DeviceContext* device, std::string text, int x, int y) ;
@@ -16,11 +18,12 @@ public:
 protected:
 	struct FontVertex
 	{
-		XMFLOAT3 position;
+		XMFLOAT4 position;
 		XMFLOAT4 color;
 		XMFLOAT2 tex;
-		XMFLOAT3 padding;
 	};
+
+	void setupBuffers(ID3D11Device* device, std::string text);
 
 	bool setFontQuad(char c, FontVertex* fontQuad);
 
@@ -37,4 +40,6 @@ protected:
 
 	ID3D11Buffer* mVertexBuffer;
 	ID3D11Buffer* mIndexBuffer;
+
+	ID3D11Buffer* mWorldCB;
 };
