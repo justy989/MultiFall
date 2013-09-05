@@ -1,4 +1,5 @@
 #include "App.h"
+#include "Log.h"
 
 int WINAPI WinMain(HINSTANCE hInstance,
                    HINSTANCE hPrevInstance,
@@ -8,6 +9,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
     //Create the app and run it
     App app;
 
+    Log::setFilePath("multifall.log");
+
     //Run it Run it
-    return app.run( hInstance, nCmdShow );
+    int rc = app.run( hInstance, nCmdShow );
+
+    LOG_INFO << "Goodbye cruel world of MultiFall" << LOG_ENDL;
+
+    Log::destroyInst();
+
+    return rc;
 }

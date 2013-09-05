@@ -12,6 +12,7 @@ App::App()
     camKeyDown[3] = false;
 
     wireframe = false;
+    collisionMode = false;
 
     FPSString[0] = '\0';
     CameraPosString[0] = '\0';
@@ -36,7 +37,7 @@ void App::handleInput( RAWINPUT* input )
         bool keyUp = input->data.keyboard.Flags & RI_KEY_BREAK;
 
         switch( VKey ){
-        case VK_SPACE:
+        case 'R':
             {
                 WorldGenerator worldGen;
                 
@@ -63,13 +64,20 @@ void App::handleInput( RAWINPUT* input )
                 }
 
                 wireframe = !wireframe;
-
-                if( wireframe ){
-                    mWindow.getDeviceContext()->RSSetState( mWireFrameRS );
-                }else{
-                    mWindow.getDeviceContext()->RSSetState( mFillRS );
-                }
             }
+            break;
+        case 'O':
+
+            if( keyUp ){
+                break;
+            }
+
+            collisionMode = !collisionMode;
+
+            if( collisionMode ){
+                mEntity.getPosition() = mCamera.getPosition();
+            }
+
             break;
         default:
             break;
@@ -81,11 +89,6 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 {
     MSG msg = {0};
     float fpsDelay = 0.0f;
-
-    //How do we report this if there is no log?!?
-    if( !Log::setFilePath("multifall.log") ){
-        return 1;
-    }
 
     if( !mWindow.init( L"MultiFall", 1280, 1024, hInstance, nCmdShow, this ) ){
         return 1;
@@ -114,16 +117,6 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 			{
                 mTimer.start();
 
-                if( camKeyDown[0] ){
-                    mCamera.moveForwardBack( 1.03f * d );
-                }else if( camKeyDown[1] ){
-                    mCamera.moveForwardBack( -1.03f * d );
-                }else if( camKeyDown[2] ){
-                    mCamera.moveLeftRight( 1.03f * d );
-                }else if( camKeyDown[3] ){
-                    mCamera.moveLeftRight( -1.03f * d );
-                }
-
                 mCamera.update( mWindow.getAspectRatio() );
 
                 fpsDelay += d;
@@ -133,9 +126,11 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
                     fpsDelay = 0.0f;
                 }
 
-                sprintf(CameraPosString, "Camera: %.2f, %.2f, %.2f", mCamera.getPosition().x, mCamera.getPosition().y, mCamera.getPosition().z );
+                sprintf(CameraPosString, "%s: %.2f, %.2f, %.2f", collisionMode ? "Player" : "Camera",  mCamera.getPosition().x, mCamera.getPosition().y, mCamera.getPosition().z );
 
-				update();
+                collidedString[0] = '\0';
+
+				update( d );
                 draw();
 			}
 			else
@@ -149,7 +144,6 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
         }
     }
 
-    LOG_INFO << "Goodbye cruel world of MultiFall" << LOG_ENDL;
 	return (int)msg.wParam;
 }
 
@@ -197,11 +191,165 @@ bool App::init( )
 
     mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );	
 
+    mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
+    mEntity.getSolidity().radius = 0.08f;
+    mEntity.getSolidity().height = 0.25f;
+
     return true;
 }
 
-void App::update( )
+void App::update( float dt )
 {
+    if( collisionMode ){
+
+        XMVECTOR rotVec;
+        XMMATRIX rotMat;
+        XMVECTOR moveVec;
+        XMVECTOR savePos;
+        XMVECTOR finalPos;
+
+        moveVec = XMVectorZero();
+        rotMat = XMMatrixRotationAxis( XMVectorSet( 0.0f, 1.0f, 0.0f, 1.0f), mCamera.getPitch() );
+             
+        if( camKeyDown[0] ){
+             rotVec = XMVectorSet( 0.0f, 0.0f, 1.0f, 1.0f );
+             rotVec = XMVector4Transform( rotVec, rotMat );
+             moveVec += rotVec;
+        }
+        
+        if( camKeyDown[1] ){
+             rotVec = XMVectorSet( 0.0f, 0.0f, -1.0f, 1.0f );
+             rotVec = XMVector4Transform( rotVec, rotMat );
+             moveVec += rotVec;
+        }
+        
+        if( camKeyDown[2] ){
+             rotVec = XMVectorSet( 1.0f, 0.0f, 0.0f, 1.0f );
+             rotVec = XMVector4Transform( rotVec, rotMat );
+             moveVec += rotVec;
+        }
+        
+        if( camKeyDown[3] ){
+             rotVec = XMVectorSet( -1.0f, 0.0f, 0.0f, 1.0f );
+             rotVec = XMVector4Transform( rotVec, rotMat );
+             moveVec += rotVec;
+        }
+
+        moveVec = XMVector4Normalize( moveVec );
+
+        savePos = XMLoadFloat4( &mEntity.getPosition() );
+
+        finalPos = savePos + XMVectorScale( moveVec, dt * 2.0f );
+
+        XMStoreFloat4( &mEntity.getPosition(), finalPos );
+
+        //Are we colliding?
+        int startX = static_cast<int>(mEntity.getPosition().x / 0.3f);
+        int startZ = static_cast<int>(mEntity.getPosition().z / 0.3f);
+
+        CLAMP( startX, 0, mWorld.getEnv().getRoom().getWidth() - 1 );
+        CLAMP( startZ, 0, mWorld.getEnv().getRoom().getDepth() - 1 );
+
+        if( mWorld.getEnv().getRoom().getBlockRamp(startX, startZ) == Environment::Room::Block::RampDirection::None ){
+            //Make sure we are on the floor, otherwise bring us down through gravity
+            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getEnv().getRoom().getBlockHeight(startX, startZ)) * 0.3f;
+
+            if( distFromGround > 0.05f ){
+                mEntity.getPosition().y -= 0.045f;
+            }
+        }
+
+        startX -= 1;
+        startZ -= 1;
+
+        int endX = startX + 2;
+        int endZ = startZ + 2;
+
+        CLAMP( startX, 0, mWorld.getEnv().getRoom().getWidth() - 1 );
+        CLAMP( startZ, 0, mWorld.getEnv().getRoom().getDepth() - 1 );
+        CLAMP( endX, 0, mWorld.getEnv().getRoom().getWidth() - 1 );
+        CLAMP( endZ, 0, mWorld.getEnv().getRoom().getDepth() - 1 );
+
+        bool collision = false;
+
+        for(int i = startX; i <= endX; i++){
+            for(int j = startZ; j <= endZ; j++){
+
+                float blockHeight = static_cast<float>(mWorld.getEnv().getRoom().getBlockHeight(i, j));
+                blockHeight *= 0.3f;
+
+                float playerHeight = mEntity.getPosition().y - mEntity.getSolidity().height;
+                float px = mEntity.getPosition().x;
+                float pz = mEntity.getPosition().z;
+
+                if(  blockHeight > playerHeight ){
+                    //Check to see if any of the points on the block touch the player
+                    float left = static_cast<float>(i) * 0.3f;
+                    float top = static_cast<float>(j) * 0.3f;
+                    float right = left + 0.3f;
+                    float bottom = top + 0.3f;
+
+                    //Left to Right in front
+                    if( WorldEntity::circleLineIntersect( 
+                        XMFLOAT2(left, top),
+                        XMFLOAT2(right, top),
+                        XMFLOAT2(px, pz),
+                        mEntity.getSolidity().radius ) ){
+                        sprintf(collidedString, "Collision!");
+                        break;
+                    }
+
+                    //Left to Right in back
+                    if( WorldEntity::circleLineIntersect( 
+                        XMFLOAT2(left, bottom),
+                        XMFLOAT2(right, bottom),
+                        XMFLOAT2(px, pz),
+                        mEntity.getSolidity().radius ) ){
+                        sprintf(collidedString, "Collision!");
+                        break;
+                    }
+
+                    //top to bottom on left
+                    if( WorldEntity::circleLineIntersect( 
+                        XMFLOAT2(left, top),
+                        XMFLOAT2(left, bottom),
+                        XMFLOAT2(px, pz),
+                        mEntity.getSolidity().radius ) ){
+                        sprintf(collidedString, "Collision!");
+                        break;
+                    }
+
+                    //top to bottom on right
+                    if( WorldEntity::circleLineIntersect( 
+                        XMFLOAT2(right, top),
+                        XMFLOAT2(right, bottom),
+                        XMFLOAT2(px, pz),
+                        mEntity.getSolidity().radius ) ){
+                        sprintf(collidedString, "Collision!");
+                        break;
+                    }
+                }
+            }
+        }
+
+        mCamera.getPosition() = mEntity.getPosition();
+    }else{
+        if( camKeyDown[0] ){
+            mCamera.moveForwardBack( 1.03f * dt ); 
+        }
+        
+        if( camKeyDown[1] ){
+            mCamera.moveForwardBack( -1.03f * dt ); 
+        }
+        
+        if( camKeyDown[2] ){
+            mCamera.moveLeftRight( 1.03f * dt ); 
+        }
+        
+        if( camKeyDown[3] ){
+            mCamera.moveLeftRight( -1.03f * dt ); 
+        }
+    }
 
 }
 
@@ -216,11 +364,20 @@ void App::draw( )
 
 	ID3DX11EffectMatrixVariable* mfxViewProj = mWorldDisplay.getFX()->GetVariableByName("gWorldViewProj")->AsMatrix();
 	mfxViewProj->SetMatrix(reinterpret_cast<float*>(&viewProj));
+    
+    if( wireframe ){
+        mWindow.getDeviceContext()->RSSetState( mWireFrameRS );
+    }else{
+        mWindow.getDeviceContext()->RSSetState( mFillRS );
+    }
 
     mWorldDisplay.draw( mWindow.getDeviceContext(), mWorld );
 
+    mWindow.getDeviceContext()->RSSetState( mFillRS );
+
     mTextManager.DrawString(mWindow.getDeviceContext(), FPSString, 0, 0);
     mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, 0, 25);
+    mTextManager.DrawString(mWindow.getDeviceContext(), collidedString, 0, 50);
 
     mWindow.getSwapChain()->Present(0, 0);
 }

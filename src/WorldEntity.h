@@ -41,7 +41,10 @@ public:
 
     inline Existence getExistence();
     inline int getID();
-    inline XMFLOAT3& getPosition();
+    inline XMFLOAT4& getPosition();
+    inline Solidity& getSolidity();
+
+    static bool circleLineIntersect( XMFLOAT2 startPoint, XMFLOAT2 endPoint, XMFLOAT2 circleCenter, float circleRadius );
 
 protected:
 
@@ -55,11 +58,12 @@ protected:
     Solidity mSolidity;
 
     //Position in the world
-    XMFLOAT3 mPosition;
+    XMFLOAT4 mPosition;
 };
 
 inline WorldEntity::Existence WorldEntity::getExistence(){return mExistence;}
 inline int WorldEntity::getID(){return mID;}
-inline XMFLOAT3& WorldEntity::getPosition(){return mPosition;}
+inline XMFLOAT4& WorldEntity::getPosition(){return mPosition;}
+inline WorldEntity::Solidity& WorldEntity::getSolidity(){return mSolidity;}
 
 #endif

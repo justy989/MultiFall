@@ -10,6 +10,8 @@
 
 #include "TextManager.h"
 
+#include "WorldEntity.h"
+
 #include <d3dx11effect.h>
 
 class App : public WMInputHandler{
@@ -27,7 +29,7 @@ protected:
 
     bool init( );
 
-    void update( );
+    void update( float dt );
     void draw( );
 
     void clear( );
@@ -50,11 +52,16 @@ protected:
     bool camKeyDown[4];
     bool wireframe;
 
+    bool collisionMode;
+
     char FPSString[128];
     char CameraPosString[128];
+    char collidedString[128];
 
     ID3D11RasterizerState* mFillRS;
     ID3D11RasterizerState* mWireFrameRS;
+
+    WorldEntity mEntity;
 };
 
 #endif

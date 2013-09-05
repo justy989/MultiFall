@@ -34,6 +34,9 @@ public:
     //Degrees
     inline void setFOV( float f );
 
+    inline float getPitch();
+    inline float getYaw();
+
 protected:
 
     XMFLOAT4 mPosition;
@@ -61,5 +64,8 @@ inline void Camera::moveForwardBack( float d ){mMove.z = d;}
 inline void Camera::moveLeftRight( float d ){mMove.x = d;}
 
 inline void Camera::setFOV( float f ){mFOV = f;}
+
+inline float Camera::getPitch(){return mPitch;}
+inline float Camera::getYaw(){return mYaw;}
 
 #endif
