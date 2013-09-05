@@ -192,7 +192,7 @@ bool App::init( )
     mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );	
 
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
-    mEntity.getSolidity().radius = 0.08f;
+    mEntity.getSolidity().radius = 0.11f;
     mEntity.getSolidity().height = 0.25f;
 
     return true;

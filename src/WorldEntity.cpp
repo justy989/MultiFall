@@ -15,6 +15,8 @@ bool WorldEntity::circleLineIntersect( XMFLOAT2 startPoint, XMFLOAT2 endPoint, X
     //Taken from: http://blog.csharphelper.com/2010/03/28/determine-where-a-line-intersects-a-circle-in-c.aspx
     float dx, dy, A, B, C, det, t;
 
+    float pointDist = 
+
     dx = endPoint.x - startPoint.x;
     dy = endPoint.y - startPoint.y;
 
@@ -30,12 +32,47 @@ bool WorldEntity::circleLineIntersect( XMFLOAT2 startPoint, XMFLOAT2 endPoint, X
     }
     else if (det == 0)
     {
-        return true;
+        t = -B / (2 * A);
+        XMFLOAT2 tF( startPoint.x + t * dx, startPoint.y + t * dy );
+
+        if( abs(dx) > abs(dy) ){
+            if( tF.x >= startPoint.x && tF.x <= endPoint.x ){
+                return true;
+            }
+        }else{
+            if( tF.y >= startPoint.y && tF.y <= endPoint.y ){
+                return true;
+            }
+        }
     }
     else
     {
-        // Two solutions.
-        return true;
+        t = (float)((-B + sqrt(det)) / (2 * A));
+        XMFLOAT2 tF( startPoint.x + t * dx, startPoint.y + t * dy );
+        
+        if( abs(dx) > abs(dy) ){
+            if( tF.x >= startPoint.x && tF.x <= endPoint.x ){
+                return true;
+            }
+        }else{
+            if( tF.y >= startPoint.y && tF.y <= endPoint.y ){
+                return true;
+            }
+        }
+
+        t = (float)((-B - sqrt(det)) / (2 * A));
+        tF.x = startPoint.x + t * dx;
+        tF.y = startPoint.y + t * dy ;
+
+        if( abs(dx) > abs(dy) ){
+            if( tF.x >= startPoint.x && tF.x <= endPoint.x ){
+                return true;
+            }
+        }else{
+            if( tF.y >= startPoint.y && tF.y <= endPoint.y ){
+                return true;
+            }
+        }
     }
 
     return false;
