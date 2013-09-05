@@ -7,7 +7,19 @@
 #define FONTWIDTH	0.06
 #define FONTHEIGHT  0.068
 
-TextManager::TextManager()
+TextManager::TextManager() :
+    mVertexShader(NULL),
+    mPixelShader(NULL),
+
+	mFontRV(NULL),
+	mSampler(NULL),
+
+	mInputLayout(NULL),
+
+	mVertexBuffer(NULL),
+	mIndexBuffer(NULL),
+
+	mWorldCB(NULL)
 {
 	
 }
@@ -89,6 +101,23 @@ void TextManager::init(ID3D11Device* device)
 	device->CreateBuffer( &constDesc, 0, &mWorldCB );
 }
 
+void TextManager::clear()
+{
+    ReleaseCOM(mVertexShader);
+
+    ReleaseCOM(mPixelShader);
+
+	ReleaseCOM(mFontRV);
+	ReleaseCOM(mSampler);
+
+	ReleaseCOM(mInputLayout);
+
+	ReleaseCOM(mVertexBuffer);
+	ReleaseCOM(mIndexBuffer);
+
+	ReleaseCOM(mWorldCB);
+}
+
 bool TextManager::CompileD3DShader(LPCWSTR filePath, char* entry, char* shaderModel, ID3DBlob** buffer )
 {
 	DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
@@ -123,6 +152,12 @@ void TextManager::setupBuffers(ID3D11Device* device, std::string text)
 {
 	//each char in the string needs it's own quad
 	int length = text.length()*4;
+
+    //If an empty string is given, we don't need to create buffers
+    if( !length ){
+        return;
+    }
+
 	FontVertex* fontQuads = new FontVertex[length];
 
 	for(int i = 0; i < text.length(); i++)

@@ -10,6 +10,7 @@
 #ifndef __D3DX11EFFECT_H__
 #define __D3DX11EFFECT_H__
 
+#include "dxgi.h"
 #include "d3d11.h" 
 #include "d3d11shader.h"
 

@@ -443,52 +443,60 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
         }
     }
 
-    D3D11_BUFFER_DESC vbd;
-    vbd.Usage = D3D11_USAGE_IMMUTABLE;
-    vbd.ByteWidth = sizeof(EnvVertex) * vertexCount;
-    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vbd.CPUAccessFlags = 0;
-    vbd.MiscFlags = 0;
-	vbd.StructureByteStride = 0;
-    D3D11_SUBRESOURCE_DATA vinitData;
-    vinitData.pSysMem = verts;
+    if( vertexCount ){
+        D3D11_BUFFER_DESC vbd;
+        vbd.Usage = D3D11_USAGE_IMMUTABLE;
+        vbd.ByteWidth = sizeof(EnvVertex) * vertexCount;
+        vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        vbd.CPUAccessFlags = 0;
+        vbd.MiscFlags = 0;
+	    vbd.StructureByteStride = 0;
+        D3D11_SUBRESOURCE_DATA vinitData;
+        vinitData.pSysMem = verts;
 
-    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mWallsVB))){
-        LOG_ERRO << "Unable to allocate Vertex buffer for room walls" << LOG_INFO;
-        return false;
+        if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mWallsVB))){
+            LOG_ERRO << "Unable to allocate Vertex buffer for room walls" << LOG_INFO;
+            return false;
+        }
+
+        delete[] verts;
     }
 
-    ushort* inds = new ushort[ indexCount ];
+    if( indexCount ){
+        ushort* inds = new ushort[ indexCount ];
 
-    v = 0;
-    int index = 0;
+        v = 0;
+        int index = 0;
 
-    for(; v < indexCount;){
-        inds[v] = index;
-        inds[v+1] = index + 2;
-        inds[v+2] = index + 1;
+        for(; v < indexCount;){
+            inds[v] = index;
+            inds[v+1] = index + 2;
+            inds[v+2] = index + 1;
 
-        inds[v+3] = index + 1;
-        inds[v+4] = index + 2;
-        inds[v+5] = index + 3;
+            inds[v+3] = index + 1;
+            inds[v+4] = index + 2;
+            inds[v+5] = index + 3;
 
-        v += 6;
-        index += 4;
-    }
+            v += 6;
+            index += 4;
+        }
 
-    D3D11_BUFFER_DESC ibd;
-    ibd.Usage = D3D11_USAGE_IMMUTABLE;
-    ibd.ByteWidth = sizeof(ushort) * indexCount;
-    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    ibd.CPUAccessFlags = 0;
-    ibd.MiscFlags = 0;
-	ibd.StructureByteStride = 0;
-    D3D11_SUBRESOURCE_DATA iinitData;
-    iinitData.pSysMem = inds;
+        D3D11_BUFFER_DESC ibd;
+        ibd.Usage = D3D11_USAGE_IMMUTABLE;
+        ibd.ByteWidth = sizeof(ushort) * indexCount;
+        ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        ibd.CPUAccessFlags = 0;
+        ibd.MiscFlags = 0;
+	    ibd.StructureByteStride = 0;
+        D3D11_SUBRESOURCE_DATA iinitData;
+        iinitData.pSysMem = inds;
 
-    if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mWallsIB))){
-        LOG_ERRO << "Unable to allocate index buffer for room walls" << LOG_INFO;
-        return false;
+        if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mWallsIB))){
+            LOG_ERRO << "Unable to allocate index buffer for room walls" << LOG_INFO;
+            return false;
+        }
+        
+        delete[] inds;
     }
 
     mWallIndices = indexCount;
@@ -496,9 +504,6 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
     mRampCount = 0;
     indexCount = 0;
     vertexCount = 0;
-
-    delete[] inds;
-    delete[] verts;
 
     verts = new EnvVertex[ mRoomSize * 6 ];
 
@@ -719,18 +724,22 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
         }
     }
 
-    vbd.Usage = D3D11_USAGE_IMMUTABLE;
-    vbd.ByteWidth = sizeof(EnvVertex) * vertexCount;
-    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vbd.CPUAccessFlags = 0;
-    vbd.MiscFlags = 0;
-	vbd.StructureByteStride = 0;
-    vinitData.pSysMem = verts;
+    if( vertexCount ){
+        D3D11_BUFFER_DESC vbd;
+        vbd.Usage = D3D11_USAGE_IMMUTABLE;
+        vbd.ByteWidth = sizeof(EnvVertex) * vertexCount;
+        vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        vbd.CPUAccessFlags = 0;
+        vbd.MiscFlags = 0;
+	    vbd.StructureByteStride = 0;
+        D3D11_SUBRESOURCE_DATA vinitData;
+        vinitData.pSysMem = verts;
 
-    if( mRampCount ){
-        if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mRampWallsVB))){
-            LOG_ERRO << "Unable to allocate Vertex buffer for ramp walls" << LOG_INFO;
-            return false;
+        if( mRampCount ){
+            if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mRampWallsVB))){
+                LOG_ERRO << "Unable to allocate Vertex buffer for ramp walls" << LOG_INFO;
+                return false;
+            }
         }
     }
     

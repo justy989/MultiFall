@@ -44,7 +44,7 @@ public:
     inline XMFLOAT4& getPosition();
     inline Solidity& getSolidity();
 
-    static bool circleLineIntersect( XMFLOAT2 startPoint, XMFLOAT2 endPoint, XMFLOAT2 circleCenter, float circleRadius );
+    static bool circleAALineIntersect( XMVECTOR start, XMVECTOR end, XMVECTOR circleCenter, float circleRadius );
 
 protected:
 

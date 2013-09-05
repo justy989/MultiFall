@@ -10,70 +10,69 @@ WorldEntity::WorldEntity() :
     mPosition.w = 0;
 }
 
-bool WorldEntity::circleLineIntersect( XMFLOAT2 startPoint, XMFLOAT2 endPoint, XMFLOAT2 circleCenter, float circleRadius )
+bool WorldEntity::circleAALineIntersect( XMVECTOR start, XMVECTOR end, XMVECTOR circleCenter, float circleRadius )
 {
-    //Taken from: http://blog.csharphelper.com/2010/03/28/determine-where-a-line-intersects-a-circle-in-c.aspx
-    float dx, dy, A, B, C, det, t;
+    //A collision function we actually understand...
+ 
+    //Create a vector from the start to the circle position
+    XMVECTOR cToStart = circleCenter - start;
+    XMVECTOR cToEnd = circleCenter - end;
 
-    float pointDist = 
+    XMVECTOR lenToStart = XMVector4Length( cToStart );
+    XMVECTOR lenToEnd = XMVector4Length( cToEnd );
 
-    dx = endPoint.x - startPoint.x;
-    dy = endPoint.y - startPoint.y;
+    XMFLOAT4 ans;
+    XMStoreFloat4( &ans, lenToStart );
 
-    A = dx * dx + dy * dy;
-    B = 2 * (dx * (startPoint.x - circleCenter.x) + dy * (startPoint.y - circleCenter.y));
-    C = (startPoint.x - circleCenter.x) * (startPoint.x - circleCenter.x) + (startPoint.y - circleCenter.y) * (startPoint.y - circleCenter.y) - circleRadius * circleRadius;
+    if( ans.x <= circleRadius ){
+        return true;
+    }
 
-    det = B * B - 4 * A * C;
+    XMStoreFloat4( &ans, lenToEnd );
 
-    if ( A <= 0.0000001f || det < 0 )
-    {
+    if( ans.x <= circleRadius ){
+        return true;
+    }
+
+    //Calculate the start to end
+    XMVECTOR endToStart = end - start;
+
+    XMVECTOR endToStartLen = XMVector4Length( endToStart );
+        
+    XMFLOAT4 tmp;
+    XMStoreFloat4(&tmp, endToStartLen);
+    tmp.x = 1.0f / tmp.x;
+
+    XMVECTOR tmpA = XMVectorScale(endToStart, tmp.x);
+    XMVECTOR tmpB = XMVectorScale(cToStart, tmp.x);
+
+    //Project it onto the start -> end vector
+    XMVECTOR dot = XMVector4Dot( tmpA, tmpB );
+
+    //Calculate the Perpendicular point
+    XMVECTOR per = start + ( endToStart * dot );
+
+    //If the perpendicular point is within range of the circle, there is a collision
+    XMVECTOR perDist = XMVector4Length( circleCenter - per );
+
+    XMStoreFloat4( &ans, perDist );
+
+    if( ans.x > circleRadius ){
         return false;
     }
-    else if (det == 0)
-    {
-        t = -B / (2 * A);
-        XMFLOAT2 tF( startPoint.x + t * dx, startPoint.y + t * dy );
+    
+    //Store the dot product to see how far down the line the collision happens
+    XMStoreFloat4( &ans, dot );
 
-        if( abs(dx) > abs(dy) ){
-            if( tF.x >= startPoint.x && tF.x <= endPoint.x ){
-                return true;
-            }
-        }else{
-            if( tF.y >= startPoint.y && tF.y <= endPoint.y ){
-                return true;
-            }
-        }
-    }
-    else
-    {
-        t = (float)((-B + sqrt(det)) / (2 * A));
-        XMFLOAT2 tF( startPoint.x + t * dx, startPoint.y + t * dy );
-        
-        if( abs(dx) > abs(dy) ){
-            if( tF.x >= startPoint.x && tF.x <= endPoint.x ){
-                return true;
-            }
-        }else{
-            if( tF.y >= startPoint.y && tF.y <= endPoint.y ){
-                return true;
-            }
-        }
-
-        t = (float)((-B - sqrt(det)) / (2 * A));
-        tF.x = startPoint.x + t * dx;
-        tF.y = startPoint.y + t * dy ;
-
-        if( abs(dx) > abs(dy) ){
-            if( tF.x >= startPoint.x && tF.x <= endPoint.x ){
-                return true;
-            }
-        }else{
-            if( tF.y >= startPoint.y && tF.y <= endPoint.y ){
-                return true;
-            }
-        }
+    //If the dot product is negative, the collision is outside the range
+    if( ans.x < 0.0f ){
+        return false;
     }
 
-    return false;
+    //If the dot product is bigger than 1.0f, meaning it scaled the vector passed the segment, the collision is outside the range
+    if( ans.x > 1.0f ){
+        return false;
+    }
+
+    return true;
 }

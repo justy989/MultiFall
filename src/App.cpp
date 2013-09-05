@@ -133,16 +133,16 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 				update( d );
                 draw();
 			}
-			else
-			{
-				Sleep(10);
-			}
+
+            Sleep(10);
 
             mTimer.stop();
 
             d = mTimer.getTimeElapsed();
         }
     }
+
+    clear();
 
 	return (int)msg.wParam;
 }
@@ -290,42 +290,42 @@ void App::update( float dt )
                     float bottom = top + 0.3f;
 
                     //Left to Right in front
-                    if( WorldEntity::circleLineIntersect( 
-                        XMFLOAT2(left, top),
-                        XMFLOAT2(right, top),
-                        XMFLOAT2(px, pz),
+                    if( WorldEntity::circleAALineIntersect( 
+                        XMVectorSet(left, 0.0f, top, 1.0f),
+                        XMVectorSet(right, 0.0f, top, 1.0f),
+                        XMVectorSet(px, 0.0f, pz, 1.0f),
                         mEntity.getSolidity().radius ) ){
-                        sprintf(collidedString, "Collision!");
+                        sprintf(collidedString, "Collision Top!");
                         break;
                     }
-
+                    
                     //Left to Right in back
-                    if( WorldEntity::circleLineIntersect( 
-                        XMFLOAT2(left, bottom),
-                        XMFLOAT2(right, bottom),
-                        XMFLOAT2(px, pz),
+                    if( WorldEntity::circleAALineIntersect( 
+                        XMVectorSet(left, 0.0f, bottom, 1.0f),
+                        XMVectorSet(right, 0.0f, bottom, 1.0f),
+                        XMVectorSet(px, 0.0f, pz, 1.0f),
                         mEntity.getSolidity().radius ) ){
-                        sprintf(collidedString, "Collision!");
+                        sprintf(collidedString, "Collision Bottom!");
                         break;
                     }
 
                     //top to bottom on left
-                    if( WorldEntity::circleLineIntersect( 
-                        XMFLOAT2(left, top),
-                        XMFLOAT2(left, bottom),
-                        XMFLOAT2(px, pz),
+                    if( WorldEntity::circleAALineIntersect( 
+                        XMVectorSet(left, 0.0f, top, 1.0f),
+                        XMVectorSet(left, 0.0f, bottom, 1.0f),
+                        XMVectorSet(px, 0.0f, pz, 1.0f),
                         mEntity.getSolidity().radius ) ){
-                        sprintf(collidedString, "Collision!");
+                        sprintf(collidedString, "Collision Left!");
                         break;
                     }
 
                     //top to bottom on right
-                    if( WorldEntity::circleLineIntersect( 
-                        XMFLOAT2(right, top),
-                        XMFLOAT2(right, bottom),
-                        XMFLOAT2(px, pz),
+                    if( WorldEntity::circleAALineIntersect( 
+                        XMVectorSet(right, 0.0f, top, 1.0f),
+                        XMVectorSet(right, 0.0f, bottom, 1.0f),
+                        XMVectorSet(px, 0.0f, pz, 1.0f),
                         mEntity.getSolidity().radius ) ){
-                        sprintf(collidedString, "Collision!");
+                        sprintf(collidedString, "Collision Right!");
                         break;
                     }
                 }
@@ -385,4 +385,10 @@ void App::draw( )
 void App::clear( )
 {
     mWorldDisplay.clear();
+    mTextManager.clear();
+
+    ReleaseCOM( mFillRS );
+    ReleaseCOM( mWireFrameRS );
+
+    mWindow.clear();
 }

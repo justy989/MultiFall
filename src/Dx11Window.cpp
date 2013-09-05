@@ -44,7 +44,7 @@ DX11Window::DX11Window() :
 
 DX11Window::~DX11Window()
 {
-    clear();
+
 }
 
 bool DX11Window::init( LPCWSTR windowCaption, unsigned int windowWidth, unsigned int windowHeight, HINSTANCE hInstance, int nCmdShow, WMInputHandler* inputHandler )

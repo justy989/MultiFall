@@ -135,16 +135,6 @@ void WorldGenerator::genRoom( Environment::Room& room )
         CLAMP( endI, 0, room.getWidth() - 1 );
         CLAMP( endJ, 0, room.getDepth() - 1 );
 
-        //Check to see if area that will be set is going to touch a door,
-        //for(int i = 0; i < 4; i++){
-            //if( startI >= doorCoords[i][0] && doorCoords[i][0] <= endI &&
-                //startJ >= doorCoords[i][1] && doorCoords[i][1] <= endJ ){
-                //If so set it to be the height of the door
-                //genHeight = room.getExitHeight((Environment::Room::Exit::Side)(i));
-                //break;
-            //}
-        //}
-
         //Loop over rect and set at genned height
         for(int i = startI ;i <= endI; i++){
             for(int j = startJ;j <= endJ; j++){
@@ -159,11 +149,6 @@ void WorldGenerator::genRoom( Environment::Room& room )
         if( doorCoords[i][0] < 0 ){
             continue;
         }
-
-        //room.setBlock( doorCoords[i][0], 
-                        //doorCoords[i][1], 
-                        //room.getExitHeight((Environment::Room::Exit::Side)(i)), 
-                        //Environment::Room::Block::RampDirection::None );
 
         room.setExit( (Environment::Room::Exit::Side)(i),
             room.getBlockHeight(doorCoords[i][0], doorCoords[i][1]),
@@ -273,11 +258,4 @@ void WorldGenerator::genRoom( Environment::Room& room )
             }
         }
     }
-
-    //Set heights randomly woooooooooo
-    //for(byte i = 0; i < room.getWidth(); i++){
-        //for( byte j = 0; j < room.getDepth(); j++){
-            //room.setBlock( i, j, mRand.gen( 0, 3 ), Environment::Room::Block::RampDirection::None );
-        //}
-    //}
 }

@@ -5,7 +5,9 @@
 
 #include "World.h"
 
-#include <D3DX11.h>
+#include <dxgi.h>
+#include <d3d11.h>
+#include <d3dx11.h>
 
 WorldDisplay::WorldDisplay() : mFX(NULL),
     mTech(NULL)

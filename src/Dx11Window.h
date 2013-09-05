@@ -1,6 +1,8 @@
 #ifndef DX11WINDOW_H
 #define DX11WINDOW_H
 
+#include <dxgi.h>
+#include <d3d11.h>
 #include <d3dx11.h>
 #include <string>
 
@@ -87,7 +89,7 @@ protected:
     WMInputHandler* mInputHandler;
 };
 
-inline float DX11Window::getAspectRatio(){return mWindowWidth / mWindowHeight;}
+inline float DX11Window::getAspectRatio(){return static_cast<float>(mWindowWidth) / static_cast<float>(mWindowHeight);}
 inline ID3D11Device* DX11Window::getDevice(){return md3dDevice;}
 inline ID3D11DeviceContext* DX11Window::getDeviceContext(){return md3dImmediateContext;}
 inline IDXGISwapChain* DX11Window::getSwapChain(){return mSwapChain;}

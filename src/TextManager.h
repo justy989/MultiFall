@@ -1,7 +1,8 @@
-#include<d3d11.h>
-#include<d3dx11.h>
-#include<DxErr.h>
-#include<D3Dcompiler.h>
+#include <dxgi.h>
+#include <d3d11.h>
+#include <d3dx11.h>
+#include <DxErr.h>
+#include <D3Dcompiler.h>
 #include <xnamath.h>
 #include <string>
 
@@ -11,6 +12,8 @@ public:
 	TextManager();
 
 	void init(ID3D11Device* device);
+
+    void clear();
 
 	//Draw string directly to the screen
 	void DrawString(ID3D11DeviceContext* device, std::string text, int x, int y) ;
