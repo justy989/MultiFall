@@ -8,6 +8,9 @@
 #include "WorldDisplay.h"
 #include "World.h"
 
+#include "Configuration.h"
+#include "UserBinds.h"
+
 #include "TextManager.h"
 
 #include "WorldEntity.h"
@@ -35,6 +38,10 @@ protected:
     void clear( );
 
 protected:
+
+    Configuration mConfig;
+
+    UserBinds mBinds;
 
     DX11Window mWindow;
 

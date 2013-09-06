@@ -26,21 +26,17 @@ void App::handleInput( RAWINPUT* input )
         long my = input->data.mouse.lLastY;
 
         //0.001f is hardcoded, but we should use a sensitivity configuration setting
-        mCamera.modPitch( (float)(mx) * 0.001f );
-        mCamera.modYaw( (float)(my) * -0.001f );
+        mCamera.modPitch( (float)(mx) * mConfig.getSensitivity() );
+        mCamera.modYaw( (float)(my) * -mConfig.getSensitivity() );
 
     }else if (input->header.dwType== RIM_TYPEKEYBOARD){
         USHORT VKey = input->data.keyboard.VKey;
-
-        float camSpeed = 0.25f;
-
         bool keyUp = input->data.keyboard.Flags & RI_KEY_BREAK;
 
         switch( VKey ){
         case 'R':
             {
                 WorldGenerator worldGen;
-                
                 worldGen.genRoom( mWorld.getEnv().getRoom() );
                 mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );
             }
@@ -67,7 +63,6 @@ void App::handleInput( RAWINPUT* input )
             }
             break;
         case 'O':
-
             if( keyUp ){
                 break;
             }
@@ -77,12 +72,13 @@ void App::handleInput( RAWINPUT* input )
             if( collisionMode ){
                 mEntity.getPosition() = mCamera.getPosition();
             }
-
             break;
         default:
             break;
         }
     }
+
+    mBinds.updateKeyStates( input );
 }
 
 int App::run( HINSTANCE hInstance, int nCmdShow )
@@ -90,7 +86,22 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
     MSG msg = {0};
     float fpsDelay = 0.0f;
 
-    if( !mWindow.init( L"MultiFall", 1280, 1024, hInstance, nCmdShow, this ) ){
+    //Load the configuration
+    if( !mConfig.load( "content/multifall.cfg" ) ){
+        return 1;
+    }
+
+    //Set the binds for movement for now
+    for(int i = UserBinds::Action::Player_Move_Forward; i <= UserBinds::Action::Player_Move_Right; i++){
+        mBinds.bindKey( (UserBinds::Action)(i), 
+                        mConfig.getBinds()[ i ] );
+    }
+
+    if( !mConfig.getWindow().hardwareRendered ){
+        mWindow.setDriverType( D3D_DRIVER_TYPE_REFERENCE );
+    }
+
+    if( !mWindow.init( L"MultiFall", mConfig.getWindow().width, mConfig.getWindow().height, hInstance, nCmdShow, this ) ){
         return 1;
     }
 
@@ -211,32 +222,31 @@ void App::update( float dt )
         moveVec = XMVectorZero();
         rotMat = XMMatrixRotationAxis( XMVectorSet( 0.0f, 1.0f, 0.0f, 1.0f), mCamera.getPitch() );
              
-        if( camKeyDown[0] ){
+        if( mBinds.isBindDown( UserBinds::Action::Player_Move_Left ) ){
              rotVec = XMVectorSet( 0.0f, 0.0f, 1.0f, 0.0f );
              rotVec = XMVector4Transform( rotVec, rotMat );
              moveVec += rotVec;
         }
         
-        if( camKeyDown[1] ){
+        if( mBinds.isBindDown( UserBinds::Action::Player_Move_Right ) ){
              rotVec = XMVectorSet( 0.0f, 0.0f, -1.0f, 0.0f );
              rotVec = XMVector4Transform( rotVec, rotMat );
              moveVec += rotVec;
         }
         
-        if( camKeyDown[2] ){
+        if( mBinds.isBindDown( UserBinds::Action::Player_Move_Forward ) ){
              rotVec = XMVectorSet( 1.0f, 0.0f, 0.0f, 0.0f );
              rotVec = XMVector4Transform( rotVec, rotMat );
              moveVec += rotVec;
         }
         
-        if( camKeyDown[3] ){
+        if( mBinds.isBindDown( UserBinds::Action::Player_Move_Backward ) ){
              rotVec = XMVectorSet( -1.0f, 0.0f, 0.0f, 0.0f );
              rotVec = XMVector4Transform( rotVec, rotMat );
              moveVec += rotVec;
         }
 
         moveVec = XMVector3Normalize( moveVec );
-
         moveVec = XMVectorSetW( moveVec, 1.0f );
 
         //TEMPORARY WAY OF SOLVING THIS!

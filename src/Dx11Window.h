@@ -53,6 +53,9 @@ public:
     inline int getWindowWidth();
     inline int getWindowHeight();
 
+    //To change to software rendered so Justin can run it at work
+    inline void setDriverType( D3D_DRIVER_TYPE dt );
+
 protected:
 
 	bool initWindow();
@@ -99,5 +102,7 @@ inline bool DX11Window::isMaximized(){return mIsMaximized;}
 inline bool DX11Window::isResizing(){return mIsResizing;}
 inline int DX11Window::getWindowWidth(){return mWindowWidth;}
 inline int DX11Window::getWindowHeight(){return mWindowHeight;}
+
+inline void DX11Window::setDriverType( D3D_DRIVER_TYPE dt ){md3dDriverType = dt;}
 
 #endif // DX11WINDOW_H
