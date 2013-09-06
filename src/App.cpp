@@ -192,7 +192,7 @@ bool App::init( )
     mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );	
 
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
-    mEntity.getSolidity().radius = 0.11f;
+    mEntity.getSolidity().radius = 0.15f;
     mEntity.getSolidity().height = 0.25f;
 
     return true;
@@ -212,142 +212,70 @@ void App::update( float dt )
         rotMat = XMMatrixRotationAxis( XMVectorSet( 0.0f, 1.0f, 0.0f, 1.0f), mCamera.getPitch() );
              
         if( camKeyDown[0] ){
-             rotVec = XMVectorSet( 0.0f, 0.0f, 1.0f, 1.0f );
+             rotVec = XMVectorSet( 0.0f, 0.0f, 1.0f, 0.0f );
              rotVec = XMVector4Transform( rotVec, rotMat );
              moveVec += rotVec;
         }
         
         if( camKeyDown[1] ){
-             rotVec = XMVectorSet( 0.0f, 0.0f, -1.0f, 1.0f );
+             rotVec = XMVectorSet( 0.0f, 0.0f, -1.0f, 0.0f );
              rotVec = XMVector4Transform( rotVec, rotMat );
              moveVec += rotVec;
         }
         
         if( camKeyDown[2] ){
-             rotVec = XMVectorSet( 1.0f, 0.0f, 0.0f, 1.0f );
+             rotVec = XMVectorSet( 1.0f, 0.0f, 0.0f, 0.0f );
              rotVec = XMVector4Transform( rotVec, rotMat );
              moveVec += rotVec;
         }
         
         if( camKeyDown[3] ){
-             rotVec = XMVectorSet( -1.0f, 0.0f, 0.0f, 1.0f );
+             rotVec = XMVectorSet( -1.0f, 0.0f, 0.0f, 0.0f );
              rotVec = XMVector4Transform( rotVec, rotMat );
              moveVec += rotVec;
         }
 
-        moveVec = XMVector4Normalize( moveVec );
+        moveVec = XMVector3Normalize( moveVec );
 
-        savePos = XMLoadFloat4( &mEntity.getPosition() );
+        moveVec = XMVectorSetW( moveVec, 1.0f );
 
-        finalPos = savePos + XMVectorScale( moveVec, dt * 2.0f );
+        //TEMPORARY WAY OF SOLVING THIS!
+        //As long as we are not on a ramp, bring us to the floor
+        int bx = static_cast<int>( mEntity.getPosition().x / 0.3f);
+        int bz = static_cast<int>( mEntity.getPosition().z / 0.3f);
 
-        XMStoreFloat4( &mEntity.getPosition(), finalPos );
+        CLAMP( bx, 0, mWorld.getEnv().getRoom().getWidth() - 1 );
+        CLAMP( bz, 0, mWorld.getEnv().getRoom().getDepth() - 1 );
 
-        //Are we colliding?
-        int startX = static_cast<int>(mEntity.getPosition().x / 0.3f);
-        int startZ = static_cast<int>(mEntity.getPosition().z / 0.3f);
-
-        CLAMP( startX, 0, mWorld.getEnv().getRoom().getWidth() - 1 );
-        CLAMP( startZ, 0, mWorld.getEnv().getRoom().getDepth() - 1 );
-
-        if( mWorld.getEnv().getRoom().getBlockRamp(startX, startZ) == Environment::Room::Block::RampDirection::None ){
+        if( mWorld.getEnv().getRoom().getBlockRamp(bx, bz) == Environment::Room::Block::RampDirection::None ){
             //Make sure we are on the floor, otherwise bring us down through gravity
-            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getEnv().getRoom().getBlockHeight(startX, startZ)) * 0.3f;
+            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getEnv().getRoom().getBlockHeight(bx, bz)) * 0.3f;
 
             if( distFromGround > 0.05f ){
                 mEntity.getPosition().y -= 0.045f;
+            }else if( distFromGround < -0.05f ){
+                //mEntity.getPosition().y += 0.045f;
             }
         }
 
-        startX -= 1;
-        startZ -= 1;
-
-        int endX = startX + 2;
-        int endZ = startZ + 2;
-
-        CLAMP( startX, 0, mWorld.getEnv().getRoom().getWidth() - 1 );
-        CLAMP( startZ, 0, mWorld.getEnv().getRoom().getDepth() - 1 );
-        CLAMP( endX, 0, mWorld.getEnv().getRoom().getWidth() - 1 );
-        CLAMP( endZ, 0, mWorld.getEnv().getRoom().getDepth() - 1 );
-
-        bool collision = false;
-
-        for(int i = startX; i <= endX; i++){
-            for(int j = startZ; j <= endZ; j++){
-
-                float blockHeight = static_cast<float>(mWorld.getEnv().getRoom().getBlockHeight(i, j));
-                blockHeight *= 0.3f;
-
-                float playerHeight = mEntity.getPosition().y - mEntity.getSolidity().height;
-                float px = mEntity.getPosition().x;
-                float pz = mEntity.getPosition().z;
-
-                if(  blockHeight > playerHeight ){
-                    //Check to see if any of the points on the block touch the player
-                    float left = static_cast<float>(i) * 0.3f;
-                    float top = static_cast<float>(j) * 0.3f;
-                    float right = left + 0.3f;
-                    float bottom = top + 0.3f;
-
-                    //Left to Right in front
-                    if( WorldEntity::circleAALineIntersect( 
-                        XMVectorSet(left, 0.0f, top, 1.0f),
-                        XMVectorSet(right, 0.0f, top, 1.0f),
-                        XMVectorSet(px, 0.0f, pz, 1.0f),
-                        mEntity.getSolidity().radius ) ){
-                        sprintf(collidedString, "Collision Top!");
-                        break;
-                    }
-                    
-                    //Left to Right in back
-                    if( WorldEntity::circleAALineIntersect( 
-                        XMVectorSet(left, 0.0f, bottom, 1.0f),
-                        XMVectorSet(right, 0.0f, bottom, 1.0f),
-                        XMVectorSet(px, 0.0f, pz, 1.0f),
-                        mEntity.getSolidity().radius ) ){
-                        sprintf(collidedString, "Collision Bottom!");
-                        break;
-                    }
-
-                    //top to bottom on left
-                    if( WorldEntity::circleAALineIntersect( 
-                        XMVectorSet(left, 0.0f, top, 1.0f),
-                        XMVectorSet(left, 0.0f, bottom, 1.0f),
-                        XMVectorSet(px, 0.0f, pz, 1.0f),
-                        mEntity.getSolidity().radius ) ){
-                        sprintf(collidedString, "Collision Left!");
-                        break;
-                    }
-
-                    //top to bottom on right
-                    if( WorldEntity::circleAALineIntersect( 
-                        XMVectorSet(right, 0.0f, top, 1.0f),
-                        XMVectorSet(right, 0.0f, bottom, 1.0f),
-                        XMVectorSet(px, 0.0f, pz, 1.0f),
-                        mEntity.getSolidity().radius ) ){
-                        sprintf(collidedString, "Collision Right!");
-                        break;
-                    }
-                }
-            }
-        }
+        mWorld.moveEntity( &mEntity, moveVec, dt );
 
         mCamera.getPosition() = mEntity.getPosition();
     }else{
         if( camKeyDown[0] ){
-            mCamera.moveForwardBack( 1.03f * dt ); 
+            mCamera.moveForwardBack( 1.0f * dt ); 
         }
         
         if( camKeyDown[1] ){
-            mCamera.moveForwardBack( -1.03f * dt ); 
+            mCamera.moveForwardBack( -1.0f * dt ); 
         }
         
         if( camKeyDown[2] ){
-            mCamera.moveLeftRight( 1.03f * dt ); 
+            mCamera.moveLeftRight( 1.0f * dt ); 
         }
         
         if( camKeyDown[3] ){
-            mCamera.moveLeftRight( -1.03f * dt ); 
+            mCamera.moveLeftRight( -1.0f * dt ); 
         }
     }
 

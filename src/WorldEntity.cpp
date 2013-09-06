@@ -76,3 +76,18 @@ bool WorldEntity::circleAALineIntersect( XMVECTOR start, XMVECTOR end, XMVECTOR 
 
     return true;
 }
+
+bool WorldEntity::circlePointIntersect( XMVECTOR point, XMVECTOR circleCenter, float circleRadius )
+{
+    XMVECTOR diff = point - circleCenter;
+    XMVECTOR len = XMVector4Length( diff );
+
+    XMFLOAT4 realLen;
+    XMStoreFloat4( &realLen, len );
+
+    if( realLen.x < circleRadius ){
+        return true;
+    }
+
+    return false;
+}
