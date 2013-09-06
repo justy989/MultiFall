@@ -82,6 +82,22 @@ void Environment::Room::setBlock( byte i, byte j, byte height, Block::RampDirect
     mBlocks[i][j].height = height;
 }
 
+void Environment::Room::setBlockID( byte i, byte j, byte id )
+{
+	assert( i < mWidth );
+    assert( j < mDepth );
+
+    mBlocks[i][j].id = id;
+}
+
+byte Environment::Room::getBlockID( byte i, byte j )
+{
+    assert( i < mWidth );
+    assert( j < mDepth );
+
+	return mBlocks[i][j].id;
+}
+
 Environment::Room::Block::RampDirection Environment::Room::getBlockRamp( byte i, byte j )
 {
     assert( i < mWidth );

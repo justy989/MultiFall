@@ -164,6 +164,10 @@ void WorldGenerator::genRoom( Environment::Room& room )
     //Set left and right ramps
     for( byte j = 0; j < room.getDepth(); j++){
         for(byte i = 0; i < room.getWidth(); i++){
+
+			//cus there's no good place for this
+			room.setBlockID(i,j, mRand.gen(0, 16));
+
             byte nextI = i;
             byte nextJ = j - 1;
 

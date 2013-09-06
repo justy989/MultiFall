@@ -28,18 +28,36 @@ bool EnvironmentDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tec
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{"NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT, 0, 40, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 
 	//Create the input layout
     D3DX11_PASS_DESC passDesc;
     tech->GetPassByIndex(0)->GetDesc( &passDesc );
 
-    if(FAILED(device->CreateInputLayout(vertexDesc, 3, passDesc.pIAInputSignature, 
+    if(FAILED(device->CreateInputLayout(vertexDesc, 4, passDesc.pIAInputSignature, 
 		passDesc.IAInputSignatureSize, &mInputLayout))){
             LOG_ERRO << "Failed to create Environment Vertex Input Layout" << LOG_ENDL;
             return false;
     }
+
+	D3D11_SAMPLER_DESC colorMapDesc;
+    ZeroMemory( &colorMapDesc, sizeof( colorMapDesc ) );
+    colorMapDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    colorMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    colorMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+    colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
+    
+    device->CreateSamplerState( &colorMapDesc, &mSampler );
+
+	D3DX11CreateShaderResourceViewFromFile( device,
+        L"content/textures/stonefloorsheet1.png", 0, 0, &mStoneFloor1RV, 0 );
+
+	D3DX11CreateShaderResourceViewFromFile( device,
+        L"content/textures/stonewall1.png", 0, 0, &mStoneWall1RV, 0 );
 
     return true;
 }
@@ -113,6 +131,11 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
                 continue;
             }
 
+			byte id = room.getBlockID(i,j);
+			float delta = 0.25f; //4x4 grid of tiles
+			float row = id / 4;
+			float column = id % 4;
+
             //Front left
             verts[ v ].position.x = static_cast<float>(i) * mBlockDimension;
             verts[ v ].position.y = static_cast<float>(room.getBlockHeight(i, j)) * mHeightInterval;
@@ -121,6 +144,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
             verts[ v ].color.y = floorColors[ room.getBlockHeight(i, j) ][1];
             verts[ v ].color.z = floorColors[ room.getBlockHeight(i, j) ][2];
             verts[ v ].color.w = floorColors[ room.getBlockHeight(i, j) ][3];
+			verts[ v ].tex = XMFLOAT2(column * delta, row * delta);
 
             v++;
 
@@ -129,6 +153,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
             verts[ v ].position.y = verts[ v - 1 ].position.y;
             verts[ v ].position.z = verts[ v - 1 ].position.z;
             verts[ v ].color = verts[ v - 1 ].color;
+			verts[ v ].tex = XMFLOAT2(column * delta, row * delta + delta);
 
             v++;
 
@@ -137,6 +162,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
             verts[ v ].position.y = verts[ v - 2 ].position.y;
             verts[ v ].position.z = verts[ v - 2 ].position.z + mBlockDimension;
             verts[ v ].color = verts[ v - 2 ].color;
+			verts[ v ].tex = XMFLOAT2(column * delta + delta, row * delta);
 
             v++;
 
@@ -145,6 +171,7 @@ bool EnvironmentDisplay::createFloorMesh( ID3D11Device* device, Environment::Roo
             verts[ v ].position.y = verts[ v - 3 ].position.y;
             verts[ v ].position.z = verts[ v - 3 ].position.z + mBlockDimension;
             verts[ v ].color = verts[ v - 3 ].color;
+			verts[ v ].tex = XMFLOAT2(column * delta + delta, row * delta + delta);
 
             v++;
 
@@ -277,6 +304,8 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].color.x = wallColor[0];
                     verts[ v ].color.y = wallColor[1];
                     verts[ v ].color.z = wallColor[2];
+					verts[ v ].tex = XMFLOAT2(1, 0);
+					
 
                     v++;
 
@@ -284,6 +313,8 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = verts[ v - 1 ].position.y;
                     verts[ v ].position.z = verts[ v - 1 ].position.z + mBlockDimension;
                     verts[ v ].color = verts[ v - 1 ].color;
+					verts[ v ].tex = XMFLOAT2(0, 0);
+					
 
                     v++;
 
@@ -291,6 +322,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 2 ].position.z;
                     verts[ v ].color = verts[ v - 2 ].color;
+					verts[ v ].tex = XMFLOAT2(1, 1*room.getBlockHeight( i, j ));
 
                     v++;
 
@@ -298,6 +330,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 3 ].position.z + mBlockDimension;
                     verts[ v ].color = verts[ v - 3 ].color;
+					verts[ v ].tex = XMFLOAT2(0, 1*room.getBlockHeight( i, j ));
 
                     v++;
 
@@ -321,6 +354,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].color.x = wallColor[0];
                     verts[ v ].color.y = wallColor[1];
                     verts[ v ].color.z = wallColor[2];
+					verts[ v ].tex = XMFLOAT2(1, 0);
 
                     v++;
                     
@@ -328,6 +362,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = verts[ v - 1 ].position.y;
                     verts[ v ].position.z = verts[ v - 1 ].position.z - mBlockDimension;
                     verts[ v ].color = verts[ v - 1 ].color;
+					verts[ v ].tex = XMFLOAT2(0,0);
 
                     v++;
 
@@ -335,6 +370,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 2 ].position.z;
                     verts[ v ].color = verts[ v - 2 ].color;
+					verts[ v ].tex = XMFLOAT2(1, 1*room.getBlockHeight( i, j ));
 
                     v++;
 
@@ -342,6 +378,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 3 ].position.z - mBlockDimension;
                     verts[ v ].color = verts[ v - 3 ].color;
+					verts[ v ].tex = XMFLOAT2(0, 1*room.getBlockHeight( i, j ));
 
                     v++;
 
@@ -365,6 +402,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].color.x = wallColor[0];
                     verts[ v ].color.y = wallColor[1];
                     verts[ v ].color.z = wallColor[2];
+					verts[ v ].tex = XMFLOAT2(1, 0);
 
                     v++;
                     
@@ -372,6 +410,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = verts[ v - 1 ].position.y;
                     verts[ v ].position.z = verts[ v - 1 ].position.z;
                     verts[ v ].color = verts[ v - 1 ].color;
+					verts[ v ].tex = XMFLOAT2(0,0);
 
                     v++;
 
@@ -379,6 +418,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 2 ].position.z;
                     verts[ v ].color = verts[ v - 2 ].color;
+					verts[ v ].tex = XMFLOAT2(1, 1*room.getBlockHeight( i, j ));
 
                     v++;
 
@@ -386,6 +426,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 3 ].position.z;
                     verts[ v ].color = verts[ v - 3 ].color;
+					verts[ v ].tex = XMFLOAT2(0, 1*room.getBlockHeight( i, j ));
 
                     v++;
 
@@ -409,6 +450,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].color.x = wallColor[0];
                     verts[ v ].color.y = wallColor[1];
                     verts[ v ].color.z = wallColor[2];
+					verts[ v ].tex = XMFLOAT2(1, 0);
 
                     v++;
                     
@@ -416,6 +458,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = verts[ v - 1 ].position.y;
                     verts[ v ].position.z = verts[ v - 1 ].position.z;
                     verts[ v ].color = verts[ v - 1 ].color;
+					verts[ v ].tex = XMFLOAT2(0,0);
 
                     v++;
 
@@ -423,6 +466,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 2 ].position.z;
                     verts[ v ].color = verts[ v - 2 ].color;
+					verts[ v ].tex = XMFLOAT2(1, 1*room.getBlockHeight( i, j ));
 
                     v++;
 
@@ -430,6 +474,7 @@ bool EnvironmentDisplay::createWallsMesh( ID3D11Device* device, Environment::Roo
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 3 ].position.z;
                     verts[ v ].color = verts[ v - 3 ].color;
+					verts[ v ].tex = XMFLOAT2(0, 1*room.getBlockHeight( i, j ));
 
                     v++;
 
@@ -1062,6 +1107,9 @@ void EnvironmentDisplay::draw( ID3D11DeviceContext* device, Environment& env, ID
         device->IASetIndexBuffer( mFloorIB, DXGI_FORMAT_R16_UINT, 0 );
         device->IASetVertexBuffers(0, 1, &mFloorVB, &stride, &offset);
 
+		device->PSSetShaderResources( 0, 1, &mStoneFloor1RV );		
+		device->PSSetSamplers( 0, 1, &mSampler );
+
         device->DrawIndexed(6 * mRoomSize, 0, 0);
 
         //Draw ramp walls separately
@@ -1071,6 +1119,8 @@ void EnvironmentDisplay::draw( ID3D11DeviceContext* device, Environment& env, ID
         //Draw the walls
         device->IASetIndexBuffer( mWallsIB, DXGI_FORMAT_R16_UINT, 0 );
         device->IASetVertexBuffers(0, 1, &mWallsVB, &stride, &offset);
+
+		device->PSSetShaderResources( 0, 1, &mStoneWall1RV );
 
         device->DrawIndexed(mWallIndices, 0, 0);
 

@@ -59,6 +59,12 @@ public:
         //set a block
         void setBlock( byte i, byte j, byte height, Block::RampDirection ramp );
 
+		//set block ID (used for spritesheet lookup)
+		void setBlockID( byte i, byte j, byte id );
+
+		//get block ID (used for spritesheet lookup)
+		byte getBlockID( byte i, byte j );		
+
         //Get the ramp type of a block
         Block::RampDirection getBlockRamp( byte i, byte j );
 
