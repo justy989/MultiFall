@@ -24,18 +24,24 @@ TextManager::TextManager() :
 	
 }
 
-void TextManager::init(ID3D11Device* device)
+bool TextManager::init(ID3D11Device* device)
 {
 	ID3DBlob* vsBuffer = 0;
 
-	CompileD3DShader( L"content/shaders/texture.fx", "VS_Main", "vs_5_0", &vsBuffer );
+	if( !CompileD3DShader( L"content/shaders/text.fx", "VS_Main", "vs_5_0", &vsBuffer ) ){
+        LOG_ERRO << "Failed to compiled text.fx shader" << LOG_ENDL;
+        return false;
+    }
 
 	device->CreateVertexShader( vsBuffer->GetBufferPointer( ),
 	vsBuffer->GetBufferSize( ), 0, &mVertexShader );	 
 
 	ID3DBlob* psBuffer = 0;
 
-	CompileD3DShader( L"content/shaders/texture.fx", "PS_Main", "ps_5_0", &psBuffer );
+	if( !CompileD3DShader( L"content/shaders/text.fx", "PS_Main", "ps_5_0", &psBuffer ) ){
+        LOG_ERRO << "Failed to compiled text.fx shader" << LOG_ENDL;
+        return false;
+    }
 
 	device->CreatePixelShader( psBuffer->GetBufferPointer( ),
 	psBuffer->GetBufferSize( ), 0, &mPixelShader );
@@ -53,8 +59,11 @@ void TextManager::init(ID3D11Device* device)
     
     device->CreateSamplerState( &colorMapDesc, &mSampler );
 
-	D3DX11CreateShaderResourceViewFromFile( device,
-        L"content/fonts/gamefont.png", 0, 0, &mFontRV, 0 );
+	if( FAILED( D3DX11CreateShaderResourceViewFromFile( device,
+        L"content/fonts/gamefont.png", 0, 0, &mFontRV, 0 ) ) ){
+        LOG_ERRO << "Failed to create Shader resource out of: " << LOG_WC_TO_C(L"content/fonts/gamefont.png") << LOG_ENDL;
+        return false;
+    }
 
 	D3D11_SUBRESOURCE_DATA resourceData;
 	ZeroMemory( &resourceData, sizeof( resourceData ) );
@@ -85,11 +94,14 @@ void TextManager::init(ID3D11Device* device)
 
 	unsigned int totalLayoutElements = ARRAYSIZE( vertexDesc );
 
-	device->CreateInputLayout(vertexDesc, totalLayoutElements, 
+	if( FAILED( device->CreateInputLayout(vertexDesc, totalLayoutElements, 
 								vsBuffer->GetBufferPointer(), vsBuffer->GetBufferSize(),
-								&mInputLayout);
-	vsBuffer->Release( );
+								&mInputLayout) ) ){
+        LOG_ERRO << "Failed to create Input Layout for Text" << LOG_ENDL;
+        return false;
+    }
 
+	vsBuffer->Release( );
 
 	//shader variables to be updated
 	D3D11_BUFFER_DESC constDesc;
@@ -98,7 +110,13 @@ void TextManager::init(ID3D11Device* device)
     constDesc.ByteWidth = sizeof( XMMATRIX );
     constDesc.Usage = D3D11_USAGE_DEFAULT;
     
-	device->CreateBuffer( &constDesc, 0, &mWorldCB );
+	if( FAILED( device->CreateBuffer( &constDesc, 0, &mWorldCB ) ) ){
+        LOG_ERRO << "Failed to create constant buffer for Text" << LOG_ENDL;
+        return false;
+    }
+
+    LOG_INFO << "Loaded Text Texture and Shader Successfully" << LOG_ENDL;
+    return true;
 }
 
 void TextManager::clear()

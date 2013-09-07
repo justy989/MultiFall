@@ -31,7 +31,7 @@ bool WorldDisplay::init( ID3D11Device* device )
  
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
-	HRESULT hr = D3DX11CompileFromFile(L"content/shaders/color.fx", 0, 0, 0, "fx_5_0", shaderFlags, 
+	HRESULT hr = D3DX11CompileFromFile(L"content/shaders/dungeon.fx", 0, 0, 0, "fx_5_0", shaderFlags, 
 		0, 0, &compiledShader, &compilationMsgs, 0);
 
 	// compilationMsgs can store errors or warnings.
@@ -58,9 +58,9 @@ bool WorldDisplay::init( ID3D11Device* device )
 	ReleaseCOM(compiledShader);
 	mTech = mFX->GetTechniqueByName("ColorTech"); //Temporary
 
-    LOG_INFO << "Loaded color.fx shader Successfully" << LOG_ENDL;
+    LOG_INFO << "Loaded dungeon.fx shader Successfully" << LOG_ENDL;
 
-    if( !mEnvDisplay.init( device, mTech ) ){
+    if( !mDungeonDisplay.init( device, mTech ) ){
         return false;
     }
 
@@ -69,12 +69,12 @@ bool WorldDisplay::init( ID3D11Device* device )
 
 void WorldDisplay::draw( ID3D11DeviceContext* device, World& world )
 {
-    mEnvDisplay.draw( device, world.getEnv(), mFX, mTech );
+    mDungeonDisplay.draw( device, mTech );
 }
 
 void WorldDisplay::clear()
 {
-    mEnvDisplay.clear();
+    mDungeonDisplay.clear();
 
     ReleaseCOM( mFX );
 }

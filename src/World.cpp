@@ -37,7 +37,7 @@ void World::moveEntity( WorldEntity* entity, XMVECTOR moveVec, float dist )
 
 bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition, XMVECTOR* outWallVector)
 {
-    Environment::Room& room = mEnv.getRoom(); //Reference to Room
+    Level& room = mDungeon.getLevel(); //Reference to Room
 
     float px = entity->getPosition().x; //Player X
     float py = entity->getPosition().y; //Player Y
@@ -63,7 +63,7 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
     bool collided = false;
 
-    /*
+    /* TODO: Corner collision so you can't go through walls
     //Check the top Left Corner
     i = bX + 1;
     j = bZ + 1;

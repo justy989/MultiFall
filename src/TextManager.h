@@ -1,3 +1,6 @@
+#ifndef TEXTMANAGER_H
+#define TEXTMANAGER_H
+
 #include <dxgi.h>
 #include <d3d11.h>
 #include <d3dx11.h>
@@ -11,7 +14,7 @@ class TextManager
 public:
 	TextManager();
 
-	void init(ID3D11Device* device);
+	bool init(ID3D11Device* device);
 
     void clear();
 
@@ -46,3 +49,5 @@ protected:
 
 	ID3D11Buffer* mWorldCB;
 };
+
+#endif

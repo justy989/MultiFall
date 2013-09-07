@@ -1,12 +1,5 @@
-//***************************************************************************************
-// color.fx by Frank Luna (C) 2011 All Rights Reserved.
-//
-// Transforms and colors geometry.
-//***************************************************************************************
-
-Texture2D stoneFloorTex_ : register( t0 );
-//Texture2D stoneWallTex_ : register( t1 );
-SamplerState colorSampler_ : register( s0 );
+Texture2D texture_ : register( t0 );
+SamplerState sampler_ : register( s0 );
 
 cbuffer cbPerObject
 {
@@ -17,7 +10,6 @@ cbuffer cbPerObject
 struct VertexIn
 {
 	float3 PosL  : POSITION;
-    float4 Color : COLOR;
 	float3 Normal : NORMAL;
 	float2 Tex :	TEXCOORD0;
 };
@@ -25,7 +17,6 @@ struct VertexIn
 struct VertexOut
 {
 	float4 PosH  : SV_POSITION;
-    float4 Color : COLOR;
 	float3 Normal : NORMAL;
 	float2 Tex :	TEXCOORD0;
 };
@@ -37,8 +28,6 @@ VertexOut VS(VertexIn vin)
 	// Transform to homogeneous clip space.
 	vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
 	
-	// Just pass vertex color into the pixel shader.
-    vout.Color = vin.Color;    
 	vout.Normal = vin.Normal;
 	vout.Tex = vin.Tex;
 	
@@ -47,24 +36,25 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
+    //Directional Light attributes
 	float lightIntensity;
 	float3 lightDir;
 
-	//pin.Color = pin.Color * stoneFloorTex_.Sample( colorSampler_, pin.Tex );
-	pin.Color = stoneFloorTex_.Sample( colorSampler_, pin.Tex );
+	float4 finalColor = texture_.Sample( sampler_, pin.Tex );
 	
-	lightDir = float3(0.2f,-0.1f,0);
+	lightDir = float3(0.2f, -0.1f, 0.0f);
 	lightDir = normalize(lightDir);
 	
 	// Calculate the amount of light on this pixel.
     lightIntensity = dot(pin.Normal, lightDir);
 	
+    [flatten]
 	if(lightIntensity > 0)
 	{
-		pin.Color = lightIntensity * pin.Color;
+		finalColor = lightIntensity * finalColor;
 	}
 	
-    return pin.Color;
+    return finalColor;
 }
 
 technique11 ColorTech

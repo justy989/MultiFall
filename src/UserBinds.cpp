@@ -4,7 +4,9 @@
 
 UserBinds::UserBinds()
 {
-
+    for(int i = 0; i < USERBIND_ACTION_COUNT; i++){
+        mBinds[ i ].isDown = false;
+    }
 }
 
 void UserBinds::updateKeyStates( RAWINPUT* rawInput )

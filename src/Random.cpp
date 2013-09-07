@@ -25,7 +25,7 @@ unsigned int Random::gen(unsigned int min, unsigned int max)
 	//Simple RNG by George Marsaglia
 	m_iF = 36969 * ( m_iF & 65535 ) + ( m_iF >> 16 );
 	m_iS = 18000 * ( m_iS & 65535 ) + ( m_iS >> 16 );
-
+     
 	return ( ( ( m_iF << 16 ) + m_iS ) % ( max - min ) ) + min;
 }
 

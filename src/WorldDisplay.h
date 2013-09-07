@@ -1,7 +1,7 @@
 #ifndef WORLD_DISPLAY_H
 #define WORLD_DISPLAY_H
 
-#include "EnvironmentDisplay.h"
+#include "DungeonDisplay.h"
 
 class World;
 
@@ -25,19 +25,19 @@ public:
     inline ID3DX11EffectTechnique* getTechnique();
     inline ID3DX11Effect* getFX();
 
-    inline EnvironmentDisplay& getEnvDis();
+    inline DungeonDisplay& getDungeonDisplay();
 
 protected:
 
     ID3DX11Effect* mFX;
 	ID3DX11EffectTechnique* mTech;
 
-    EnvironmentDisplay mEnvDisplay;
+    DungeonDisplay mDungeonDisplay;
 };
 
 inline ID3DX11EffectTechnique* WorldDisplay::getTechnique(){return mTech;}
 inline ID3DX11Effect* WorldDisplay::getFX(){return mFX;}
 
-inline EnvironmentDisplay& WorldDisplay::getEnvDis(){return mEnvDisplay;}
+inline DungeonDisplay& WorldDisplay::getDungeonDisplay(){return mDungeonDisplay;}
 
 #endif

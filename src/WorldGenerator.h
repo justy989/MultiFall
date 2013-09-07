@@ -2,7 +2,7 @@
 #define WORLD_GENERATOR_H
 
 #include "Random.h"
-#include "Environment.h"
+#include "Dungeon.h"
 
 class WorldGenerator{
 public:
@@ -10,7 +10,20 @@ public:
     WorldGenerator();
 
     //Generate a room's exits and floor layout
-    void genRoom( Environment::Room& room );
+    void genLevel( Level& level );
+
+protected:
+
+    struct Room{
+        int left;
+        int right;
+        int top;
+        int bottom;
+    };
+
+    void genLevelLayout( Level& level ); 
+    void genLevelRooms( Level& level, Room& rooms );
+    void genLevelDoorways( Level& level );
 
 protected:
 

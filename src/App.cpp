@@ -36,9 +36,13 @@ void App::handleInput( RAWINPUT* input )
         switch( VKey ){
         case 'R':
             {
+                if( keyUp ){
+                    break;
+                }
+
                 WorldGenerator worldGen;
-                worldGen.genRoom( mWorld.getEnv().getRoom() );
-                mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );
+                worldGen.genLevel( mWorld.getDungeon().getLevel() );
+                mWorldDisplay.getDungeonDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getDungeon().getLevel() );
             }
             break;
         case 'A':
@@ -198,9 +202,8 @@ bool App::init( )
 
     //TMP Stuff
     WorldGenerator worldGen;
-    worldGen.genRoom( mWorld.getEnv().getRoom() );
-
-    mWorldDisplay.getEnvDis().createRoomMesh( mWindow.getDevice(), mWorld.getEnv().getRoom() );	
+    worldGen.genLevel( mWorld.getDungeon().getLevel() );
+    mWorldDisplay.getDungeonDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getDungeon().getLevel() );	
 
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
     mEntity.getSolidity().radius = 0.15f;
@@ -216,8 +219,6 @@ void App::update( float dt )
         XMVECTOR rotVec;
         XMMATRIX rotMat;
         XMVECTOR moveVec;
-        XMVECTOR savePos;
-        XMVECTOR finalPos;
 
         moveVec = XMVectorZero();
         rotMat = XMMatrixRotationAxis( XMVectorSet( 0.0f, 1.0f, 0.0f, 1.0f), mCamera.getPitch() );
@@ -254,12 +255,12 @@ void App::update( float dt )
         int bx = static_cast<int>( mEntity.getPosition().x / 0.3f);
         int bz = static_cast<int>( mEntity.getPosition().z / 0.3f);
 
-        CLAMP( bx, 0, mWorld.getEnv().getRoom().getWidth() - 1 );
-        CLAMP( bz, 0, mWorld.getEnv().getRoom().getDepth() - 1 );
+        CLAMP( bx, 0, mWorld.getDungeon().getLevel().getWidth() - 1 );
+        CLAMP( bz, 0, mWorld.getDungeon().getLevel().getDepth() - 1 );
 
-        if( mWorld.getEnv().getRoom().getBlockRamp(bx, bz) == Environment::Room::Block::RampDirection::None ){
+        if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Block::Ramp::None ){
             //Make sure we are on the floor, otherwise bring us down through gravity
-            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getEnv().getRoom().getBlockHeight(bx, bz)) * 0.3f;
+            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
 
             if( distFromGround > 0.05f ){
                 mEntity.getPosition().y -= 0.045f;

@@ -3,9 +3,6 @@
 
 #include "Utils.h"
 
-#include <Windows.h>
-#include <xnamath.h>
-
 class WorldEntity{
 public:
 

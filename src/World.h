@@ -1,7 +1,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include "Environment.h"
+#include "Dungeon.h"
 #include "WorldEntity.h"
 
 class World{
@@ -13,16 +13,32 @@ public:
 
     void update( float dt );
 
-    inline Environment& getEnv();
+    //Get the world's dungeon
+    inline Dungeon& getDungeon();
+
+    //Get the block dimensions
+    inline float getBlockDimension();
+
+    //Set the block dimensions
+    inline void setBlockDimension( float d );
 
 protected:
 
     bool checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition, XMVECTOR* outWallVector);
 
-    Environment mEnv;
+    Dungeon mDungeon;
     //Population mPop;
+    //Projectiles mProjs;
+    //MagicFields mMagicFields;
+    //Activatables mActivatables;
+
+    //Block settings
+    float mBlockDimension;
 };
 
-Environment& World::getEnv(){return mEnv;}
+Dungeon& World::getDungeon(){return mDungeon;}
+
+inline float World::getBlockDimension(){return mBlockDimension;}
+inline void World::setBlockDimension( float d ){mBlockDimension = d;}
 
 #endif

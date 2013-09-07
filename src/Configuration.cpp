@@ -2,8 +2,6 @@
 #include "Log.h"
 
 #include <fstream>
-//#include <rapidxml.hpp>
-//#include <rapidxml_utils.hpp>
 
 Configuration::Configuration()
 {
