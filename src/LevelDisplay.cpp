@@ -9,9 +9,11 @@ LevelDisplay::LevelDisplay() :
     mRampWallsVB(NULL),
     mFloorTexture(NULL),
     mWallTexture(NULL),
-    mBlockCount(NULL),
-    mWallCount(NULL),
-    mRampCount(NULL)
+    mBlockCount(0),
+    mWallCount(0),
+    mRampCount(0),
+    mFloorClip(1.0f),
+    mWallClip(1.0f)
 {
 
 }
@@ -45,6 +47,9 @@ bool LevelDisplay::setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, 
         LOG_ERRO << "Unable to load wall texture: " << LOG_WC_TO_C(wallTexturePath) << LOG_ENDL;
         return false;
     }
+
+    mFloorClip = floorClip;
+    mWallClip = wallClip;
 
     LOG_INFO << "Loaded Level Floor Texture: " << LOG_WC_TO_C(floorTexturePath) << LOG_ENDL;
     LOG_INFO << "Loaded Level Wall Texture: " << LOG_WC_TO_C(wallTexturePath) << LOG_ENDL;
@@ -134,7 +139,6 @@ bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float bl
             }
 
 			byte id = level.getBlockTileID(i,j);
-			float delta = 0.25f; //4x4 grid of tiles
 			float row = id / 4;
 			float column = id % 4;
 
@@ -142,7 +146,7 @@ bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float bl
             verts[ v ].position.x = static_cast<float>(i) * blockDimension;
             verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval;
             verts[ v ].position.z = static_cast<float>(j) * blockDimension;
-			verts[ v ].tex = XMFLOAT2(column * delta, row * delta);
+			verts[ v ].tex = XMFLOAT2(column * mFloorClip, row * mFloorClip);
 
             v++;
 
@@ -150,7 +154,7 @@ bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float bl
             verts[ v ].position.x = verts[ v - 1 ].position.x + blockDimension;
             verts[ v ].position.y = verts[ v - 1 ].position.y;
             verts[ v ].position.z = verts[ v - 1 ].position.z;
-			verts[ v ].tex = XMFLOAT2(column * delta, row * delta + delta);
+			verts[ v ].tex = XMFLOAT2(column * mFloorClip, row * mFloorClip + mFloorClip);
 
             v++;
 
@@ -158,7 +162,7 @@ bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float bl
             verts[ v ].position.x = verts[ v - 2 ].position.x;
             verts[ v ].position.y = verts[ v - 2 ].position.y;
             verts[ v ].position.z = verts[ v - 2 ].position.z + blockDimension;
-			verts[ v ].tex = XMFLOAT2(column * delta + delta, row * delta);
+			verts[ v ].tex = XMFLOAT2(column * mFloorClip + mFloorClip, row * mFloorClip);
 
             v++;
 
@@ -166,7 +170,7 @@ bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float bl
             verts[ v ].position.x = verts[ v - 3 ].position.x + blockDimension;
             verts[ v ].position.y = verts[ v - 3 ].position.y;
             verts[ v ].position.z = verts[ v - 3 ].position.z + blockDimension;
-			verts[ v ].tex = XMFLOAT2(column * delta + delta, row * delta + delta);
+			verts[ v ].tex = XMFLOAT2(column * mFloorClip + mFloorClip, row * mFloorClip + mFloorClip);
 
             v++;
 
@@ -286,7 +290,6 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                     verts[ v ].position.z = static_cast<float>(j) * blockDimension;
 					verts[ v ].tex = XMFLOAT2(1, 0);
 					
-
                     v++;
 
                     verts[ v ].position.x = verts[ v - 1 ].position.x;
@@ -294,7 +297,6 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                     verts[ v ].position.z = verts[ v - 1 ].position.z + blockDimension;
 					verts[ v ].tex = XMFLOAT2(0, 0);
 					
-
                     v++;
 
                     verts[ v ].position.x = verts[ v - 2 ].position.x;
