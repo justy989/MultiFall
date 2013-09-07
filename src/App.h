@@ -14,6 +14,7 @@
 #include "TextManager.h"
 
 #include "WorldEntity.h"
+#include "WorldGenerator.h"
 
 #include <d3dx11effect.h>
 
@@ -69,6 +70,8 @@ protected:
     ID3D11RasterizerState* mWireFrameRS;
 
     WorldEntity mEntity;
+
+    WorldGenerator::LevelPreset mLevelPreset;
 };
 
 #endif

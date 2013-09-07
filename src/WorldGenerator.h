@@ -7,10 +7,37 @@
 class WorldGenerator{
 public:
 
+    struct IRange{
+        int min;
+        int max;
+    };
+
+    struct FRange{
+        float min;
+        float max;
+    };
+
+    struct LevelPreset{
+        IRange roomCount;
+
+        IRange roomWidth;
+        IRange roomDepth;
+
+        IRange roomCeilingHeight;
+    };
+
+    struct RoomPreset{
+        IRange floorSectionArea; //Sections of floors that get generated at different heights,
+        FRange rampDensity;
+        FRange wallDensity;
+        IRange wallLength;
+    };
+
     WorldGenerator();
+    ~WorldGenerator();
 
     //Generate a room's exits and floor layout
-    void genLevel( Level& level );
+    void genLevel( Level& level, LevelPreset& preset );
 
 protected:
 
@@ -21,13 +48,26 @@ protected:
         int bottom;
     };
 
-    void genLevelLayout( Level& level ); 
-    void genLevelRooms( Level& level, Room& rooms );
-    void genLevelDoorways( Level& level );
+    enum WallSide{
+        Front,
+        Left,
+        Back,
+        Right
+    };
+
+    void genLevelLayout( Level& level, LevelPreset& preset ); 
+    void genLevelRoom( Level& level, LevelPreset& preset, Room& room );
+    void genLevelDoorways( Level& level, LevelPreset& preset );
+    void genLevelWalls( Level& level, LevelPreset& preset );
+
+    void genRoom( WallSide side, int attachX, int attachY, Room& room, LevelPreset& preset ); 
 
 protected:
 
     Random mRand;
+
+    Room* mRooms;
+    int mRoomCount;
 };
 
 #endif

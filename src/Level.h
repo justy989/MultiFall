@@ -10,17 +10,17 @@ public:
     Level();
     ~Level();
 
+    //Direction ramp is pointing and the height is the bottom of the ramp, is none if not a ramp
+    enum Ramp{
+        None,
+        Front,
+        Left,
+        Back,
+        Right
+    };
+
     //Holds a block in a room
     struct Block{
-        //Direction ramp is pointing and the height is the bottom of the ramp, is none if not a ramp
-        enum Ramp{
-            None,
-            Front,
-            Left,
-            Back,
-            Right
-        };
-
         byte ramp; //is this a ramp? If so, what kind?
         byte height; //Height of the Level at this block
         byte tileId; //ID for tiling
@@ -28,41 +28,41 @@ public:
     };
 
     //initialize a room to certain dimensions
-    bool init( byte width, byte depth, byte height );
+    bool init( short width, short depth, byte height );
 
     //clear the room's allocated memory
     void clear();
 
     //set a block
-    void setBlock( byte i, byte j, byte height, Block::Ramp ramp );
+    void setBlock( short i, short j, byte height, Ramp ramp );
 
 	//set block ID (used for spritesheet lookup)
-	void setBlockTileID( byte i, byte j, byte id );
+	void setBlockTileID( short i, short j, byte id );
 
 	//get block ID (used for spritesheet lookup)
-	byte getBlockTileID( byte i, byte j );		
+	byte getBlockTileID( short i, short j );		
 
     //Get the ramp type of a block
-    Block::Ramp getBlockRamp( byte i, byte j );
+    Ramp getBlockRamp( short i, short j );
 
     //Get the height of a block
-    byte getBlockHeight( byte i, byte j );
+    byte getBlockHeight( short i, short j );
 
-    inline byte getWidth();
-    inline byte getDepth();
+    inline short getWidth();
+    inline short getDepth();
     inline byte getHeight();
 
 protected:
 
-    byte mWidth;
-    byte mDepth;
+    short mWidth;
+    short mDepth;
     byte mHeight;
 
     Block** mBlocks;
 };
 
-byte Level::getWidth(){return mWidth;}
-byte Level::getDepth(){return mDepth;}
+short Level::getWidth(){return mWidth;}
+short Level::getDepth(){return mDepth;}
 byte Level::getHeight(){return mHeight;}
 
 #endif

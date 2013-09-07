@@ -41,7 +41,7 @@ void App::handleInput( RAWINPUT* input )
                 }
 
                 WorldGenerator worldGen;
-                worldGen.genLevel( mWorld.getDungeon().getLevel() );
+                worldGen.genLevel( mWorld.getDungeon().getLevel(), mLevelPreset );
                 mWorldDisplay.getDungeonDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getDungeon().getLevel() );
             }
             break;
@@ -201,14 +201,25 @@ bool App::init( )
     mWindow.getDevice()->CreateRasterizerState(&rasterDesc, &mFillRS);
 
     //TMP Stuff
+    mLevelPreset.roomCount.min = 8;
+    mLevelPreset.roomCount.max = 16;
+
+    mLevelPreset.roomWidth.min = 2;
+    mLevelPreset.roomWidth.max = 16;
+
+    mLevelPreset.roomDepth.min = 2;
+    mLevelPreset.roomDepth.max = 16;
+
+    mLevelPreset.roomCeilingHeight.min = 3;
+    mLevelPreset.roomCeilingHeight.max = 6;
+
     WorldGenerator worldGen;
-    worldGen.genLevel( mWorld.getDungeon().getLevel() );
+    worldGen.genLevel( mWorld.getDungeon().getLevel(), mLevelPreset );
     mWorldDisplay.getDungeonDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getDungeon().getLevel() );	
 
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
     mEntity.getSolidity().radius = 0.15f;
     mEntity.getSolidity().height = 0.25f;
-
     return true;
 }
 
@@ -258,7 +269,7 @@ void App::update( float dt )
         CLAMP( bx, 0, mWorld.getDungeon().getLevel().getWidth() - 1 );
         CLAMP( bz, 0, mWorld.getDungeon().getLevel().getDepth() - 1 );
 
-        if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Block::Ramp::None ){
+        if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Ramp::None ){
             //Make sure we are on the floor, otherwise bring us down through gravity
             float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
 

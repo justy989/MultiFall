@@ -4,83 +4,217 @@
 
 #include <time.h>
 
-WorldGenerator::WorldGenerator()
+WorldGenerator::WorldGenerator() : 
+    mRooms(NULL),
+    mRoomCount(0)
 {
     mRand.seed( time( 0 ) );
 }
 
-void WorldGenerator::genLevel( Level& level )
+WorldGenerator::~WorldGenerator()
 {
-    int minLevelCeilingHeight = 6;
-    int maxLevelCeilingHeight = 10;
+    if( mRooms ){
+        delete[] mRooms;
+    }
+}
 
-    level.clear();
-    level.init( mRand.gen( 8, 24 ), 
-        mRand.gen( 8, 24 ),
-        mRand.gen( minLevelCeilingHeight, maxLevelCeilingHeight ) );
+void WorldGenerator::genLevel( Level& level, LevelPreset& preset )
+{
+    int roomCount = mRand.gen( preset.roomCount.min, preset.roomCount.max + 1 );
+    mRoomCount = roomCount;
+    mRooms = new Room[ roomCount ];
 
-    /*
-    //Generate Exits
-    int numExits = mRand.gen(2, 4);
-    int sides[] = { 0, 1, 2, 3 };
-    int doorCoords[4][2] = {
-        {-1, -1},
-        {-1, -1},
-        {-1, -1},
-        {-1, -1}
-    } ;
+    genLevelLayout( level, preset );
 
-    //Randomize the list of sides
-    for(int i = 0; i < 4; i++){
-        int gen = mRand.gen( 0, 3 );
-        int tmp = sides[ gen ];
-        sides[gen] = sides[i];
-        sides[i] = tmp;
+    for(int i = 0; i < mRoomCount; i++){
+        genLevelRoom( level, preset, mRooms[i] );
     }
 
-    for(int i = 0; i < numExits; i++){
+    delete[] mRooms;
+    mRooms = NULL;
+}
 
-        int h = mRand.gen(0, ENV_Level_MAX_EXIT_HEIGHT+1);
-        int l = mRand.gen(1, (sides[i] % 2) ? level.getDepth() - 2 : level.getWidth() - 2 );
+void WorldGenerator::genRoom( WallSide attachSide, int attachX, int attachY, Room& room, LevelPreset& preset ) 
+{
+    int genWidth = mRand.gen( preset.roomWidth.min, preset.roomWidth.max );
+    int genHeight = mRand.gen( preset.roomDepth.min, preset.roomDepth.max );
 
-        //Use the random list of sides, gen a height, then gen a location if the side is even, use the depth, else use the width
-        level.setExit((Environment::Level::Exit::Side)(sides[i]), 
-                      h,
-                      l);
+    switch( attachSide ){
+    case Back:
+        if( mRand.gen(1, 100) > 50 ){
+            genWidth = -genWidth;
+        }
+        break;
+    case Right:
+        if( mRand.gen(1, 100) > 50 ){
+            genHeight = -genHeight;
+        }
+        break;
+    case Front:
+        genHeight = -genHeight;
+        if( mRand.gen(1, 100) > 50 ){
+            genWidth = -genWidth;
+        }
+        break;
+    case Left:
+        genWidth = -genWidth;
+        if( mRand.gen(1, 100) > 50 ){
+            genHeight = -genHeight;
+        }
+        break;
+    default:
+        break;
+    }
 
-        switch( sides[i] ){
-        case Environment::Level::Exit::Side::Right:
-            doorCoords[sides[i]][0] = level.getWidth() - 1;
-            doorCoords[sides[i]][1] = l;
+    if( genWidth > 0 ){
+        room.left = attachX;
+        room.right = attachX + genWidth;
+    }else{
+        room.left = attachX + genWidth;
+        room.right = attachX;
+    }
+
+    if( genHeight > 0 ){
+        room.top = attachY;
+        room.bottom = attachY + genHeight;
+    }else{
+        room.top = attachY + genHeight;
+        room.bottom = attachY;
+    }
+}
+
+void WorldGenerator::genLevelLayout( Level& level, LevelPreset& preset  )
+{
+    Level space;
+
+    //Allocate a level big enough to generate a large length of rooms without
+    //having to worry about hitting an edge
+    space.init( mRoomCount * ( preset.roomWidth.max + 3 ) * 2,
+                mRoomCount * ( preset.roomDepth.max + 3 ) * 2,
+                mRand.gen( preset.roomCeilingHeight.min, preset.roomCeilingHeight.max + 1 ) );
+
+    //Initialize walls EVERYWHERE
+    for(int i = 0; i < space.getWidth(); i++){
+        for(int j = 0; j < space.getDepth(); j++){
+            space.setBlock(i, j, space.getHeight(), Level::Ramp::None );
+        }
+    }
+
+    //Find the center to start so we can generate in any direction
+    WallSide wallSide = (WallSide)mRand.gen(0, WallSide::Right + 1 );
+    int attachedX = space.getWidth() / 2;
+    int attachedY = space.getDepth() / 2;
+
+    //Generate the rooms
+    for(int i = 0; i < mRoomCount; i++){
+        genRoom( wallSide, attachedX, attachedY, mRooms[ i ], preset );
+
+        for(int x = mRooms[ i ].left; x <= mRooms[ i ].right; x++){
+            for(int y = mRooms[ i ].top; y <= mRooms[ i ].bottom; y++){
+                space.setBlock(x, y, 0, Level::Ramp::None);
+            }
+        }
+
+        wallSide = (WallSide)mRand.gen(0, WallSide::Right + 1 );
+
+        switch( wallSide ){
+        case Front:
+            attachedY = mRooms[ i ].top - 2;
+            attachedX = mRand.gen( mRooms[ i ].left, mRooms[ i ].right + 1 );
             break;
-        case Environment::Level::Exit::Side::Left:
-            doorCoords[sides[i]][0] = 0;
-            doorCoords[sides[i]][1] = l;
+        case Left:
+            attachedX = mRooms[ i ].left - 2;
+            attachedY = mRand.gen( mRooms[ i ].top, mRooms[ i ].bottom + 1 );
             break;
-        case Environment::Level::Exit::Side::Front:
-            doorCoords[sides[i]][0] = l;
-            doorCoords[sides[i]][1] = 0;
+        case Back:
+            attachedY = mRooms[ i ].bottom + 2;
+            attachedX = mRand.gen( mRooms[ i ].left, mRooms[ i ].right + 1 );
             break;
-        case Environment::Level::Exit::Side::Back:
-            doorCoords[sides[i]][0] = l;
-            doorCoords[sides[i]][1] = level.getDepth() - 1;
+        case Right:
+            attachedX = mRooms[ i ].right + 2;
+            attachedY = mRand.gen( mRooms[ i ].top, mRooms[ i ].bottom + 1 );
             break;
         default:
             break;
         }
-    }*/
+    }
 
-    int minArea = 25;
-    int maxArea = 75;
+    int minX = space.getWidth();
+    int maxX = 0;
+    int minY = space.getDepth();
+    int maxY = 0;
 
-    int minWidth = 5;
-    int maxWidth = 10;
-    int minDepth = 3;
-    int maxDepth = 12;
+    //Cut out the bounds of the rooms to save space
+    for( int i = 0; i < space.getWidth(); i++){
+        for(int j = 0; j < space.getDepth(); j++){
+            if( space.getBlockHeight(i, j) == 0 ){
+                if( i > maxX ){maxX = i;}
+                if( i < minX ){minX = i;}
+                if( j > maxY ){maxY = j;}
+                if( j < minY ){minY = j;}
+            }
+        }
+    }
+
+    minX-=1;
+    minY-=1;
+
+    maxX+=2;
+    maxY+=2;
+
+    level.init( maxX - minX, maxY - minY, space.getHeight() );
+
+    for( int i = 0; i < level.getWidth(); i++){
+        for(int j = 0; j < level.getDepth(); j++){
+            level.setBlock(i, j, space.getBlockHeight(i + minX, j + minY), Level::Ramp::None );
+        }
+    }
+
+    for(int i = 0; i < mRoomCount; i++){
+        mRooms[i].left -= minX;
+        mRooms[i].right -= minX;
+        mRooms[i].top -= minY;
+        mRooms[i].bottom -= minY;
+    }
+
+    space.clear();
+}
+
+void WorldGenerator::genLevelDoorways( Level& level, LevelPreset& preset )
+{
+
+}
+
+void WorldGenerator::genLevelWalls( Level& level, LevelPreset& preset )
+{
+
+}
+
+void WorldGenerator::genLevelRoom( Level& level, LevelPreset& preset, Room& room )
+{
+    RoomPreset rPreset;
+    rPreset.floorSectionArea.min = 50;
+    rPreset.floorSectionArea.max = 100;
+
+    rPreset.rampDensity.min = 0.0f;
+    rPreset.rampDensity.max = 1.0f;
+
+    rPreset.wallDensity.min = 0.0f;
+    rPreset.wallDensity.max = 0.35f;
+
+    rPreset.wallLength.min = 1;
+    rPreset.wallLength.max = 16;
+
+    //Init floor to -1
+    for(short i = room.left; i <= room.right; i++){
+        for( short j = room.top; j <= room.bottom; j++){
+            level.setBlock( i, j, 255, Level::Ramp::None );
+        }
+    }
 
     //Generate floor rects
     while( true ){ //While we can still find empy floor to generate!
-        int genArea = mRand.gen( minArea, maxArea );
+        int genArea = mRand.gen( rPreset.floorSectionArea.min, rPreset.floorSectionArea.max + 1 );
         genArea += (5 - (genArea % 5)); //Round up to the nearest 5
         int halfGenArea = genArea / 2;
 
@@ -104,18 +238,16 @@ void WorldGenerator::genLevel( Level& level )
 
         delete[] divisors;
 
-        int maxGennedHeight = minLevelCeilingHeight - 2;
+        int maxGennedHeight = level.getHeight() - 2;
 
         //Find first empty space and fill it with this the generated height
         int genHeight = mRand.gen(0, maxGennedHeight + 1 );
-        //int genWidth = mRand.gen( minWidth, maxWidth );
-        //int genDepth = mRand.gen( minDepth, maxDepth );
         int startI = -1;
         int startJ = 0;
 
         //Find the first empty block
-        for(byte i = 0; i < level.getWidth(); i++){
-            for( byte j = 0; j < level.getDepth(); j++){
+        for(short i = room.left; i <= room.right; i++){
+            for( short j = room.top; j <= room.bottom; j++){
                 if( level.getBlockHeight(i, j) == 255 ){
                     startI = i;
                     startJ = j;
@@ -138,51 +270,34 @@ void WorldGenerator::genLevel( Level& level )
         int endJ = startJ + genDepth;
 
         //Clamp it so we don't go outside the array
-        CLAMP( endI, 0, level.getWidth() - 1 );
-        CLAMP( endJ, 0, level.getDepth() - 1 );
+        CLAMP( endI, room.left, room.right );
+        CLAMP( endJ, room.left, room.bottom );
 
         //Loop over rect and set at genned height
-        for(int i = startI ;i <= endI; i++){
-            for(int j = startJ;j <= endJ; j++){
-                level.setBlock( i, j, genHeight, Level::Block::Ramp::None );
+        for(short i = startI ;i <= endI; i++){
+            for(short j = startJ;j <= endJ; j++){
+                level.setBlock( i, j, genHeight, Level::Ramp::None );
             }
         }
     }
-
-    //TMP
-    //Set the exit's height to be the height of the block
-    /*
-    for(int i = 0; i < 4; i++){
-        if( doorCoords[i][0] < 0 ){
-            continue;
-        }
-
-        level.setExit( (Environment::Level::Exit::Side)(i),
-            level.getBlockHeight(doorCoords[i][0], doorCoords[i][1]),
-            level.getExitLocation( (Environment::Level::Exit::Side)(i) ) );
-    }*/
-
     //Generate ramps
-    float rampMinDensity = 0.0f;
-    float rampMaxDensity = 0.25f;
-    float genRampDensity = rampMinDensity + ( mRand.genNorm() * ( rampMaxDensity - rampMinDensity ) ); 
+    float genRampDensity = rPreset.rampDensity.min + ( mRand.genNorm() * ( rPreset.rampDensity.max - rPreset.rampDensity.min ) ); 
     int rampPct = static_cast<int>((1.0f - genRampDensity) * 100.0f);
 
     //Set left and right ramps
-    for( byte j = 0; j < level.getDepth(); j++){
-        for(byte i = 0; i < level.getWidth(); i++){
+    for( short i = room.left; i <= room.right; i++){
+        for(short j = room.top; j <= room.bottom; j++){
 
 			//cus there's no good place for this
 			level.setBlockTileID(i,j, mRand.gen(0, 16));
 
-            byte nextI = i;
-            byte nextJ = j - 1;
+            short nextI = i;
+            short nextJ = j - 1;
 
-            if( nextJ < level.getDepth() ){
+            if( nextJ >= room.top ){
                 if( level.getBlockHeight(nextI,nextJ) != level.getHeight() && mRand.gen(1, 100) > rampPct ){
                     if( level.getBlockHeight(i,j) + 1 == level.getBlockHeight(nextI, nextJ) ){
-                        level.setBlock(i, j, level.getBlockHeight(i,j), Level::Block::Ramp::Back);
-                        break;
+                        level.setBlock(i, j, level.getBlockHeight(i,j), Level::Ramp::Back);
                     }
                 }
             }
@@ -190,11 +305,10 @@ void WorldGenerator::genLevel( Level& level )
             nextI = i;
             nextJ = j + 1;
 
-            if( nextJ < level.getDepth() ){
+            if( nextJ <= room.bottom ){
                 if( level.getBlockHeight(nextI,nextJ) != level.getHeight() && mRand.gen(1, 100) > rampPct ){
                     if( level.getBlockHeight(i,j) + 1 == level.getBlockHeight(nextI, nextJ) ){
-                        level.setBlock(i, j, level.getBlockHeight(i,j), Level::Block::Ramp::Front);
-                        break;
+                        level.setBlock(i, j, level.getBlockHeight(i,j), Level::Ramp::Front);
                     }
                 }
             }
@@ -202,16 +316,15 @@ void WorldGenerator::genLevel( Level& level )
     }
 
     //Set front and back ramps
-    for(byte i = 0; i < level.getWidth(); i++){
-        for( byte j = 0; j < level.getDepth(); j++){
-            byte nextI = i - 1;
-            byte nextJ = j;
+    for( short i = room.left; i <= room.right; i++){
+        for(short j = room.top; j <= room.bottom; j++){
+            short nextI = i - 1;
+            short nextJ = j;
 
-            if( nextI < level.getWidth() ){
+            if( nextI >= room.left ){
                 if( level.getBlockHeight(nextI,nextJ) != level.getHeight() ){
                     if( level.getBlockHeight(i,j) + 1 == level.getBlockHeight(nextI, nextJ) && mRand.gen(1, 100) > rampPct ){
-                        level.setBlock(i, j, level.getBlockHeight(i,j), Level::Block::Ramp::Right);
-                        break;
+                        level.setBlock(i, j, level.getBlockHeight(i,j), Level::Ramp::Right);
                     }
                 }
             }
@@ -219,52 +332,45 @@ void WorldGenerator::genLevel( Level& level )
             nextI = i + 1;
             nextJ = j;
 
-            if( nextI < level.getWidth() ){
+            if( nextI <= room.right ){
                 if( level.getBlockHeight(nextI,nextJ) != level.getHeight() ){
                     if( level.getBlockHeight(i,j) + 1 == level.getBlockHeight(nextI, nextJ) && mRand.gen(1, 100) > rampPct ){
-                        level.setBlock(i, j, level.getBlockHeight(i,j), Level::Block::Ramp::Left);
-                        break;
+                        level.setBlock(i, j, level.getBlockHeight(i,j), Level::Ramp::Left);
                     }
                 }
             }
         }
     }
 
-    //Generate Walls
-    float wallMinDensity = 0.0f;
-    float wallMaxDensity = 0.35f;
-    int wallMinLen = 1;
-    int wallMaxLen = 10;
-
-    float genWallDensity = wallMinDensity + ( mRand.genNorm() * ( wallMaxDensity - wallMinDensity ) ); 
-    int wallCount = static_cast<int>(static_cast<float>(level.getWidth() * level.getHeight()) * genWallDensity);
+    float genWallDensity = rPreset.wallDensity.min + ( mRand.genNorm() * ( rPreset.wallDensity.max - rPreset.wallDensity.min ) ); 
+    int wallCount = static_cast<int>(static_cast<float>((room.right - room.left) * (room.bottom - room.top)) * genWallDensity);
     int gennedWalls = 0;
     
     while( gennedWalls < wallCount ){
-        int genLength = mRand.gen( wallMinLen, wallMinLen );
+        int genLength = mRand.gen( rPreset.wallLength.min, rPreset.wallLength.max + 1);
         int genVertical = mRand.gen(0, 100);
 
-        int startX = mRand.gen(0, level.getWidth() - 1);
-        int startY = mRand.gen(0, level.getDepth() - 1);
+        int startX = mRand.gen(room.left, room.right + 1);
+        int startY = mRand.gen(room.top, room.bottom + 1);
         int end = 0;
 
         //50/50 chance to be vertical or horizontal
         if(genVertical > 50){
             end = startY + genLength;
 
-            CLAMP(end, 0, level.getDepth() - 1);
+            CLAMP(end, room.top, room.bottom);
 
             for(; startY <= end; startY++){
-                level.setBlock(startX, startY, level.getHeight(), Level::Block::Ramp::None );
+                level.setBlock(startX, startY, level.getHeight(), Level::Ramp::None );
                 gennedWalls++;
             }
         }else{
             end = startX + genLength;
 
-            CLAMP(end, 0, level.getWidth() - 1);
+            CLAMP(end, room.left, room.right);
 
             for(; startX <= end; startX++){
-                level.setBlock(startX, startY, level.getHeight(), Level::Block::Ramp::None );
+                level.setBlock(startX, startY, level.getHeight(), Level::Ramp::None );
                 gennedWalls++;
             }
         }

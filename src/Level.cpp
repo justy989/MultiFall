@@ -16,7 +16,7 @@ Level::~Level()
     clear();
 }
 
-bool Level::init( byte width, byte depth, byte height )
+bool Level::init( short width, short depth, byte height )
 {
     clear();
 
@@ -27,10 +27,10 @@ bool Level::init( byte width, byte depth, byte height )
 
     mBlocks = new Block*[ mWidth ];
 
-    for(byte i = 0; i < mWidth; i++){
+    for(short i = 0; i < mWidth; i++){
         mBlocks[i] = new Block[ mDepth ];
 
-        for( byte j = 0; j < mDepth; j++){
+        for( short j = 0; j < mDepth; j++){
             mBlocks[i][j].height = BYTE_MAX;
             mBlocks[i][j].ramp = 0;
         }
@@ -43,7 +43,7 @@ void Level::clear()
 {
     if( mBlocks ){
 
-        for(byte i = 0; i < mWidth; i++){
+        for(short i = 0; i < mWidth; i++){
             delete[] mBlocks[i];
         }
 
@@ -52,7 +52,7 @@ void Level::clear()
     }
 }
 
-void Level::setBlock( byte i, byte j, byte height, Block::Ramp ramp )
+void Level::setBlock( short i, short j, byte height, Ramp ramp )
 {
     assert( i < mWidth );
     assert( j < mDepth );
@@ -61,7 +61,7 @@ void Level::setBlock( byte i, byte j, byte height, Block::Ramp ramp )
     mBlocks[i][j].height = height;
 }
 
-void Level::setBlockTileID( byte i, byte j, byte id )
+void Level::setBlockTileID( short i, short j, byte id )
 {
 	assert( i < mWidth );
     assert( j < mDepth );
@@ -69,7 +69,7 @@ void Level::setBlockTileID( byte i, byte j, byte id )
     mBlocks[i][j].tileId = id;
 }
 
-byte Level::getBlockTileID( byte i, byte j )
+byte Level::getBlockTileID( short i, short j )
 {
     assert( i < mWidth );
     assert( j < mDepth );
@@ -77,15 +77,15 @@ byte Level::getBlockTileID( byte i, byte j )
 	return mBlocks[i][j].tileId;
 }
 
-Level::Block::Ramp Level::getBlockRamp( byte i, byte j )
+Level::Ramp Level::getBlockRamp( short i, short j )
 {
     assert( i < mWidth );
     assert( j < mDepth );
 
-    return (Level::Block::Ramp)(mBlocks[i][j].ramp);
+    return (Level::Ramp)(mBlocks[i][j].ramp);
 }
 
-byte Level::getBlockHeight( byte i, byte j )
+byte Level::getBlockHeight( short i, short j )
 {
     assert( i < mWidth );
     assert( j < mDepth );
