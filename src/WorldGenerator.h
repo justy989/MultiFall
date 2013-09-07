@@ -56,15 +56,17 @@ protected:
     };
 
     void genLevelLayout( Level& level, LevelPreset& preset ); 
-    void genLevelRoom( Level& level, LevelPreset& preset, Room& room );
+    void genLevelRoomHeights( Level& level, LevelPreset& preset, Room& room );
+    void genLevelRoomWalls( Level& level, LevelPreset& preset, Room& room );
     void genLevelDoorways( Level& level, LevelPreset& preset );
-    void genLevelWalls( Level& level, LevelPreset& preset );
 
     void genRoom( WallSide side, int attachX, int attachY, Room& room, LevelPreset& preset ); 
 
 protected:
 
     Random mRand;
+
+    RoomPreset mRoomPreset;
 
     Room* mRooms;
     int mRoomCount;

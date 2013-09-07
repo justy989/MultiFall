@@ -12,6 +12,8 @@
 
 #define CLAMP(x, min, max) if( x < min ){x = min;} if (x > max){x = max;}
 
+#define EPSILON 0.00001f
+
 #define BYTE_MAX 255
 
 //Typedefs

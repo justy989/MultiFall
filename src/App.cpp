@@ -258,9 +258,6 @@ void App::update( float dt )
              moveVec += rotVec;
         }
 
-        moveVec = XMVector3Normalize( moveVec );
-        moveVec = XMVectorSetW( moveVec, 1.0f );
-
         //TEMPORARY WAY OF SOLVING THIS!
         //As long as we are not on a ramp, bring us to the floor
         int bx = static_cast<int>( mEntity.getPosition().x / 0.3f);
@@ -274,33 +271,53 @@ void App::update( float dt )
             float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
 
             if( distFromGround > 0.05f ){
-                mEntity.getPosition().y -= 0.045f;
-            }else if( distFromGround < -0.05f ){
-                //mEntity.getPosition().y += 0.045f;
+                moveVec -= XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
             }
+        }else if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Ramp::Front ){
+            float blockHeight = static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
+            float rampUp = fmod(mEntity.getPosition().z, 0.3f);
+            rampUp *= 1.25f;
+            mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
+        }else if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Ramp::Back ){
+            float blockHeight = static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
+            float rampUp = fmod(mEntity.getPosition().z, 0.3f);
+            rampUp = (0.3f - rampUp) * 1.25f;
+            mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
+        }else if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Ramp::Left ){
+            float blockHeight = static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
+            float rampUp = fmod(mEntity.getPosition().x, 0.3f);
+            rampUp *= 1.25f;
+            mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
+        }else if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Ramp::Right ){
+            float blockHeight = static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
+            float rampUp = fmod(mEntity.getPosition().x, 0.3f);
+            rampUp = (0.3f - rampUp) * 1.25f;
+            mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
         }
 
-        mWorld.moveEntity( &mEntity, moveVec, dt );
+        moveVec = XMVector3Normalize( moveVec );
+        moveVec = XMVectorSetW( moveVec, 1.0f );
+
+        mWorld.moveEntity( &mEntity, moveVec, 2.0f * dt );
 
         mCamera.getPosition() = mEntity.getPosition();
     }else{
         if( camKeyDown[0] ){
-            mCamera.moveForwardBack( 1.0f * dt ); 
+            mCamera.moveForwardBack( 2.0f * dt ); 
         }
         
         if( camKeyDown[1] ){
-            mCamera.moveForwardBack( -1.0f * dt ); 
+            mCamera.moveForwardBack( -2.0f * dt ); 
         }
         
         if( camKeyDown[2] ){
-            mCamera.moveLeftRight( 1.0f * dt ); 
+            mCamera.moveLeftRight( 2.0f * dt ); 
         }
         
         if( camKeyDown[3] ){
-            mCamera.moveLeftRight( -1.0f * dt ); 
+            mCamera.moveLeftRight( -2.0f * dt ); 
         }
     }
-
 }
 
 void App::draw( )

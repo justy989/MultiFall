@@ -42,7 +42,7 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     float px = entity->getPosition().x; //Player X
     float py = entity->getPosition().y; //Player Y
     float pz = entity->getPosition().z; //Player Z
-    float pf = entity->getPosition().y - entity->getSolidity().height; //Player Feet
+    float pf = entity->getPosition().y - ( entity->getSolidity().height - 0.15f); //Player Feet, take into account the tops of ramps
 
     int bX = static_cast<int>(px / 0.3f); //Block Starting X
     int bZ = static_cast<int>(pz / 0.3f); //Block Starting X
@@ -106,9 +106,12 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     if( i >= 0 && i < room.getWidth() &&
         j >= 0 && j < room.getDepth() ){
 
-        blockHeight = static_cast<float>(room.getBlockHeight(i, j)) * 0.3f;
+        blockHeight = static_cast<float>( room.getBlockHeight(i, j) ) * 0.3f;
 
-        if( blockHeight > pf ){
+        if( blockHeight > pf ||
+            ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
+            ( room.getBlockRamp(i,j) == Level::Ramp::Front ||
+               room.getBlockRamp(i,j) == Level::Ramp::Back ) ) ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
@@ -134,7 +137,10 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
         blockHeight = static_cast<float>(room.getBlockHeight(i, j)) * 0.3f;
 
-        if( blockHeight > pf ){
+        if( blockHeight > pf ||
+            ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
+            ( room.getBlockRamp(i,j) == Level::Ramp::Front ||
+               room.getBlockRamp(i,j) == Level::Ramp::Back ) ) ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
@@ -160,7 +166,10 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
         blockHeight = static_cast<float>(room.getBlockHeight(i, j)) * 0.3f;
 
-        if( blockHeight > pf ){
+        if( blockHeight > pf ||
+            ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
+            ( room.getBlockRamp(i,j) == Level::Ramp::Left ||
+               room.getBlockRamp(i,j) == Level::Ramp::Right ) )  ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
@@ -186,7 +195,10 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
         blockHeight = static_cast<float>(room.getBlockHeight(i, j)) * 0.3f;
 
-        if( blockHeight > pf ){
+        if( blockHeight > pf ||
+            ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
+            ( room.getBlockRamp(i,j) == Level::Ramp::Left ||
+               room.getBlockRamp(i,j) == Level::Ramp::Right ) ) ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
