@@ -24,6 +24,8 @@ public:
         IRange roomDepth;
 
         IRange roomCeilingHeight;
+
+        FRange doorScrubChance;
     };
 
     struct RoomPreset{
@@ -48,6 +50,12 @@ protected:
         int bottom;
     };
 
+    struct Door{
+        int x;
+        int y;
+        bool essential;
+    };
+
     enum WallSide{
         Front,
         Left,
@@ -58,7 +66,10 @@ protected:
     void genLevelLayout( Level& level, LevelPreset& preset ); 
     void genLevelRoomHeights( Level& level, LevelPreset& preset, Room& room );
     void genLevelRoomWalls( Level& level, LevelPreset& preset, Room& room );
-    void genLevelDoorways( Level& level, LevelPreset& preset );
+
+    void genDoors( Level& level, Room& room, Room& prevRoom, WallSide attached );
+    void scrubLevelDoorways( Level& level, LevelPreset& preset );
+    int applyLevelDoorways( Level& level );
 
     void genRoom( WallSide side, int attachX, int attachY, Room& room, LevelPreset& preset ); 
 
@@ -70,6 +81,9 @@ protected:
 
     Room* mRooms;
     int mRoomCount;
+
+    Door* mDoors;
+    int mDoorCount;
 };
 
 #endif

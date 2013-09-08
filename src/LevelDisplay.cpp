@@ -65,6 +65,8 @@ void LevelDisplay::clear()
     ReleaseCOM( mRampWallsVB );
     ReleaseCOM( mFloorTexture );
     ReleaseCOM( mWallTexture );
+
+    LOG_INFO << "Released Level Display Assets and buffers" << LOG_ENDL;
 }
 
 bool LevelDisplay::createMeshFromLevel( ID3D11Device* device, Level& level, float blockDimension, float heightInterval )

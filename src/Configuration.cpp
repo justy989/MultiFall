@@ -203,10 +203,6 @@ bool Configuration::load( char* configPath )
 
     checkFile.close();
 
-    //rapidxml::file<> xmlFile(configPath);
-    //rapidxml::xml_document<> doc;
-    //doc.parse<0>(xmlFile.data());
-
     return true;
 }
 

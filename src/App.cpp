@@ -213,6 +213,9 @@ bool App::init( )
     mLevelPreset.roomCeilingHeight.min = 3;
     mLevelPreset.roomCeilingHeight.max = 6;
 
+    mLevelPreset.doorScrubChance.min = 0.0f;
+    mLevelPreset.doorScrubChance.max = 1.0f;
+
     WorldGenerator worldGen;
     worldGen.genLevel( mWorld.getDungeon().getLevel(), mLevelPreset );
     mWorldDisplay.getDungeonDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getDungeon().getLevel() );	

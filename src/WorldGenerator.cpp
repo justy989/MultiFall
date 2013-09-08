@@ -36,16 +36,34 @@ void WorldGenerator::genLevel( Level& level, LevelPreset& preset )
     mRoomCount = roomCount;
     mRooms = new Room[ roomCount ];
 
+    int doorCount = roomCount * 4; //The max doors we can have, generating one per side
+    mDoors = new Door[ doorCount ];
+    mDoorCount = 0; //No doors have been generated yet
+
+    //Init all doors to non-essential
+    for(int i = 0; i < doorCount; i++){
+        mDoors[i].essential = false;
+        mDoors[i].x = -1;
+        mDoors[i].y = -1;
+    }
+
     genLevelLayout( level, preset );
-    genLevelDoorways( level, preset );
+    
+    //The door count is no longer accurate. It only represents the number of doors placed in the dungeon
 
     for(int i = 0; i < mRoomCount; i++){
         genLevelRoomHeights( level, preset, mRooms[i] );
         genLevelRoomWalls( level, preset, mRooms[i] );
     }
 
+    LOG_INFO << "Generated Level: " << level.getWidth() << ", " << level.getDepth() << LOG_ENDL;
+    LOG_INFO << "Level has " << mRoomCount << " rooms and " << mDoorCount << " doors" << LOG_ENDL;
+
     delete[] mRooms;
     mRooms = NULL;
+
+    delete[] mDoors;
+    mDoors = NULL;
 }
 
 void WorldGenerator::genRoom( WallSide attachSide, int attachX, int attachY, Room& room, LevelPreset& preset ) 
@@ -129,6 +147,13 @@ void WorldGenerator::genLevelLayout( Level& level, LevelPreset& preset  )
             }
         }
 
+        //Generate a door along each wall if there is a room on the other side
+        //The door along wallSide is always unScrubable
+        //We only generate doors after the first room has been genned
+        if( i > 0 ){
+            genDoors( space, mRooms[ i - 1 ], mRooms[ i ], wallSide );
+        }
+
         wallSide = (WallSide)mRand.gen(0, WallSide::Right + 1 );
 
         switch( wallSide ){
@@ -152,6 +177,9 @@ void WorldGenerator::genLevelLayout( Level& level, LevelPreset& preset  )
             break;
         }
     }
+
+    scrubLevelDoorways( space, preset );
+    mDoorCount = applyLevelDoorways( space );
 
     int minX = space.getWidth();
     int maxX = 0;
@@ -196,9 +224,168 @@ void WorldGenerator::genLevelLayout( Level& level, LevelPreset& preset  )
     space.clear();
 }
 
-void WorldGenerator::genLevelDoorways( Level& level, LevelPreset& preset )
+void WorldGenerator::genDoors( Level& level, Room& room, Room& prevRoom, WallSide attached )
 {
+    int min = 0;
+    int max = 0;
 
+    //Left Side
+
+    //Calulcate ranges to gen from
+    min = room.top > prevRoom.top ? room.top : prevRoom.top;
+    max = room.bottom < prevRoom.bottom ? room.bottom : prevRoom.bottom;
+
+    mDoors[ mDoorCount ].x = room.left - 1;
+
+    if( min >= max ){
+        mDoors[ mDoorCount ].y = min;
+    }else{
+        mDoors[ mDoorCount ].y = mRand.gen( min, max + 1);
+    }
+
+    //Ungenerate the door if there is no room on the other side
+    if( level.getBlockHeight( mDoors[ mDoorCount ].x - 1, mDoors[ mDoorCount ].y ) == level.getHeight() ||
+        level.getBlockHeight( mDoors[ mDoorCount ].x, mDoors[ mDoorCount ].y ) != level.getHeight() ){
+        mDoors[ mDoorCount ].x = -1;
+        mDoors[ mDoorCount ].y = -1;
+    }
+
+    if( attached == Left ){
+        mDoors[ mDoorCount ].essential = true;
+    }
+
+    mDoorCount++;
+
+    //Right Side
+    min = room.top > prevRoom.top ? room.top : prevRoom.top;
+    max = room.bottom < prevRoom.bottom ? room.bottom : prevRoom.bottom;
+
+    mDoors[ mDoorCount ].x = room.right + 1;
+
+    if( min >= max ){
+        mDoors[ mDoorCount ].y = min;
+    }else{
+        mDoors[ mDoorCount ].y = mRand.gen( min, max + 1);
+    }
+
+    //Ungenerate the door if there is no room on the other side
+    if( level.getBlockHeight( mDoors[ mDoorCount ].x + 1, mDoors[ mDoorCount ].y ) == level.getHeight() ||
+        level.getBlockHeight( mDoors[ mDoorCount ].x, mDoors[ mDoorCount ].y ) != level.getHeight() ){
+        mDoors[ mDoorCount ].x = -1;
+        mDoors[ mDoorCount ].y = -1;
+    }
+
+    if( attached == Right ){
+        mDoors[ mDoorCount ].essential = true;
+    }
+
+    mDoorCount++;
+
+    //Front Side
+    min = room.left > prevRoom.left ? room.left : prevRoom.left;
+    max = room.right < prevRoom.right ? room.right : prevRoom.right;
+
+    mDoors[ mDoorCount ].y = room.top - 1;
+
+    if( min >= max ){
+        mDoors[ mDoorCount ].x = min;
+    }else{
+        mDoors[ mDoorCount ].x = mRand.gen( min, max + 1);
+    }
+
+    //Ungenerate the door if there is no room on the other side
+    if( level.getBlockHeight( mDoors[ mDoorCount ].x, mDoors[ mDoorCount ].y - 1 ) == level.getHeight() ||
+        level.getBlockHeight( mDoors[ mDoorCount ].x, mDoors[ mDoorCount ].y ) != level.getHeight() ){
+        mDoors[ mDoorCount ].x = -1;
+        mDoors[ mDoorCount ].y = -1;
+    }
+
+    if( attached == Front ){
+        mDoors[ mDoorCount ].essential = true;
+    }
+
+    mDoorCount++;
+
+    //Back Side
+    min = room.left > prevRoom.left ? room.left : prevRoom.left;
+    max = room.right < prevRoom.right ? room.right : prevRoom.right;
+
+    mDoors[ mDoorCount ].y = room.bottom + 1;
+
+    if( min >= max ){
+        mDoors[ mDoorCount ].x = min;
+    }else{
+        mDoors[ mDoorCount ].x = mRand.gen( min, max + 1);
+    }
+
+    //Ungenerate the door if there is no room on the other side
+    if( level.getBlockHeight( mDoors[ mDoorCount ].x, mDoors[ mDoorCount ].y + 1 ) == level.getHeight() ||
+        level.getBlockHeight( mDoors[ mDoorCount ].x, mDoors[ mDoorCount ].y ) != level.getHeight() ){
+        mDoors[ mDoorCount ].x = -1;
+        mDoors[ mDoorCount ].y = -1;
+    }
+
+    if( attached == Front ){
+        mDoors[ mDoorCount ].essential = true;
+    }
+
+    mDoorCount++;
+}
+
+void WorldGenerator::scrubLevelDoorways( Level& level, LevelPreset& preset )
+{
+    float scrubChance = preset.doorScrubChance.min + ( mRand.genNorm() * ( preset.doorScrubChance.max - preset.doorScrubChance.min ) ); 
+
+    for(int i = 0; i < mDoorCount; i++){
+        if( !mDoors[i].essential && mRand.genNorm() < scrubChance ){
+            mDoors[i].x = -1;
+            mDoors[i].y = -1;
+        }
+    }
+}
+
+int WorldGenerator::applyLevelDoorways( Level& level )
+{
+    int placed = 0;
+
+    for(int i = 0; i < mDoorCount; i++){
+        if( mDoors[i].x >= 0 && mDoors[i].y >= 0 ){
+            //Average out heights around the door ignoring walls
+            int totalHeight = 0;
+            int validHeightCount = 0;
+
+            if( level.getBlockHeight( mDoors[i].x - 1, mDoors[i].y ) != level.getHeight() ){
+                totalHeight += level.getBlockHeight( mDoors[i].x - 1, mDoors[i].y );
+                validHeightCount++;
+            }
+
+            if( level.getBlockHeight( mDoors[i].x + 1, mDoors[i].y ) != level.getHeight() ){
+                totalHeight += level.getBlockHeight( mDoors[i].x + 1, mDoors[i].y );
+                validHeightCount++;
+            }
+
+            if( level.getBlockHeight( mDoors[i].x, mDoors[i].y - 1) != level.getHeight() ){
+                totalHeight += level.getBlockHeight( mDoors[i].x, mDoors[i].y - 1 );
+                validHeightCount++;
+            }
+
+            if( level.getBlockHeight( mDoors[i].x, mDoors[i].y + 1 ) != level.getHeight() ){
+                totalHeight += level.getBlockHeight( mDoors[i].x, mDoors[i].y + 1 );
+                validHeightCount++;
+            }
+
+            int avg = 0;
+
+            if( validHeightCount > 0 ){
+                avg = totalHeight /= validHeightCount;
+            }
+
+            level.setBlock( mDoors[i].x, mDoors[i].y, avg, Level::Ramp::None );
+            placed++;
+        }
+    }
+
+    return placed;
 }
 
 void WorldGenerator::genLevelRoomWalls( Level& level, LevelPreset& preset, Room& room )

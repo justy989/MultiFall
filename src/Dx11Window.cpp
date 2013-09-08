@@ -346,7 +346,7 @@ LRESULT CALLBACK DX11Window::mainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
         if( LOWORD(wParam) == VK_ESCAPE ){
             PostQuitMessage(0);
         }
-        break;
+        return 0;
 
     case WM_INPUT:
         {
@@ -451,6 +451,7 @@ LRESULT CALLBACK DX11Window::mainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
  
 	// WM_DESTROY is sent when the window is being destroyed.
 	case WM_DESTROY:
+    case WM_CLOSE:
 		PostQuitMessage(0);
 		return 0;
 

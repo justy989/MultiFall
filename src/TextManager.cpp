@@ -134,6 +134,8 @@ void TextManager::clear()
 	ReleaseCOM(mIndexBuffer);
 
 	ReleaseCOM(mWorldCB);
+
+    LOG_INFO << "Released Text Assets and Buffers" << LOG_ENDL;
 }
 
 bool TextManager::CompileD3DShader(LPCWSTR filePath, char* entry, char* shaderModel, ID3DBlob** buffer )
