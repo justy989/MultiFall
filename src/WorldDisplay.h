@@ -12,7 +12,7 @@ public:
     ~WorldDisplay();
 
     //Initialize the different displays
-    bool init( ID3D11Device* device );
+	bool init( ID3D11Device* device, ID3DX11EffectTechnique* tech );
 
     //Draw the world in it's current state
     void draw( ID3D11DeviceContext* device, World& world );

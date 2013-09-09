@@ -190,10 +190,10 @@ void TextManager::setupBuffers(ID3D11Device* device, std::string text)
 
 		//set font location starting at -1, 1 (top left)
 		//and move right (no wrapping)
-		fontQuads[i * 4].position		= XMFLOAT4(-1.0f + (i*FONTWIDTH),				1.0f,				0.11f,1);
-		fontQuads[i * 4 + 1].position	= XMFLOAT4(-1.0f + (i*FONTWIDTH) + FONTWIDTH,	1.0f,				0.11f,1);
-		fontQuads[i * 4 + 2].position	= XMFLOAT4(-1.0f + (i*FONTWIDTH),				1.0f - FONTHEIGHT,	0.11f,1);
-		fontQuads[i * 4 + 3].position	= XMFLOAT4(-1.0f + (i*FONTWIDTH) + FONTWIDTH,	1.0f - FONTHEIGHT,	0.11f,1);
+		fontQuads[i * 4].position		= XMFLOAT4(-1.0f + (i*FONTWIDTH),				1.0f,				0.051f,1);
+		fontQuads[i * 4 + 1].position	= XMFLOAT4(-1.0f + (i*FONTWIDTH) + FONTWIDTH,	1.0f,				0.051f,1);
+		fontQuads[i * 4 + 2].position	= XMFLOAT4(-1.0f + (i*FONTWIDTH),				1.0f - FONTHEIGHT,	0.051f,1);
+		fontQuads[i * 4 + 3].position	= XMFLOAT4(-1.0f + (i*FONTWIDTH) + FONTWIDTH,	1.0f - FONTHEIGHT,	0.051f,1);
 
 		setFontQuad(text.at(i), &fontQuads[i*4]);
 	}

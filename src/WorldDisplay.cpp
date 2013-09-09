@@ -20,7 +20,7 @@ WorldDisplay::~WorldDisplay()
     clear();
 }
 
-bool WorldDisplay::init( ID3D11Device* device )
+bool WorldDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tech )
 {
     //Compile shader
     DWORD shaderFlags = 0;
@@ -56,9 +56,9 @@ bool WorldDisplay::init( ID3D11Device* device )
 
 	// Done with compiled shader.
 	ReleaseCOM(compiledShader);
-	mTech = mFX->GetTechniqueByName("ColorTech"); //Temporary
+	mTech = tech;	//mFX->GetTechniqueByName("ColorTech"); //Temporary
 
-    LOG_INFO << "Loaded dungeon.fx shader Successfully" << LOG_ENDL;
+    //LOG_INFO << "Loaded dungeon.fx shader Successfully" << LOG_ENDL;
 
     if( !mDungeonDisplay.init( device, mTech ) ){
         return false;

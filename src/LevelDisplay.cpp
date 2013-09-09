@@ -90,11 +90,11 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11EffectTechnique* te
     UINT stride = sizeof(DungeonVertex);
     UINT offset = 0;
 
-    D3DX11_TECHNIQUE_DESC techDesc;
+    /*D3DX11_TECHNIQUE_DESC techDesc;
     tech->GetDesc( &techDesc );
 
     for(ushort p = 0; p < techDesc.Passes; ++p){
-        tech->GetPassByIndex(p)->Apply(0, device);
+        tech->GetPassByIndex(p)->Apply(0, device);*/
 
         //Draw the floor and ramps
         device->IASetIndexBuffer( mFloorIB, DXGI_FORMAT_R16_UINT, 0 );
@@ -117,7 +117,7 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11EffectTechnique* te
 
 
         device->DrawIndexed(6 *mWallCount, 0, 0);
-    }
+    //}
 }
 
 bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  )

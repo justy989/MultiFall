@@ -109,7 +109,15 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
         return 1;
     }
 
+    if( !initShaders() ){
+        return 1;
+    }
+
     if( !init() ){
+        return 1;
+    }
+
+	if( !initRTVs() ){
         return 1;
     }
     
@@ -164,7 +172,7 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 
 bool App::init( )
 {
-    if( !mWorldDisplay.init( mWindow.getDevice() ) ){
+	if( !mWorldDisplay.init( mWindow.getDevice(), mRenderGBufferTech ) ){
         return false;
     }
 
@@ -224,6 +232,203 @@ bool App::init( )
     mEntity.getSolidity().radius = 0.15f;
     mEntity.getSolidity().height = 0.25f;
     return true;
+}
+
+bool App::initShaders()
+{
+	//Compile shader
+    DWORD shaderFlags = 0;
+#if defined( DEBUG ) || defined( _DEBUG )
+    shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+ 
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	HRESULT hr = D3DX11CompileFromFile(L"content/shaders/RenderGBuffer.hlsl", 0, 0, 0, "fx_5_0", shaderFlags, 
+		0, 0, &compiledShader, &compilationMsgs, 0);
+
+	// compilationMsgs can store errors or warnings.
+	if( compilationMsgs != 0 )
+	{
+		LOG_ERRO << (char*)compilationMsgs->GetBufferPointer() << LOG_ENDL;
+		ReleaseCOM(compilationMsgs);
+	}
+
+	// Even if there are no compilationMsgs, check to make sure there were no other errors.
+	if(FAILED(hr))
+	{
+        LOG_ERRO << "D3DCompileFromFile() failed" << LOG_ENDL;
+        return false;
+	}
+
+	if(FAILED( D3DX11CreateEffectFromMemory( compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 
+        0,  mWindow.getDevice(), &mFX) ) ){
+        LOG_ERRO << "CreateEffectFromMemory() Failed" << LOG_ENDL;
+        return false;
+    }
+
+	// Done with compiled shader.
+	ReleaseCOM(compiledShader);
+	mRenderGBufferTech = mFX->GetTechniqueByName("GeoPass");
+	mDirLightTech = mFX->GetTechniqueByName("DirLight");
+
+    LOG_INFO << "Loaded color.fx shader Successfully" << LOG_ENDL;
+
+	// Create the vertex input layout.
+	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0}
+	};
+
+	//Create the input layout
+    D3DX11_PASS_DESC passDesc;
+    mDirLightTech->GetPassByIndex(0)->GetDesc( &passDesc );
+
+    if(FAILED(mWindow.getDevice()->CreateInputLayout(vertexDesc, 3, passDesc.pIAInputSignature, 
+		passDesc.IAInputSignatureSize, &mInputLayout))){
+            LOG_ERRO << "Failed to create Environment Vertex Input Layout" << LOG_ENDL;
+            return false;
+    }
+
+	D3D11_SUBRESOURCE_DATA resourceData;
+	ZeroMemory( &resourceData, sizeof( resourceData ) );
+
+	EnvVertex fsQuad[] = {
+		{ XMFLOAT3(-1, 1, 0.0511f),  XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(0,0) },
+		{ XMFLOAT3(1, 1, 0.0511f),  XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(1,0) },
+		{ XMFLOAT3(-1, -1, 0.0511f),  XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(0,1) },
+		{ XMFLOAT3(1, -1, 0.0511f),  XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(1,1)}	
+	};
+
+	D3D11_BUFFER_DESC vbd;
+    vbd.Usage = D3D11_USAGE_IMMUTABLE;
+    vbd.ByteWidth = sizeof(EnvVertex) * 4;
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vbd.CPUAccessFlags = 0;
+    vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+
+    resourceData.pSysMem = fsQuad;
+
+    mWindow.getDevice()->CreateBuffer(&vbd, &resourceData, &mFSQuadVB);
+
+	//clockwise
+	WORD indices[] =
+	{
+		0,  1,  2,  
+		1,  3,  2
+	};
+
+	D3D11_BUFFER_DESC indexDesc;
+	ZeroMemory( &indexDesc, sizeof( indexDesc ) );
+	indexDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexDesc.ByteWidth = sizeof( WORD ) * 6;
+	indexDesc.CPUAccessFlags = 0;
+	resourceData.pSysMem = indices;
+    
+	mWindow.getDevice()->CreateBuffer( &indexDesc, &resourceData, &mFSQuadIB );
+
+	return true;
+}
+
+bool App::initRTVs()
+{
+	D3D11_TEXTURE2D_DESC textureDesc;
+	HRESULT result;
+	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+
+
+	// Initialize the render target texture description.
+	ZeroMemory(&textureDesc, sizeof(textureDesc));
+
+	// Setup the render target texture description.
+	textureDesc.Width = mConfig.getWindow().width;
+	textureDesc.Height = mConfig.getWindow().height;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.MiscFlags = 0;
+
+	// Create the render target texture.
+	result = mWindow.getDevice()->CreateTexture2D(&textureDesc, NULL, &mGBufferTextures[0]);
+	if(FAILED(result))
+	{
+		return false;
+	}
+	result = mWindow.getDevice()->CreateTexture2D(&textureDesc, NULL, &mGBufferTextures[1]);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Setup the description of the render target view.
+	renderTargetViewDesc.Format = textureDesc.Format;
+	renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.Texture2D.MipSlice = 0;
+
+	// Setup the description of the shader resource view.
+	shaderResourceViewDesc.Format = textureDesc.Format;
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+	for(int i = 0; i < 2; i++)
+	{
+		// Create the render target view.
+		result = mWindow.getDevice()->CreateRenderTargetView(mGBufferTextures[i], &renderTargetViewDesc, &mGBufferRTVs[i]);
+		if(FAILED(result))
+		{
+			return false;
+		}
+
+		// Create the shader resource view.
+		result = mWindow.getDevice()->CreateShaderResourceView(mGBufferTextures[i], &shaderResourceViewDesc, &mGBufferSRVs[i]);
+		if(FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	// Create the depth/stencil buffer and view.	
+	textureDesc.Format     = DXGI_FORMAT_R32_TYPELESS;
+	textureDesc.BindFlags  = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+
+	if(FAILED(result = mWindow.getDevice()->CreateTexture2D(&textureDesc, 0, &mGBufferTextures[2]))){
+        LOG_ERRO << "Failed to CreateTexture2D() of DepthStencil" << LOG_ENDL;
+        return false;
+    }
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+	ZeroMemory(&descDSV, sizeof(descDSV));
+	descDSV.Format = DXGI_FORMAT_D32_FLOAT;
+	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	descDSV.Texture2D.MipSlice = 0;
+
+	if(FAILED(result = mWindow.getDevice()->CreateDepthStencilView(mGBufferTextures[2], &descDSV, &mDepthStencilView))){
+        LOG_ERRO << "Failed to CreateDepthStencilView from device" << LOG_ENDL;
+        return false;
+    }
+
+
+	shaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	// Create the shader resource view.
+	result = mWindow.getDevice()->CreateShaderResourceView(mGBufferTextures[2], &shaderResourceViewDesc, &mGBufferSRVs[2]);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void App::update( float dt )
@@ -327,12 +532,28 @@ void App::draw( )
 {
     mWindow.clearBDS();
 
+	//save the previous render target and depth stencil
+	ID3D11RenderTargetView* prevRTV;
+	ID3D11DepthStencilView* prevDSV;
+	mWindow.getDeviceContext()->OMGetRenderTargets(1, &prevRTV, &prevDSV);
+
+	//set gbuffer render targets
+    mWindow.getDeviceContext()->OMSetRenderTargets(2, mGBufferRTVs, mDepthStencilView);
+
+	//clear gbuffer render targets
+	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	float clearNormal[4] = { 0.5f, 0.5f, 0.5f, 0.5f };
+
+	mWindow.getDeviceContext()->ClearRenderTargetView(mGBufferRTVs[0], clearColor);
+	mWindow.getDeviceContext()->ClearRenderTargetView(mGBufferRTVs[1], clearNormal);
+	mWindow.getDeviceContext()->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH|D3D11_CLEAR_STENCIL, 1.0f, 0);
+
 	// Set constants
     XMMATRIX view  = XMLoadFloat4x4(&mCamera.getView());
     XMMATRIX proj  = XMLoadFloat4x4(&mCamera.getProj());
 	XMMATRIX viewProj = view * proj;
 
-	ID3DX11EffectMatrixVariable* mfxViewProj = mWorldDisplay.getFX()->GetVariableByName("gWorldViewProj")->AsMatrix();
+	ID3DX11EffectMatrixVariable* mfxViewProj = mFX->GetVariableByName("gWorldViewProj")->AsMatrix();
 	mfxViewProj->SetMatrix(reinterpret_cast<float*>(&viewProj));
     
     if( wireframe ){
@@ -341,7 +562,39 @@ void App::draw( )
         mWindow.getDeviceContext()->RSSetState( mFillRS );
     }
 
-    mWorldDisplay.draw( mWindow.getDeviceContext(), mWorld );
+	//Start geometry fill pass
+	D3DX11_TECHNIQUE_DESC techDesc;
+	mRenderGBufferTech->GetDesc( &techDesc );
+
+	for(ushort p = 0; p < techDesc.Passes; ++p)
+	{
+		mRenderGBufferTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
+
+		mWorldDisplay.draw( mWindow.getDeviceContext(), mWorld );
+	}
+
+	//switch back to original render target
+	mWindow.getDeviceContext()->OMSetRenderTargets(1, &prevRTV, prevDSV);	
+
+	//pass in GBuffer to the lighting shaders
+	ID3DX11EffectShaderResourceVariable* mfxcolorbuf = mFX->GetVariableByName("colorBuffer")->AsShaderResource();
+	mfxcolorbuf->SetResource(mGBufferSRVs[0]);
+
+	ID3DX11EffectShaderResourceVariable* mfxnormalbuf = mFX->GetVariableByName("normalBuffer")->AsShaderResource();
+	mfxnormalbuf->SetResource(mGBufferSRVs[1]);
+
+	ID3DX11EffectShaderResourceVariable* mfxdepthbuf = mFX->GetVariableByName("depthBuffer")->AsShaderResource();
+	mfxdepthbuf->SetResource(mGBufferSRVs[2]);
+
+	//start lighting pass
+	mDirLightTech->GetDesc( &techDesc );
+    for(ushort p = 0; p < techDesc.Passes; ++p)
+	{
+		mDirLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
+
+		//draw fullscreen quad to spawn the lighting post process
+		drawFSQuad();
+	}
 
     mWindow.getDeviceContext()->RSSetState( mFillRS );
 
@@ -350,6 +603,17 @@ void App::draw( )
     mTextManager.DrawString(mWindow.getDeviceContext(), collidedString, 0, 50);
 
     mWindow.getSwapChain()->Present(0, 0);
+}
+
+void App::drawFSQuad( )
+{
+	UINT stride = sizeof(EnvVertex);
+    UINT offset = 0;
+
+	mWindow.getDeviceContext()->IASetIndexBuffer( mFSQuadIB, DXGI_FORMAT_R16_UINT, 0 );
+	mWindow.getDeviceContext()->IASetVertexBuffers(0, 1, &mFSQuadVB, &stride, &offset);
+
+    mWindow.getDeviceContext()->DrawIndexed(6, 0, 0);
 }
 
 void App::clear( )

@@ -29,12 +29,22 @@ public:
     //run the application
     int run( HINSTANCE hInstance, int nCmdShow );
 
+	struct EnvVertex{
+		XMFLOAT3 position;
+		XMFLOAT3 normal;
+		XMFLOAT2 tex;
+	};
+
 protected:
 
     bool init( );
+	bool initShaders( );
+	bool initRTVs( );	
 
     void update( float dt );
     void draw( );
+
+	void drawFSQuad( );
 
     void clear( );
 
@@ -72,6 +82,26 @@ protected:
     WorldEntity mEntity;
 
     WorldGenerator::LevelPreset mLevelPreset;
+
+	protected:
+
+	ID3DX11Effect* mFX;
+	ID3DX11EffectTechnique* mRenderGBufferTech;
+	ID3DX11EffectTechnique* mDirLightTech;
+
+	ID3D11InputLayout* mInputLayout;
+	ID3D11Buffer* mFSQuadVB;
+    ID3D11Buffer* mFSQuadIB;
+
+	XMFLOAT2 mHalfPixel;
+
+	//G-buffer render targets for deferred shading
+	//[0] = color
+	//[1] = normal
+	ID3D11RenderTargetView* mGBufferRTVs[2];
+	ID3D11DepthStencilView* mDepthStencilView;
+	ID3D11Texture2D* mGBufferTextures[3];
+	ID3D11ShaderResourceView* mGBufferSRVs[3];
 };
 
 #endif
