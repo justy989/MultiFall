@@ -628,6 +628,8 @@ void App::clear( )
     mWorldDisplay.clear();
     mTextManager.clear();
 
+    mTorch.clear();
+
     ReleaseCOM( mFillRS );
     ReleaseCOM( mWireFrameRS );
 
