@@ -231,6 +231,11 @@ bool App::init( )
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
     mEntity.getSolidity().radius = 0.15f;
     mEntity.getSolidity().height = 0.25f;
+
+    if( !mTorch.loadFromObj(mWindow.getDevice(), "content/meshes/torch.obj", L"content/textures/torch_texture.png") ){
+        return false;
+    }
+
     return true;
 }
 
@@ -571,6 +576,8 @@ void App::draw( )
 		mRenderGBufferTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
 
 		mWorldDisplay.draw( mWindow.getDeviceContext(), mWorld );
+
+        mTorch.draw( mWindow.getDeviceContext() );
 	}
 
 	//switch back to original render target

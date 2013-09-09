@@ -16,6 +16,8 @@
 #include "WorldEntity.h"
 #include "WorldGenerator.h"
 
+#include "StaticMesh.h"
+
 #include <d3dx11effect.h>
 
 class App : public WMInputHandler{
@@ -94,6 +96,8 @@ protected:
     ID3D11Buffer* mFSQuadIB;
 
 	XMFLOAT2 mHalfPixel;
+
+    StaticMesh mTorch;
 
 	//G-buffer render targets for deferred shading
 	//[0] = color
