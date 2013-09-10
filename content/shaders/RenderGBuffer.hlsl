@@ -73,17 +73,18 @@ float4 ps_directional(VertexOut pin) : SV_TARGET0
 	float3 lightDir;
 
 	float4 color = colorBuffer.Sample( colorSampler_, pin.tex );
+	float4 ambient = color * 0.3f;
 	
-	lightDir = float3(0.2f,-0.1f,0);
+	lightDir = float3(0.0f,0.1f,0.1f);
 	lightDir = normalize(lightDir);
 	
 	// Calculate the amount of light on this pixel.
     lightIntensity = dot(normal, lightDir);
 	
-	if(lightIntensity > 0)
-	{
-		color = lightIntensity * color;
-	}
+	//if(lightIntensity > 0)
+	//{
+		color = saturate(lightIntensity * color + ambient);
+	//}
 	
     return color;
 }
