@@ -1,11 +1,5 @@
-//***************************************************************************************
-// color.fx by Frank Luna (C) 2011 All Rights Reserved.
-//
-// Transforms and colors geometry.
-//***************************************************************************************
-
-Texture2D gameFont_ : register( t0 );
-SamplerState colorSampler_ : register( s0 );
+Texture2D uiTexture_ : register( t0 );
+SamplerState sampler_ : register( s0 );
 
 cbuffer cbPerObject
 {
@@ -43,7 +37,7 @@ VertexOut VS_Main(VertexIn vin)
 
 float4 PS_Main(VertexOut pin) : SV_Target
 {
-	float4 color = gameFont_.Sample( colorSampler_, pin.Tex );
+	float4 color = uiTexture_.Sample( sampler_, pin.Tex );
 
     //Cut the pixel if the alpha is too low
     clip( color.a < 0.1f ? -1 : 1 );
