@@ -2,19 +2,11 @@
 #include "Log.h"
 #include "Utils.h"
 
-#define DEBUG
-
 #define FONTWIDTH	0.06
 #define FONTHEIGHT  0.068
 
 TextManager::TextManager() :
-    mVertexShader(NULL),
-    mPixelShader(NULL),
-
 	mFontRV(NULL),
-	mSampler(NULL),
-
-	mInputLayout(NULL),
 
 	mVertexBuffer(NULL),
 	mIndexBuffer(NULL),
@@ -26,39 +18,6 @@ TextManager::TextManager() :
 
 bool TextManager::init(ID3D11Device* device)
 {
-	ID3DBlob* vsBuffer = 0;
-
-	if( !CompileD3DShader( L"content/shaders/text.fx", "VS_Main", "vs_5_0", &vsBuffer ) ){
-        LOG_ERRO << "Failed to compiled text.fx shader" << LOG_ENDL;
-        return false;
-    }
-
-	device->CreateVertexShader( vsBuffer->GetBufferPointer( ),
-	vsBuffer->GetBufferSize( ), 0, &mVertexShader );	 
-
-	ID3DBlob* psBuffer = 0;
-
-	if( !CompileD3DShader( L"content/shaders/text.fx", "PS_Main", "ps_5_0", &psBuffer ) ){
-        LOG_ERRO << "Failed to compiled text.fx shader" << LOG_ENDL;
-        return false;
-    }
-
-	device->CreatePixelShader( psBuffer->GetBufferPointer( ),
-	psBuffer->GetBufferSize( ), 0, &mPixelShader );
-
-	psBuffer->Release( );
-   
-	D3D11_SAMPLER_DESC colorMapDesc;
-    ZeroMemory( &colorMapDesc, sizeof( colorMapDesc ) );
-    colorMapDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    colorMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    colorMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-    colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
-    
-    device->CreateSamplerState( &colorMapDesc, &mSampler );
-
 	if( FAILED( D3DX11CreateShaderResourceViewFromFile( device,
         L"content/fonts/gamefont.png", 0, 0, &mFontRV, 0 ) ) ){
         LOG_ERRO << "Failed to create Shader resource out of: " << LOG_WC_TO_C(L"content/fonts/gamefont.png") << LOG_ENDL;
@@ -94,15 +53,6 @@ bool TextManager::init(ID3D11Device* device)
 
 	unsigned int totalLayoutElements = ARRAYSIZE( vertexDesc );
 
-	if( FAILED( device->CreateInputLayout(vertexDesc, totalLayoutElements, 
-								vsBuffer->GetBufferPointer(), vsBuffer->GetBufferSize(),
-								&mInputLayout) ) ){
-        LOG_ERRO << "Failed to create Input Layout for Text" << LOG_ENDL;
-        return false;
-    }
-
-	vsBuffer->Release( );
-
 	//shader variables to be updated
 	D3D11_BUFFER_DESC constDesc;
     ZeroMemory( &constDesc, sizeof( constDesc ) );
@@ -121,14 +71,7 @@ bool TextManager::init(ID3D11Device* device)
 
 void TextManager::clear()
 {
-    ReleaseCOM(mVertexShader);
-
-    ReleaseCOM(mPixelShader);
-
 	ReleaseCOM(mFontRV);
-	ReleaseCOM(mSampler);
-
-	ReleaseCOM(mInputLayout);
 
 	ReleaseCOM(mVertexBuffer);
 	ReleaseCOM(mIndexBuffer);
@@ -136,36 +79,6 @@ void TextManager::clear()
 	ReleaseCOM(mWorldCB);
 
     LOG_INFO << "Released Text Assets and Buffers" << LOG_ENDL;
-}
-
-bool TextManager::CompileD3DShader(LPCWSTR filePath, char* entry, char* shaderModel, ID3DBlob** buffer )
-{
-	DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-
-	#if defined( DEBUG ) || defined( _DEBUG )
-		shaderFlags |= D3DCOMPILE_DEBUG;
-	#endif
-
-    ID3DBlob* errorBuffer = 0;
-    HRESULT result;
-
-    result = D3DX11CompileFromFile( filePath, 0, 0, entry, shaderModel,
-        shaderFlags, 0, 0, buffer, &errorBuffer, 0 );
-    if( FAILED( result ) )
-    {
-        if( errorBuffer != 0 )
-        {
-            LOG_ERRO << (char*)errorBuffer->GetBufferPointer() << LOG_ENDL;
-			ReleaseCOM(errorBuffer);
-        }
-
-        return false;
-    }
-
-    if( errorBuffer != 0 )
-        errorBuffer->Release( );
-
-    return true;
 }
 
 void TextManager::setupBuffers(ID3D11Device* device, std::string text)
@@ -248,14 +161,11 @@ void TextManager::setupBuffers(ID3D11Device* device, std::string text)
     delete[] inds;
 }
 
-void TextManager::DrawString(ID3D11DeviceContext* device, std::string text, int x, int y)
+void TextManager::DrawString(ID3D11DeviceContext* device, std::string text, float x, float y)
 {
 	ID3D11Device* d;
 	device->GetDevice(&d);
 	setupBuffers(d, text);	
-
-	device->IASetInputLayout( mInputLayout );
-    device->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
 	UINT stride = sizeof(FontVertex);
     UINT offset = 0;
@@ -263,14 +173,11 @@ void TextManager::DrawString(ID3D11DeviceContext* device, std::string text, int 
 	device->IASetIndexBuffer( mIndexBuffer, DXGI_FORMAT_R16_UINT, 0 );
 	device->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
 
-	XMMATRIX world = XMMatrixTranslation((2.0f * (float)x / 800.0f), (-2.0f * (float)y / 600.0f), 0);
+	XMMATRIX world = XMMatrixTranslation(x, -y, 0);
     XMMATRIX worldMat = world;
     worldMat = XMMatrixTranspose( worldMat );
 
-	device->VSSetShader( mVertexShader, 0, 0 );
-	device->PSSetShader( mPixelShader, 0, 0 );
 	device->PSSetShaderResources( 0, 1, &mFontRV );
-	device->PSSetSamplers( 0, 1, &mSampler );
 
 	device->UpdateSubresource( mWorldCB, 0, 0, &worldMat, 0, 0 );
 	device->VSSetConstantBuffers( 0, 1, &mWorldCB );

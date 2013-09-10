@@ -18,6 +18,8 @@
 
 #include "StaticMesh.h"
 
+#include "UIDisplay.h"
+
 #include <d3dx11effect.h>
 
 class App : public WMInputHandler{
@@ -76,7 +78,6 @@ protected:
 
     char FPSString[128];
     char CameraPosString[128];
-    char collidedString[128];
 
     ID3D11RasterizerState* mFillRS;
     ID3D11RasterizerState* mWireFrameRS;
@@ -85,7 +86,9 @@ protected:
 
     WorldGenerator::LevelPreset mLevelPreset;
 
-	protected:
+    UIDisplay mUIDisplay;
+
+protected:
 
 	ID3DX11Effect* mFX;
 	ID3DX11EffectTechnique* mRenderGBufferTech;

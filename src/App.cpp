@@ -151,8 +151,6 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 
                 sprintf(CameraPosString, "%s: %.2f, %.2f, %.2f", collisionMode ? "Player" : "Camera",  mCamera.getPosition().x, mCamera.getPosition().y, mCamera.getPosition().z );
 
-                collidedString[0] = '\0';
-
 				update( d );
                 draw();
 			}
@@ -233,6 +231,10 @@ bool App::init( )
     mEntity.getSolidity().height = 0.25f;
 
     if( !mTorch.loadFromObj(mWindow.getDevice(), "content/meshes/torch.obj", L"content/textures/torch_texture.png") ){
+        return false;
+    }
+
+    if( !mUIDisplay.init( mWindow.getDevice(), L"content/textures/multifall_ui.png", L"content/shaders/ui.fx" ) ){
         return false;
     }
 
@@ -605,9 +607,10 @@ void App::draw( )
 
     mWindow.getDeviceContext()->RSSetState( mFillRS );
 
-    mTextManager.DrawString(mWindow.getDeviceContext(), FPSString, 0, 0);
-    mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, 0, 25);
-    mTextManager.DrawString(mWindow.getDeviceContext(), collidedString, 0, 50);
+    mUIDisplay.prepareUIRendering( mWindow.getDeviceContext() );
+
+    mTextManager.DrawString(mWindow.getDeviceContext(), FPSString, 0.0f, 0.0f);
+    mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, 0.0f, 0.1f);
 
     mWindow.getSwapChain()->Present(0, 0);
 }
@@ -627,6 +630,8 @@ void App::clear( )
 {
     mWorldDisplay.clear();
     mTextManager.clear();
+
+    mUIDisplay.clear();
 
     mTorch.clear();
 

@@ -263,6 +263,7 @@ bool DX11Window::onResize()
 
 	// Resize the swap chain and recreate the render target view.
 	if(FAILED(mSwapChain->ResizeBuffers(1, mWindowWidth, mWindowHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0))){
+        LOG_ERRO << "Failed to resize swap chain buffers to: " << mWindowWidth << ", " << mWindowHeight << LOG_ENDL;
         return false;
     }
 
