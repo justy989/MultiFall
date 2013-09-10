@@ -36,94 +36,146 @@ bool UIDisplay::init( ID3D11Device* device, LPCWSTR uiTexturePath, LPCWSTR uiSha
         //Left Window Title Corner
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.0f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.125f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.125f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.125f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.125f)},
 
         //Middle Window Title
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.0f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.0f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.125f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.125f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.125f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.125f)},
 
         //Right Window Title Corner
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.0f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.0f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.125f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.125f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.125f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.125f)},
 
+        
         //Top Left Window Body
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.125f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.125f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.25f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.25f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.25f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.25f)},
 
         //Top Middle Window Body
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.125f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.125f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.25f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.25f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.25f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.25f)},
 
         //Top Right Window Body
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.125f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.125f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.25f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.25f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.25f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.25f)},
+
+        //Below Tab Left
+        {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.125f)},
+        {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.125f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.25f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.25f)},
+
+        //Below Tab Right
+        {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.25f)},
+        {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.25f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.375f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.375f)},
 
         //Middle Left Window Body
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.25f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.25f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.375f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.375f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.375f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.375f)},
 
         //Middle Middle Window Body
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.25f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.25f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.375f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.375f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.375f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.375f)},
 
         //Middle Right Window Body
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.25f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.25f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.375f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.375f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.375f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.375f)},
 
+        
         //Bottom Left Window Body
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.375f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.375f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.5f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.5f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.5f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.5f)},
 
         //Bottom Middle Window Body
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.375f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.375f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.5f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.5f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.5f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.5f)},
 
         //Bottom Right Window Body
         {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.375f)},
         {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.375f)},
-        {XMFLOAT4(0.1f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.5f)},
-        {XMFLOAT4(0.0f, 0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.5f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.5f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.5f)},
+
+
+        //Checkbox unchecked
+        {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.5f)},
+        {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.5f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.625f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.625f)},
+
+        //Checkbox checked
+        {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.5f)},
+        {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.5f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.625f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.625f)},
+
+
+        //Left Arrow Slider
+        {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.625f)},
+        {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.625f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.75f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.75f)},
+
+         //Right Arrow Slider
+        {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.625f)},
+        {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.625f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.75f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.25f, 0.75f)},
+
+        //Filled Bar Slider
+        {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.625f)},
+        {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.625f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.75f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.5f, 0.75f)},
+
+         //Empty Bar Slider
+        {XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.625f)},
+        {XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.625f)},
+        {XMFLOAT4(0.1f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.75f)},
+        {XMFLOAT4(0.0f, -0.1f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.75f, 0.75f)},
     };
 
-    ushort inds[ 16 * 6 ];
+    ushort inds[ UI_INDEX_COUNT ];
     ushort v = 0;
 
-    for(int i = 0; i < 16 * 6; ){
+    for(int i = 0; i < UI_INDEX_COUNT; ){
         inds[i] = v; i++;
-        inds[i] = v + 2; i++;
         inds[i] = v + 1; i++;
+        inds[i] = v + 2; i++;
 
         inds[i] = v; i++;
-        inds[i] = v + 3; i++;
         inds[i] = v + 2; i++;
+        inds[i] = v + 3; i++;
 
         v += 4;
     }
 
     D3D11_BUFFER_DESC vbd;
     vbd.Usage = D3D11_USAGE_IMMUTABLE;
-    vbd.ByteWidth = sizeof(FontVertex) * 16 * 4;
+    vbd.ByteWidth = sizeof(FontVertex) * UI_INDEX_COUNT;
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vbd.CPUAccessFlags = 0;
     vbd.MiscFlags = 0;
@@ -262,7 +314,7 @@ void UIDisplay::drawWindow( ID3D11DeviceContext* device, UIWindow& window, TextM
     device->PSSetShaderResources( 0, 1, &mTexture );
 
     //Draw stuffs
-    for(int i = 0; i < 16; i++){
+    for(int i = 0; i < 20; i++){
         XMMATRIX world = XMMatrixTranslation( -1.0f + ( static_cast<float>(i) * 0.1f ), 0.0f, 0.0f);
         XMMATRIX worldMat = world;
         worldMat = XMMatrixTranspose( worldMat );

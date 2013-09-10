@@ -611,6 +611,10 @@ void App::draw( )
 
     mTextManager.DrawString(mWindow.getDeviceContext(), FPSString, 0.0f, 0.0f);
     mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, 0.0f, 0.1f);
+    
+    //For testing drawing windows
+    //UIWindow window;
+    //mUIDisplay.drawWindow( mWindow.getDeviceContext(), window, mTextManager );
 
     mWindow.getSwapChain()->Present(0, 0);
 }
