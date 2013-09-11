@@ -78,6 +78,7 @@ protected:
 
     char FPSString[128];
     char CameraPosString[128];
+    char MousePosString[128];
 
     ID3D11RasterizerState* mFillRS;
     ID3D11RasterizerState* mWireFrameRS;
@@ -87,6 +88,9 @@ protected:
     WorldGenerator::LevelPreset mLevelPreset;
 
     UIDisplay mUIDisplay;
+    UIWindow mUIWindow;
+
+    bool mLeftClick;
 
 protected:
 

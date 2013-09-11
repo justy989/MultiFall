@@ -8,7 +8,11 @@ UIWindow::UIWindow() :
     mTabCount(0),
     mCurrentTab(0)
 {
+    mTitleClickPos.x = -2.0f;
+    mResizeClickPos.x = -2.0f;
 
+    mMinDimensions.x = 0.25f;
+    mMinDimensions.y = 0.25f;
 }
 
 UIWindow::~UIWindow()
@@ -21,6 +25,45 @@ UIWindow::UserChange UIWindow::update( bool mouseClick, XMFLOAT2 mousePosition,
 {
     UserChange change;
 
+    //Has it clicked down?
+    if( mouseClick ){
+        //Have we saved the mouse position?
+        if( mTitleClickPos.x > -1.1f ){
+            //Move the window based on how far the mouse position has changed
+            mPosition.x += mousePosition.x - mTitleClickPos.x;
+            mPosition.y += mousePosition.y - mTitleClickPos.y;
+            mTitleClickPos = mousePosition;
+        }else{ //If not we need to
+            if( mousePosition.x >= mPosition.x && mousePosition.x <= (mPosition.x + mDimensions.x) &&
+                mousePosition.y >= mPosition.y && mousePosition.y <= (mPosition.y + UIWINDOW_TITLE_BAR_HEIGHT) ){
+                mTitleClickPos = mousePosition;
+            }
+        }
+
+        //Have we saved the mouse position?
+        if( mResizeClickPos.x > -1.1f ){
+            //Move the window based on how far the mouse position has changed
+            mDimensions.x += mousePosition.x - mResizeClickPos.x;
+            mDimensions.y += mousePosition.y - mResizeClickPos.y;
+
+            CLAMP( mDimensions.x, mMinDimensions.x, 2.0f );
+            CLAMP( mDimensions.y, mMinDimensions.y, 2.0f );
+
+            mResizeClickPos = mousePosition;
+        }else{ //If not we need to
+            if( mousePosition.x >= (mPosition.x + mDimensions.x - 0.1f) && mousePosition.x <= (mPosition.x + mDimensions.x) &&
+                mousePosition.y >= (mPosition.y + mDimensions.y - 0.1f) && mousePosition.y <= (mPosition.y + mDimensions.y) ){
+                mResizeClickPos = mousePosition;
+            }
+        }
+    }else{
+        mTitleClickPos.x = -2.0f;
+        mResizeClickPos.x = -2.0f;
+    }
+
+
+
+    /*
     for(int i = 0; i < mTabs[ mCurrentTab ].elementCount; i++){
         change = mTabs[ mCurrentTab ].elements[ i ]->update( mouseClick,
             mousePosition,
@@ -29,7 +72,10 @@ UIWindow::UserChange UIWindow::update( bool mouseClick, XMFLOAT2 mousePosition,
         if( change.action != UserChange::Action::None ){
             return change;
         }
-    }
+    }*/
+
+    change.action = UserChange::Action::None;
+    change.dropOptionIndex = 0;
 
     return change;
 }

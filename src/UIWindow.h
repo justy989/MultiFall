@@ -62,6 +62,8 @@ public:
     inline int getCurrentTab();
 
     virtual ElemType getElemType(){return Window;}
+    
+    inline void setMinDimensions( XMFLOAT2 dim );
 
 protected:
 
@@ -69,6 +71,11 @@ protected:
     int mTabCount;
 
     int mCurrentTab;
+
+    XMFLOAT2 mMinDimensions;
+
+    XMFLOAT2 mTitleClickPos;
+    XMFLOAT2 mResizeClickPos;
 
     static float mTitleBarHeight;
     static float mTabBarHeight;
@@ -90,6 +97,11 @@ inline UIWindow::Tab& UIWindow::getTab(uint tabIndex )
 inline int UIWindow::getCurrentTab()
 {
     return mCurrentTab;
+}
+
+inline void UIWindow::setMinDimensions( XMFLOAT2 dim )
+{
+    mMinDimensions = dim;
 }
 
 #endif

@@ -9,8 +9,8 @@
 #include <xnamath.h>
 #include <string>
 
-#define FONTWIDTH	0.06
-#define FONTHEIGHT  0.068
+#define FONTWIDTH	0.04
+#define FONTHEIGHT  0.045
 
 struct FontVertex
 {

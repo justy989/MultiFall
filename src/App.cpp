@@ -16,6 +16,9 @@ App::App()
 
     FPSString[0] = '\0';
     CameraPosString[0] = '\0';
+    MousePosString[0] = '\0';
+
+    mLeftClick = false;
 }
 
 void App::handleInput( RAWINPUT* input )
@@ -28,6 +31,12 @@ void App::handleInput( RAWINPUT* input )
         //0.001f is hardcoded, but we should use a sensitivity configuration setting
         mCamera.modPitch( (float)(mx) * mConfig.getSensitivity() );
         mCamera.modYaw( (float)(my) * -mConfig.getSensitivity() );
+
+        if( input->data.mouse.ulButtons & RI_MOUSE_LEFT_BUTTON_DOWN ){
+            mLeftClick = true;
+        }else if( input->data.mouse.ulButtons & RI_MOUSE_LEFT_BUTTON_UP ){
+            mLeftClick = false;
+        }
 
     }else if (input->header.dwType== RIM_TYPEKEYBOARD){
         USHORT VKey = input->data.keyboard.VKey;
@@ -259,6 +268,14 @@ bool App::init( )
     if( !mUIDisplay.init( mWindow.getDevice(), L"content/textures/multifall_ui.png", L"content/shaders/ui.fx" ) ){
         return false;
     }
+
+    UIWindow::Text text;
+    text.message = "Window Title";
+    mUIWindow.setPosition( XMFLOAT2( -0.75f, -0.75f ) );
+    mUIWindow.setDimension( XMFLOAT2( 0.75f, 0.75f ) );
+    mUIWindow.setText( text );
+
+    mUIWindow.setMinDimensions( XMFLOAT2( 0.5f, 0.5f ) );
 
     return true;
 }
@@ -556,6 +573,24 @@ void App::update( float dt )
             mCamera.moveLeftRight( -2.0f * dt ); 
         }
     }
+
+    POINT p;
+    GetCursorPos( &p );
+
+    XMFLOAT2 mousePos( 
+        static_cast<float>(p.x) / static_cast<float>(mWindow.getWindowWidth()), 
+        static_cast<float>(p.y) / static_cast<float>(mWindow.getWindowHeight()) );
+
+    mousePos.x *= 2.0f; mousePos.x -= 1.0f;
+    mousePos.y *= 2.0f; mousePos.y -= 1.0f;
+
+    //Hack!
+    mousePos.x -= 0.01f;
+    mousePos.y -= 0.06f;
+
+    sprintf(MousePosString, "Mouse: %.2f, %.2f", mousePos.x, mousePos.y);
+
+    mUIWindow.update( mLeftClick, mousePos, false, 0 );
 }
 
 void App::draw( )
@@ -658,20 +693,14 @@ void App::draw( )
     mUIDisplay.prepareUIRendering( mWindow.getDeviceContext() );
 
     mTextManager.DrawString(mWindow.getDeviceContext(), FPSString, -1.0f, -1.0f);
-    mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, -1.0f, -0.9f);
+    mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, -1.0f, -0.95f);
+    mTextManager.DrawString(mWindow.getDeviceContext(), MousePosString, -1.0f, -0.9f);
     
     //For testing drawing windows
-    UIWindow window;
-    UIWindow::Text text;
-    text.message = "Window Title";
-    window.setPosition( XMFLOAT2( -0.75f, -0.75f ) );
-    window.setDimension( XMFLOAT2( 0.75f, 0.75f ) );
-    window.setText( text );
-
-    mUIDisplay.buildWindowVB( window, mWindow.getAspectRatio() );
+    mUIDisplay.buildWindowVB( mUIWindow, mWindow.getAspectRatio() );
 
     //Draw!
-    mUIDisplay.drawWindowText( mWindow.getDeviceContext(), window, mTextManager );
+    mUIDisplay.drawWindowText( mWindow.getDeviceContext(), mUIWindow, mTextManager );
     mUIDisplay.drawUI( mWindow.getDeviceContext() );
 
     mWindow.getSwapChain()->Present(0, 0);
