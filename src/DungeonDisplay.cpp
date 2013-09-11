@@ -76,7 +76,7 @@ void DungeonDisplay::draw( ID3D11DeviceContext* device, ID3DX11EffectTechnique* 
     mLevelDisplay.draw( device, tech, mTextureSampler );
 }
 
-void DungeonDisplay::drawLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos )
+void DungeonDisplay::DrawPointLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos )
 {
-	mLevelDisplay.drawLights(device, ViewProj, cameraPos);
+	mLevelDisplay.DrawPointLights(device, ViewProj, cameraPos);
 }

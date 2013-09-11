@@ -632,15 +632,21 @@ void App::draw( )
 	mWindow.getDeviceContext()->OMSetDepthStencilState(mDSState, 0);
 
 	//start lighting pass
+	mDirLightTech->GetDesc( &techDesc );
+    for(ushort p = 0; p < techDesc.Passes; ++p)
+	{
+		mDirLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());		
+		
+		//draw fullscreen quad to spawn the lighting post process
+		drawFSQuad();
+	}
+
 	mPointLightTech->GetDesc( &techDesc );
     for(ushort p = 0; p < techDesc.Passes; ++p)
 	{
 		mPointLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
 
-		mWorldDisplay.drawLights(mWindow.getDeviceContext(), &viewProj, &mCamera.getPosition());
-
-		//draw fullscreen quad to spawn the lighting post process
-		//drawFSQuad();
+		mWorldDisplay.DrawPointLights(mWindow.getDeviceContext(), &viewProj, &mCamera.getPosition());		
 	}
 
 	mWindow.getDeviceContext()->OMSetDepthStencilState(prevDSS, 0);

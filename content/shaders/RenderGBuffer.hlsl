@@ -87,25 +87,25 @@ VertexOut vs_fsquad(VertexIn input)
 
 float4 ps_directional(VertexOut pin) : SV_TARGET0
 {
-    float4 n = normalBuffer.Sample( colorSampler_, pin.tex );
-	float3 normal = 2.0f * n.xyz - 1.0f; //transform back into (-1, 1)
-	normal = normalize(normal);
+    //float4 n = normalBuffer.Sample( colorSampler_, pin.tex );
+	//float3 normal = 2.0f * n.xyz - 1.0f; //transform back into (-1, 1)
+	//normal = normalize(normal);
 	
-	float lightIntensity;
-	float3 lightDir;
+	//float lightIntensity;
+	//float3 lightDir;
 
 	float4 color = colorBuffer.Sample( colorSampler_, pin.tex );
-	float4 ambient = color * 0.1f;
+	float4 ambient = color * 0.013f;
 	
-	lightDir = float3(0.1f,0.02f,-0.05f);
-	lightDir = normalize(lightDir);
+	//lightDir = float3(0.1f,0.02f,-0.05f);
+	//lightDir = normalize(lightDir);
 	
 	// Calculate the amount of light on this pixel.
-    lightIntensity = saturate(dot(normal, lightDir));
+    //lightIntensity = saturate(dot(normal, lightDir));
 	
 	//if(lightIntensity > 0)
 	//{
-		color = saturate(lightIntensity * color + ambient);
+		color = ambient;//0.1f *saturate(lightIntensity * color + ambient);
 	//}
 	
     return color;

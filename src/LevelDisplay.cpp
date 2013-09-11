@@ -122,9 +122,9 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11EffectTechnique* te
     //}
 }
 
-void LevelDisplay::drawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos)
+void LevelDisplay::DrawPointLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos)
 {
-	mLightManager.DrawLights(device, ViewProj, cameraPos);
+	mLightManager.DrawPointLights(device, ViewProj, cameraPos);
 }
 
 bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  )

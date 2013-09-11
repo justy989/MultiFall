@@ -72,9 +72,9 @@ void WorldDisplay::draw( ID3D11DeviceContext* device, World& world )
     mDungeonDisplay.draw( device, mTech );
 }
 
-void WorldDisplay::drawLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos )
+void WorldDisplay::DrawPointLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos )
 {
-    mDungeonDisplay.drawLights( device, ViewProj, cameraPos );
+    mDungeonDisplay.DrawPointLights( device, ViewProj, cameraPos );
 }
 
 void WorldDisplay::clear()

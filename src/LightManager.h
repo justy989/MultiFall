@@ -16,7 +16,7 @@ public:
 
 	bool init(ID3D11Device* device);
 
-	void DrawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos);
+	void DrawPointLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos);
 
 	//probably going to add support for cubemaps later (whatever that means)
 	void addDirectional(XMFLOAT3 dir);

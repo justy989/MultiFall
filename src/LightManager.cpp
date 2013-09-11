@@ -75,7 +75,7 @@ bool LightManager::init(ID3D11Device* device)
 	return true;
 }
 
-void LightManager::DrawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos)
+void LightManager::DrawPointLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos)
 {
 
 	ID3D11RasterizerState* prevRast;

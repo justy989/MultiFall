@@ -17,7 +17,7 @@ public:
     //Draw the world in it's current state
     void draw( ID3D11DeviceContext* device, World& world );
 
-	void drawLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos);
+	void DrawPointLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos);
 
     //Clear the different displays
     void clear();
