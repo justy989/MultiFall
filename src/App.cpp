@@ -174,17 +174,39 @@ bool App::init( )
         return false;
     }
 
+	D3D11_DEPTH_STENCIL_DESC dsDesc;
+	ZeroMemory(&dsDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+	// Depth test parameters
+	dsDesc.DepthEnable = true;
+	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dsDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
+
+	mWindow.getDevice()->CreateDepthStencilState(&dsDesc, &mDSState);
+
+	D3D11_BLEND_DESC bdesc;
+	ZeroMemory(&bdesc, sizeof(D3D11_BLEND_DESC));
+	bdesc.RenderTarget[0].BlendEnable = true;
+	bdesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	bdesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	bdesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	bdesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	bdesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	bdesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	bdesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+
+	mWindow.getDevice()->CreateBlendState(&bdesc, &mBlendState);
+
 	mTextManager.init(mWindow.getDevice());
 
     D3D11_RASTERIZER_DESC rasterDesc;
 
     // Setup the raster description which will determine how and what polygons will be drawn.
     rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_BACK;
+    rasterDesc.CullMode = D3D11_CULL_NONE;
     rasterDesc.DepthBias = 0;
     rasterDesc.DepthBiasClamp = 0.0f;
     rasterDesc.DepthClipEnable = true;
-    rasterDesc.FillMode = D3D11_FILL_WIREFRAME;
+    rasterDesc.FillMode = D3D11_FILL_SOLID;
     rasterDesc.FrontCounterClockwise = false;
     rasterDesc.MultisampleEnable = false;
     rasterDesc.ScissorEnable = false;
@@ -279,6 +301,7 @@ bool App::initShaders()
 	ReleaseCOM(compiledShader);
 	mRenderGBufferTech = mFX->GetTechniqueByName("GeoPass");
 	mDirLightTech = mFX->GetTechniqueByName("DirLight");
+	mPointLightTech = mFX->GetTechniqueByName("PointLight");
 
     LOG_INFO << "Loaded color.fx shader Successfully" << LOG_ENDL;
 
@@ -559,6 +582,7 @@ void App::draw( )
     XMMATRIX view  = XMLoadFloat4x4(&mCamera.getView());
     XMMATRIX proj  = XMLoadFloat4x4(&mCamera.getProj());
 	XMMATRIX viewProj = view * proj;
+	XMMATRIX trans = XMMatrixTranspose(viewProj);
 
 	ID3DX11EffectMatrixVariable* mfxViewProj = mFX->GetVariableByName("gWorldViewProj")->AsMatrix();
 	mfxViewProj->SetMatrix(reinterpret_cast<float*>(&viewProj));
@@ -595,15 +619,33 @@ void App::draw( )
 	ID3DX11EffectShaderResourceVariable* mfxdepthbuf = mFX->GetVariableByName("depthBuffer")->AsShaderResource();
 	mfxdepthbuf->SetResource(mGBufferSRVs[2]);
 
+	ID3D11DepthStencilState* prevDSS;
+	mWindow.getDeviceContext()->OMGetDepthStencilState(&prevDSS, 0);
+
+	ID3D11BlendState* prevBS;
+	FLOAT prevfloat[4];
+	UINT prevMask = 0;
+	mWindow.getDeviceContext()->OMGetBlendState(&prevBS, prevfloat, &prevMask);
+
+	mWindow.getDeviceContext()->OMSetBlendState(mBlendState, prevfloat, prevMask);
+
+	mWindow.getDeviceContext()->OMSetDepthStencilState(mDSState, 0);
+
 	//start lighting pass
-	mDirLightTech->GetDesc( &techDesc );
+	mPointLightTech->GetDesc( &techDesc );
     for(ushort p = 0; p < techDesc.Passes; ++p)
 	{
-		mDirLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
+		mPointLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
+
+		mWorldDisplay.drawLights(mWindow.getDeviceContext(), &viewProj);
 
 		//draw fullscreen quad to spawn the lighting post process
-		drawFSQuad();
+		//drawFSQuad();
 	}
+
+	mWindow.getDeviceContext()->OMSetDepthStencilState(prevDSS, 0);
+
+	mWindow.getDeviceContext()->OMSetBlendState(prevBS, prevfloat, prevMask);
 
     mWindow.getDeviceContext()->RSSetState( mFillRS );
 

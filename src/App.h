@@ -90,9 +90,14 @@ protected:
 
 protected:
 
+	// Create depth stencil state
+	ID3D11DepthStencilState * mDSState;
+	ID3D11BlendState* mBlendState;
+
 	ID3DX11Effect* mFX;
 	ID3DX11EffectTechnique* mRenderGBufferTech;
 	ID3DX11EffectTechnique* mDirLightTech;
+	ID3DX11EffectTechnique* mPointLightTech;
 
 	ID3D11InputLayout* mInputLayout;
 	ID3D11Buffer* mFSQuadVB;

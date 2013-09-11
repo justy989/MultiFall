@@ -72,6 +72,11 @@ void WorldDisplay::draw( ID3D11DeviceContext* device, World& world )
     mDungeonDisplay.draw( device, mTech );
 }
 
+void WorldDisplay::drawLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj )
+{
+    mDungeonDisplay.drawLights( device, ViewProj );
+}
+
 void WorldDisplay::clear()
 {
     mDungeonDisplay.clear();

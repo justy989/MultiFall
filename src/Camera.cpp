@@ -42,9 +42,11 @@ void Camera::update( float aspectRatio ){
     mMove.z = 0.0f;
     mMove.w = 1.0f;
 
-	camTarget = position + camTarget;	
+	camTarget = position + camTarget;
+
+	//position = XMVectorSet(0,0,6, 0);
     
-    XMMATRIX V = XMMatrixLookAtLH( position, camTarget, camUp );
+	XMMATRIX V = XMMatrixLookAtLH( position, camTarget, camUp );
     XMStoreFloat4x4(&mView, V);
 
     XMStoreFloat4( &mPosition, position );

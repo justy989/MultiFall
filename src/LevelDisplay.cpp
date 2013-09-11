@@ -20,12 +20,14 @@ LevelDisplay::LevelDisplay() :
 
 LevelDisplay::~LevelDisplay()
 {
-    clear();
+	clear();
 }
 
 bool LevelDisplay::setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, float floorClip, LPCWSTR wallTexturePath, float wallClip )
 {
     HRESULT hr;
+
+	mLightManager.init(device);
 
     //Release the current textures first
     ReleaseCOM( mFloorTexture );
@@ -118,6 +120,11 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11EffectTechnique* te
 
         device->DrawIndexed(6 *mWallCount, 0, 0);
     //}
+}
+
+void LevelDisplay::drawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj)
+{
+	mLightManager.DrawLights(device, ViewProj);
 }
 
 bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  )
@@ -278,13 +285,16 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
 
     mWallCount = 0;
 
+	//mLightManager.addPointLight(XMFLOAT3(0,0,0), 1.0f);
+
     for(int i = 0; i < level.getWidth(); i++){
         for(int j = 0; j < level.getDepth(); j++){ 
 
             //Make Left Wall
             int nextI = i - 1;
             int nextJ = j;
-
+			
+			
             if( nextI >= 0 ){
                 if( level.getBlockHeight( i, j ) > level.getBlockHeight( nextI, nextJ ) ){
 
@@ -292,6 +302,11 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                     verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval ;
                     verts[ v ].position.z = static_cast<float>(j) * blockDimension;
 					verts[ v ].tex = XMFLOAT2(1, 0);
+
+					if(i % 4 == 0 && j % 4 == 0)
+					{
+						mLightManager.addPointLight(verts[ v ].position, 1.0f);
+					}
 					
                     v++;
 

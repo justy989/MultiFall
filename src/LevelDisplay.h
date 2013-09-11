@@ -8,6 +8,7 @@
 #include <xnamath.h>
 
 #include "dungeon.h"
+#include "LightManager.h"
 
 class LevelDisplay{
 public:
@@ -27,12 +28,17 @@ public:
     //Draw the Level Mesh that we generated
     void draw( ID3D11DeviceContext* device, ID3DX11EffectTechnique* tech, ID3D11SamplerState* textureSampler );
 
+	void drawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj);
+
 protected:
 
     bool createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  );
     bool createWallsMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  );
 
 protected:
+
+	//lightmanager for the level
+	LightManager mLightManager;
     
     //The floor that the player walks on, at every height
     ID3D11Buffer* mFloorVB;
