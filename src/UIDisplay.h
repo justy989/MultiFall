@@ -8,10 +8,10 @@
 #include <D3D11.h>
 #include <D3DX11.h>
 
-#define UI_QUAD_COUNT 9
+#define MAX_UI_QUADS 128
 
-#define UI_VERTEX_COUNT UI_QUAD_COUNT * 4
-#define UI_INDEX_COUNT UI_QUAD_COUNT * 6
+#define UI_INDEX_COUNT MAX_UI_QUADS * 6
+#define UI_VERTEX_COUNT MAX_UI_QUADS * 4
 
 class UIDisplay{
 public:
@@ -25,11 +25,14 @@ public:
     //Set input layout, shaders and sampler for UI and text
     void prepareUIRendering( ID3D11DeviceContext* device );
     
+    //Setup vertex buffers for the next frame
+    void prepareWindow( ID3D11DeviceContext* device, UIWindow& window, TextManager& tm );
+
     //Clear everything we've allocated
     void clear();
 
     //Draw a given window
-    void drawWindow( ID3D11DeviceContext* device, UIWindow& window, TextManager& tm );
+    void drawUI( ID3D11DeviceContext* device );
 
 protected:
 
@@ -58,6 +61,9 @@ protected:
     ID3D11Buffer* mWorldCB;
 
     ID3D11ShaderResourceView* mTexture;
+
+    FontVertex mVerts[ UI_VERTEX_COUNT ];
+    int mVertsGenerated;
 };
 
 #endif

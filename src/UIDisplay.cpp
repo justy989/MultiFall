@@ -10,7 +10,8 @@ UIDisplay::UIDisplay() :
     mPixelShader(NULL),
     mVertexShader(NULL),
     mSampler(NULL),
-    mInputLayout(NULL)
+    mInputLayout(NULL),
+    mVertsGenerated(0)
 {
 
 }
@@ -28,6 +29,7 @@ bool UIDisplay::init( ID3D11Device* device, LPCWSTR uiTexturePath, LPCWSTR uiSha
         return false;
     }
 
+    /*
     //Create quad for each object, then reference them when drawing as needed
     FontVertex verts[] = 
     {
@@ -91,7 +93,7 @@ bool UIDisplay::init( ID3D11Device* device, LPCWSTR uiTexturePath, LPCWSTR uiSha
 
 
         //
-    };
+    };*/
 
     ushort inds[ UI_INDEX_COUNT ];
     ushort v = 0;
@@ -107,22 +109,22 @@ bool UIDisplay::init( ID3D11Device* device, LPCWSTR uiTexturePath, LPCWSTR uiSha
 
         v += 4;
     }
-
+    /*
     D3D11_BUFFER_DESC vbd;
-    vbd.Usage = D3D11_USAGE_IMMUTABLE;
+    vbd.Usage = D3D11_USAGE_DYNAMIC;
     vbd.ByteWidth = sizeof(FontVertex) * UI_VERTEX_COUNT;
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vbd.CPUAccessFlags = 0;
+    vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     vbd.MiscFlags = 0;
 	vbd.StructureByteStride = 0;
 
     D3D11_SUBRESOURCE_DATA vinitData;
-    vinitData.pSysMem = verts;
+    vinitData.pSysMem = mVerts;
 
     if( FAILED(device->CreateBuffer(&vbd, &vinitData, &mVB) ) ){
         LOG_ERRO << "Unable to allocate Vertex Buffer for UI" << LOG_ENDL;
         return false;
-    }
+    }*/
 
     D3D11_BUFFER_DESC ibd;
     ibd.Usage = D3D11_USAGE_IMMUTABLE;
@@ -237,8 +239,95 @@ void UIDisplay::prepareUIRendering( ID3D11DeviceContext* device )
 	device->PSSetSamplers( 0, 1, &mSampler );
 }
 
-void UIDisplay::drawWindow( ID3D11DeviceContext* device, UIWindow& window, TextManager& tm )
+void UIDisplay::prepareWindow( ID3D11DeviceContext* device, UIWindow& window, TextManager& tm )
 {
+    //Generate each part of the window
+    FontVertex* v = mVerts + mVertsGenerated;
+    XMFLOAT4 c = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+    //{XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f)},
+    //{XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f)},
+    //{XMFLOAT4(1.0f, -1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 0.125f)},
+    //{XMFLOAT4(0.0f, -1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 0.125f)},
+
+    //TL
+    v->position = XMFLOAT4( 0.0f, 0.0f, 0.0f, 1.0f );
+    v->color = c;
+    v->tex = XMFLOAT2( 0.0f, 0.00f );
+    v++;
+
+    v->position = XMFLOAT4( 1.0f, 0.0f, 0.0f, 1.0f );
+    v->color = c;
+    v->tex = XMFLOAT2( 1.0f, 0.00f );
+    v++;
+
+    v->position = XMFLOAT4( 1.0f, -1.0f, 0.0f, 1.0f );
+    v->color = c;
+    v->tex = XMFLOAT2( 1.0f, 1.0f );
+    v++;
+
+    v->position = XMFLOAT4( 0.0f, -1.0f, 0.0f, 1.0f );
+    v->color = c;
+    v->tex = XMFLOAT2( 0.0f, 1.0f );
+    v++;
+
+    mVertsGenerated += 4;
+
+    //TB
+    v->position = XMFLOAT4( window.getPosition().x + 0.1f, -window.getPosition().y, 0.0f, 0.0f );
+    v->color = c;
+    v->tex = XMFLOAT2( 0.0f, 0.0625f );
+    v++;
+
+    v->position = XMFLOAT4( window.getPosition().x + 0.2f, -window.getPosition().y, 0.0f, 0.0f );
+    v->color = c;
+    v->tex = XMFLOAT2( 1.0f, 0.0625f );
+    v++;
+
+    v->position = XMFLOAT4( window.getPosition().x + 0.2f, -window.getPosition().y - 0.1f, 0.0f, 0.0f );
+    v->color = c;
+    v->tex = XMFLOAT2( 1.0f, 0.125f );
+    v++;
+
+    v->position = XMFLOAT4( window.getPosition().x + 0.1f, -window.getPosition().y - 0.1f, 0.0f, 0.0f );
+    v->color = c;
+    v->tex = XMFLOAT2( 0.0f, 0.125f );
+    v++;
+
+    mVertsGenerated += 4;
+
+    //Draw the title
+    UIWindow::Text* t;
+    int tCount;
+    window.getText( &t, &tCount );
+    float len = static_cast<float>(strlen( t->message )) * 0.1f;
+    tm.DrawString( device, t->message, 
+        window.getPosition().x + ( window.getDimension().x / 2.0f ) - (len / 2.0f),
+        window.getPosition().y + 0.1f );
+}
+
+void UIDisplay::drawUI( ID3D11DeviceContext* device )
+{
+    //Setup the vertex buffer
+    D3D11_BUFFER_DESC vbd;
+    vbd.Usage = D3D11_USAGE_IMMUTABLE;
+    vbd.ByteWidth = sizeof(FontVertex) * mVertsGenerated;
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vbd.CPUAccessFlags = 0;
+    vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+
+    D3D11_SUBRESOURCE_DATA vinitData;
+    vinitData.pSysMem = mVerts;
+    ID3D11Device* dev;
+    device->GetDevice(&dev);
+
+    if( FAILED(dev->CreateBuffer(&vbd, &vinitData, &mVB) ) ){
+        LOG_ERRO << "Unable to allocate Vertex Buffer for UI" << LOG_ENDL;
+        //return false;
+    }
+
+    //Setup temp vars
     uint stride = sizeof(FontVertex);
     uint offset = 0;
 
@@ -246,21 +335,20 @@ void UIDisplay::drawWindow( ID3D11DeviceContext* device, UIWindow& window, TextM
     device->IASetVertexBuffers( 0, 1, &mVB, &stride, &offset );
     device->IASetIndexBuffer( mIB, DXGI_FORMAT_R16_UINT, offset );
 
+    //Setup Texture
     device->PSSetShaderResources( 0, 1, &mTexture );
 
-    XMMATRIX world = XMMatrixTranslation( -1.0f, 0.0f, 0.0f);
-    XMMATRIX worldMat = world;
-    worldMat = XMMatrixTranspose( worldMat );
+    XMMATRIX world =  XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+    XMMATRIX worldTrans = XMMatrixTranspose( world );
+    device->UpdateSubresource( mWorldCB, 0, 0, &world, 0, 0 );
+	device->VSSetConstantBuffers( 0, 1, &mWorldCB );
 
-    //Draw Window
-    //Top Left
+    int indices = ( mVertsGenerated / 4 ) * 6;
 
-    //Top Middle
+    //Draw the verts we generated wooo
+    device->DrawIndexed( indices, 0, 0 );
 
-    //Top Right
+    mVertsGenerated = 0;
 
-    //device->UpdateSubresource( mWorldCB, 0, 0, &worldMat, 0, 0 );
-	//device->VSSetConstantBuffers( 0, 1, &mWorldCB );
-
-	//device->DrawIndexed(6, 8 * 6, 0);
+    ReleaseCOM(mVB);
 }

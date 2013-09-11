@@ -34,6 +34,9 @@ public:
     //Set the position of the UI Element
     virtual void setPosition( XMFLOAT2 pos );
 
+    //Set the dimension
+    virtual void setDimension( XMFLOAT2 dim );
+
     //Set the text for a component
     virtual void setText( Text& text );
 

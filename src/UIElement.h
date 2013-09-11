@@ -54,6 +54,7 @@ public:
 
     //Set the position of the UI Element
     virtual void setPosition( XMFLOAT2 pos ) = 0;
+    virtual void setDimension( XMFLOAT2 dim ) = 0;
 
     //Get Text from the element, to draw
     virtual void getText( Text** text, int* textCount ){
@@ -66,6 +67,7 @@ public:
 
     //Get the position of the element
     inline const XMFLOAT2& getPosition();
+    inline const XMFLOAT2& getDimension();
 
     //Accessors
 
@@ -98,6 +100,7 @@ inline bool UIElement::isHighlighted(){return mIsHighlighted;}
 inline void UIElement::setActive( bool active ){mIsActive = active;}
 
 inline const XMFLOAT2& UIElement::getPosition(){return mPosition;}
+inline const XMFLOAT2& UIElement::getDimension(){return mDimensions;}
 
 class UIButton : public UIElement{
 public:

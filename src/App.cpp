@@ -655,8 +655,15 @@ void App::draw( )
     mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, 0.0f, 0.1f);
     
     //For testing drawing windows
-    //UIWindow window;
-    //mUIDisplay.drawWindow( mWindow.getDeviceContext(), window, mTextManager );
+    UIWindow window;
+    UIWindow::Text text;
+    text.message = "Title";
+    window.setPosition( XMFLOAT2( 0.5f, 0.5f ) );
+    window.setDimension( XMFLOAT2( 0.25f, 0.25f ) );
+    window.setText( text );
+    //mUIDisplay.prepareWindow( mWindow.getDeviceContext(), window, mTextManager );
+
+    //mUIDisplay.drawUI( mWindow.getDeviceContext() );
 
     mWindow.getSwapChain()->Present(0, 0);
 }

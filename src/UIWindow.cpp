@@ -36,6 +36,7 @@ UIWindow::UserChange UIWindow::update( bool mouseClick, XMFLOAT2 mousePosition,
 
 void UIWindow::setPosition( XMFLOAT2 pos )
 {
+    /*
     //Loops through tabs and each element in them. Set the position
     for(int t = 0; t < mTabCount; t++){
         for(int e = 0; e < mTabs[ t ].elementCount; e++){
@@ -46,6 +47,13 @@ void UIWindow::setPosition( XMFLOAT2 pos )
     //Adjust the text position as well
     mText.position.x = pos.x + 0.01f;
     mText.position.y = pos.y + 0.01f;
+    */
+    mPosition = pos;
+}
+
+void UIWindow::setDimension( XMFLOAT2 dim )
+{
+    mDimensions = dim;
 }
 
 void UIWindow::setText( Text& text )
