@@ -637,7 +637,7 @@ void App::draw( )
 	{
 		mPointLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
 
-		mWorldDisplay.drawLights(mWindow.getDeviceContext(), &viewProj);
+		mWorldDisplay.drawLights(mWindow.getDeviceContext(), &viewProj, &mCamera.getPosition());
 
 		//draw fullscreen quad to spawn the lighting post process
 		//drawFSQuad();

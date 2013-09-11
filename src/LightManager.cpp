@@ -52,11 +52,35 @@ bool LightManager::init(ID3D11Device* device)
         return false;
     }
 
+	D3D11_RASTERIZER_DESC rasterDesc;
+
+    // Setup the raster description which will determine how and what polygons will be drawn.
+    rasterDesc.AntialiasedLineEnable = false;
+    rasterDesc.CullMode = D3D11_CULL_BACK;
+    rasterDesc.DepthBias = 0;
+    rasterDesc.DepthBiasClamp = 0.0f;
+    rasterDesc.DepthClipEnable = true;
+    rasterDesc.FillMode = D3D11_FILL_SOLID;
+    rasterDesc.FrontCounterClockwise = false;
+    rasterDesc.MultisampleEnable = false;
+    rasterDesc.ScissorEnable = false;
+    rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	device->CreateRasterizerState(&rasterDesc, &mOutsideLight);
+
+	rasterDesc.CullMode = D3D11_CULL_FRONT;
+
+	device->CreateRasterizerState(&rasterDesc, &mInsideLight);
+
 	return true;
 }
 
-void LightManager::DrawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj)
+void LightManager::DrawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos)
 {
+
+	ID3D11RasterizerState* prevRast;
+	device->RSGetState(&prevRast);
+
 	XMMATRIX invviewproj = XMMatrixInverse(&XMMatrixDeterminant(*ViewProj), *ViewProj);
 	invviewproj = XMMatrixTranspose(invviewproj);
 
@@ -80,6 +104,28 @@ void LightManager::DrawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj)
 		device->UpdateSubresource( mPSCB, 0, 0, &pscb, 0, 0 );
 		device->PSSetConstantBuffers( 1, 1, &mPSCB );
 
+		XMFLOAT3 v1 = XMFLOAT3(cameraPos->x,cameraPos->y,cameraPos->z);
+		XMFLOAT3 v2 = XMFLOAT3(pscb.lightPosition.x,pscb.lightPosition.y,pscb.lightPosition.z);
+
+		XMVECTOR vector1 = XMLoadFloat3(&v1);
+		XMVECTOR vector2 = XMLoadFloat3(&v2);
+		XMVECTOR vectorSub = XMVectorSubtract(vector1,vector2);
+		XMVECTOR length = XMVector3LengthEst(vectorSub);
+
+		float distance = 0.0f;
+		XMStoreFloat(&distance,length);
+
+		if(distance < pscb.lightRadIntensity.x + 0.051f)
+		{
+			device->RSSetState(mInsideLight);
+		}
+		else
+		{
+			device->RSSetState(mOutsideLight);
+		}
+
 		mSphere.draw(device);
 	}
+
+	device->RSSetState(prevRast);
 }

@@ -18,7 +18,7 @@ public:
     //Draw the last room mesh that was created
     void draw( ID3D11DeviceContext* device, ID3DX11EffectTechnique* tech );
 
-	void drawLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj);
+	void drawLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos);
 
     //Create the level Mesh
     bool createMeshFromLevel( ID3D11Device* device, Level& level );

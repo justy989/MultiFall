@@ -40,7 +40,7 @@ bool DungeonDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tech )
     samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
     samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
     samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
     samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
     
     if( FAILED(device->CreateSamplerState( &samplerDesc, &mTextureSampler ) ) ){
@@ -76,7 +76,7 @@ void DungeonDisplay::draw( ID3D11DeviceContext* device, ID3DX11EffectTechnique* 
     mLevelDisplay.draw( device, tech, mTextureSampler );
 }
 
-void DungeonDisplay::drawLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj )
+void DungeonDisplay::drawLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos )
 {
-	mLevelDisplay.drawLights(device, ViewProj);
+	mLevelDisplay.drawLights(device, ViewProj, cameraPos);
 }

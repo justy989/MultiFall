@@ -16,7 +16,7 @@ public:
 
 	bool init(ID3D11Device* device);
 
-	void DrawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj);
+	void DrawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos);
 
 	//probably going to add support for cubemaps later (whatever that means)
 	void addDirectional(XMFLOAT3 dir);
@@ -31,6 +31,9 @@ public:
 
 protected:
 	StaticMesh mSphere; //for point lights
+
+	ID3D11RasterizerState* mInsideLight;
+	ID3D11RasterizerState* mOutsideLight;
 
 	ID3D11Buffer* mWorldCB;
 	ID3D11Buffer* mPSCB;

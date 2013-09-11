@@ -28,7 +28,7 @@ public:
     //Draw the Level Mesh that we generated
     void draw( ID3D11DeviceContext* device, ID3DX11EffectTechnique* tech, ID3D11SamplerState* textureSampler );
 
-	void drawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj);
+	void drawLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos);
 
 protected:
 
