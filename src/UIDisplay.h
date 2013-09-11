@@ -25,14 +25,31 @@ public:
     //Set input layout, shaders and sampler for UI and text
     void prepareUIRendering( ID3D11DeviceContext* device );
     
-    //Setup vertex buffers for the next frame
-    void prepareWindow( ID3D11DeviceContext* device, UIWindow& window, TextManager& tm );
+    //Setup VB for drawing a window
+    void buildWindowVB( UIWindow& window, float aspectRatio );
 
     //Clear everything we've allocated
     void clear();
 
+    //Draw window Text
+    void drawWindowText( ID3D11DeviceContext* device, UIWindow& window, TextManager& tm );
+
     //Draw a given window
     void drawUI( ID3D11DeviceContext* device );
+
+    //Accessor to set the border dimension
+    inline void setBorderDimension( float b );
+
+    //Accessor to set the bg color
+    inline void setBGColor( XMFLOAT4 color );
+
+protected:
+
+    //Setup vertex buffers for the border of an element
+    void buildBorderVB( UIElement* elem, float aspectRatio );
+
+    //Setup the background for the border of an element
+    void buildBGVB(  UIElement* elem );
 
 protected:
 
@@ -49,6 +66,7 @@ protected:
     };
 
     ID3D11SamplerState* mSampler;
+    ID3D11BlendState* mBlender;
 
 	ID3D11InputLayout* mInputLayout;
 
@@ -64,6 +82,13 @@ protected:
 
     FontVertex mVerts[ UI_VERTEX_COUNT ];
     int mVertsGenerated;
+
+    float mBorderDimension;
+
+    XMFLOAT4 mBGColor;
 };
+
+inline void UIDisplay::setBorderDimension( float b ){mBorderDimension = b;}
+inline void UIDisplay::setBGColor( XMFLOAT4 color ){mBGColor = color;}
 
 #endif

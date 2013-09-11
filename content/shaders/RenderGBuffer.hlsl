@@ -95,7 +95,7 @@ float4 ps_directional(VertexOut pin) : SV_TARGET0
 	//float3 lightDir;
 
 	float4 color = colorBuffer.Sample( colorSampler_, pin.tex );
-	float4 ambient = color * 0.013f;
+	float4 ambient = color * 0.12f;
 	
 	//lightDir = float3(0.1f,0.02f,-0.05f);
 	//lightDir = normalize(lightDir);

@@ -2,9 +2,6 @@
 #include "Log.h"
 #include "Utils.h"
 
-#define FONTWIDTH	0.06
-#define FONTHEIGHT  0.068
-
 TextManager::TextManager() :
 	mFontRV(NULL),
 
@@ -103,10 +100,10 @@ void TextManager::setupBuffers(ID3D11Device* device, std::string text)
 
 		//set font location starting at -1, 1 (top left)
 		//and move right (no wrapping)
-		fontQuads[i * 4].position		= XMFLOAT4(-1.0f + (i*FONTWIDTH),				1.0f,				0.051f,1);
-		fontQuads[i * 4 + 1].position	= XMFLOAT4(-1.0f + (i*FONTWIDTH) + FONTWIDTH,	1.0f,				0.051f,1);
-		fontQuads[i * 4 + 2].position	= XMFLOAT4(-1.0f + (i*FONTWIDTH),				1.0f - FONTHEIGHT,	0.051f,1);
-		fontQuads[i * 4 + 3].position	= XMFLOAT4(-1.0f + (i*FONTWIDTH) + FONTWIDTH,	1.0f - FONTHEIGHT,	0.051f,1);
+		fontQuads[i * 4].position		= XMFLOAT4((i*FONTWIDTH),				0.0f,			0.0f, 1);
+		fontQuads[i * 4 + 1].position	= XMFLOAT4((i*FONTWIDTH) + FONTWIDTH,	0.0f,			0.0f, 1);
+		fontQuads[i * 4 + 2].position	= XMFLOAT4((i*FONTWIDTH),				-FONTHEIGHT,	0.0f, 1);
+		fontQuads[i * 4 + 3].position	= XMFLOAT4((i*FONTWIDTH) + FONTWIDTH,	-FONTHEIGHT,	0.0f, 1);
 
 		setFontQuad(text.at(i), &fontQuads[i*4]);
 	}

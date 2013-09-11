@@ -37,10 +37,11 @@ VertexOut VS_Main(VertexIn vin)
 
 float4 PS_Main(VertexOut pin) : SV_Target
 {
-	float4 color = uiTexture_.Sample( sampler_, pin.Tex );
+    float4 color = uiTexture_.Sample( sampler_, pin.Tex );
+    color *= pin.Color;
 
     //Cut the pixel if the alpha is too low
     clip( color.a < 0.1f ? -1 : 1 );
 
-	return color;
+    return color;
 }

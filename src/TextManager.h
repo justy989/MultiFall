@@ -9,6 +9,9 @@
 #include <xnamath.h>
 #include <string>
 
+#define FONTWIDTH	0.06
+#define FONTHEIGHT  0.068
+
 struct FontVertex
 {
 	XMFLOAT4 position;

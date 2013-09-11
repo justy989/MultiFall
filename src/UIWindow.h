@@ -5,6 +5,8 @@
 
 #include <assert.h>
 
+#define UIWINDOW_TITLE_BAR_HEIGHT 0.1f
+
 class UIWindow : public UIElement{
 public:
 

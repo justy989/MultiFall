@@ -657,19 +657,22 @@ void App::draw( )
 
     mUIDisplay.prepareUIRendering( mWindow.getDeviceContext() );
 
-    mTextManager.DrawString(mWindow.getDeviceContext(), FPSString, 0.0f, 0.0f);
-    mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, 0.0f, 0.1f);
+    mTextManager.DrawString(mWindow.getDeviceContext(), FPSString, -1.0f, -1.0f);
+    mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, -1.0f, -0.9f);
     
     //For testing drawing windows
     UIWindow window;
     UIWindow::Text text;
-    text.message = "Title";
-    window.setPosition( XMFLOAT2( 0.5f, 0.5f ) );
-    window.setDimension( XMFLOAT2( 0.25f, 0.25f ) );
+    text.message = "Window Title";
+    window.setPosition( XMFLOAT2( -0.75f, -0.75f ) );
+    window.setDimension( XMFLOAT2( 0.75f, 0.75f ) );
     window.setText( text );
-    //mUIDisplay.prepareWindow( mWindow.getDeviceContext(), window, mTextManager );
 
-    //mUIDisplay.drawUI( mWindow.getDeviceContext() );
+    mUIDisplay.buildWindowVB( window, mWindow.getAspectRatio() );
+
+    //Draw!
+    mUIDisplay.drawWindowText( mWindow.getDeviceContext(), window, mTextManager );
+    mUIDisplay.drawUI( mWindow.getDeviceContext() );
 
     mWindow.getSwapChain()->Present(0, 0);
 }
