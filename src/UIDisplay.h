@@ -7,6 +7,7 @@
 #include <DXGI.h>
 #include <D3D11.h>
 #include <D3DX11.h>
+#include <d3dx11effect.h>
 
 #define MAX_UI_QUADS 128
 
@@ -65,18 +66,13 @@ protected:
         Border_Corner_Bottom_Right = 48,
     };
 
-    ID3D11SamplerState* mSampler;
-    ID3D11BlendState* mBlender;
-
 	ID3D11InputLayout* mInputLayout;
-
-    ID3D11VertexShader* mVertexShader;
-    ID3D11PixelShader* mPixelShader;
 
     ID3D11Buffer* mVB;
     ID3D11Buffer* mIB;
 
-    ID3D11Buffer* mWorldCB;
+    ID3DX11Effect* mFX;
+	ID3DX11EffectTechnique* mTechnique;
 
     ID3D11ShaderResourceView* mTexture;
 

@@ -1,5 +1,27 @@
-Texture2D uiTexture_ : register( t0 );
-SamplerState sampler_ : register( s0 );
+//ui.fx: Render the UI in Multifall
+
+Texture2D uiTexture : register( t0 );
+
+SamplerState pointSampler
+{
+	Filter = MIN_MAG_MIP_POINT;
+	ComparisonFunc = NEVER;
+	AddressU = WRAP;
+	AddressV = WRAP;
+};
+
+BlendState blendState
+{
+	BlendEnable[0] = TRUE;
+	BlendOp[0] = ADD;
+	SrcBlend[0] = SRC_ALPHA;
+	DestBlend[0] = INV_SRC_ALPHA;
+	RenderTargetWriteMask[0] = 0x0F;
+	SrcBlendAlpha[0] = ONE;
+	DestBlendAlpha[0] = ONE;
+	BlendOpAlpha[0] = ADD;
+};
+
 
 cbuffer cbPerObject
 {
@@ -37,11 +59,25 @@ VertexOut VS_Main(VertexIn vin)
 
 float4 PS_Main(VertexOut pin) : SV_Target
 {
-    float4 color = uiTexture_.Sample( sampler_, pin.Tex );
+	//Sample the texture
+    float4 color = uiTexture.Sample( pointSampler, pin.Tex );
+	
+	//Multiply the sampled texture by the input color
     color *= pin.Color;
 
     //Cut the pixel if the alpha is too low
     clip( color.a < 0.1f ? -1 : 1 );
 
     return color;
+}
+
+technique11 RenderUI
+{
+	pass P0
+	{
+		SetBlendState( blendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF );
+		SetVertexShader( CompileShader( vs_5_0, VS_Main() ) );
+		SetGeometryShader( NULL );
+        SetPixelShader( CompileShader( ps_5_0, PS_Main() ) );
+	}
 }

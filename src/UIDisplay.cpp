@@ -7,10 +7,9 @@ UIDisplay::UIDisplay() :
     mVB(NULL),
     mIB(NULL),
     mTexture(NULL),
-    mPixelShader(NULL),
-    mVertexShader(NULL),
-    mSampler(NULL),
     mInputLayout(NULL),
+    mFX(NULL),
+    mTechnique(NULL),
     mVertsGenerated(0),
     mBorderDimension(0.01f)
 {
@@ -32,6 +31,14 @@ bool UIDisplay::init( ID3D11Device* device, LPCWSTR uiTexturePath, LPCWSTR uiSha
         LOG_ERRO << "Failed to create UI Texture out of: " << LOG_WC_TO_C(uiTexturePath) << LOG_ENDL;
         return false;
     }
+
+    if( !compileEffect( device, uiShaderPath, &mFX ) ){
+        LOG_ERRO << "Unable to compile effect for UI: " << LOG_WC_TO_C(uiShaderPath) << LOG_ENDL;
+        return false;
+    }
+
+    //Dont sweat the technique
+    mTechnique = mFX->GetTechniqueByName("RenderUI");
 
     ushort inds[ UI_INDEX_COUNT ];
     ushort v = 0;
@@ -65,52 +72,8 @@ bool UIDisplay::init( ID3D11Device* device, LPCWSTR uiTexturePath, LPCWSTR uiSha
         return false;
     }
 
-    //shader variables to be updated
-	D3D11_BUFFER_DESC constDesc;
-    ZeroMemory( &constDesc, sizeof( constDesc ) );
-    constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    constDesc.ByteWidth = sizeof( XMMATRIX );
-    constDesc.Usage = D3D11_USAGE_DEFAULT;
-    
-	if( FAILED( device->CreateBuffer( &constDesc, 0, &mWorldCB ) ) ){
-        LOG_ERRO << "Failed to create constant buffer for UI" << LOG_ENDL;
-        return false;
-    }
-
-    //Compile the shaders
-    ID3DBlob* vsBuffer = 0;
-
-	if( !CompileD3DShader( uiShaderPath, "VS_Main", "vs_5_0", &vsBuffer ) ){
-        LOG_ERRO << "Failed to compile: " << LOG_WC_TO_C(uiShaderPath) << " vertex shader" << LOG_ENDL;
-        return false;
-    }
-
-	device->CreateVertexShader( vsBuffer->GetBufferPointer( ),
-	vsBuffer->GetBufferSize( ), 0, &mVertexShader );	 
-
-	ID3DBlob* psBuffer = 0;
-
-	if( !CompileD3DShader( uiShaderPath, "PS_Main", "ps_5_0", &psBuffer ) ){
-        LOG_ERRO << "Failed to compile: " << LOG_WC_TO_C(uiShaderPath) << " pixel shader" << LOG_ENDL;
-        return false;
-    }
-
-	device->CreatePixelShader( psBuffer->GetBufferPointer( ),
-	psBuffer->GetBufferSize( ), 0, &mPixelShader );
-
-	psBuffer->Release( );
-
-    //Create the sampler
-    D3D11_SAMPLER_DESC samplerDesc;
-    ZeroMemory( &samplerDesc, sizeof( samplerDesc ) );
-    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT; //Point filtering!
-    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-    
-    device->CreateSamplerState( &samplerDesc, &mSampler );
+    D3DX11_PASS_DESC passDesc;
+    HRESULT hr = mTechnique->GetPassByIndex(0)->GetDesc( &passDesc );
 
     //Input Description
     D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
@@ -123,27 +86,10 @@ bool UIDisplay::init( ID3D11Device* device, LPCWSTR uiTexturePath, LPCWSTR uiSha
 	unsigned int totalLayoutElements = ARRAYSIZE( vertexDesc );
 
 	if( FAILED( device->CreateInputLayout(vertexDesc, totalLayoutElements, 
-								vsBuffer->GetBufferPointer(), vsBuffer->GetBufferSize(),
+								passDesc.pIAInputSignature, 
+		                        passDesc.IAInputSignatureSize,
 								&mInputLayout) ) ){
         LOG_ERRO << "Failed to create Input Layout for UI" << LOG_ENDL;
-        return false;
-    }
-
-    vsBuffer->Release();
-
-    D3D11_BLEND_DESC bdesc;
-	ZeroMemory(&bdesc, sizeof(D3D11_BLEND_DESC));
-	bdesc.RenderTarget[0].BlendEnable = true;
-	bdesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	bdesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-	bdesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-	bdesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	bdesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	bdesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-	bdesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-
-	if( FAILED( device->CreateBlendState(&bdesc, &mBlender) ) ){
-        LOG_ERRO << "Failed to create Blend State for UI" << LOG_ENDL;
         return false;
     }
 
@@ -155,9 +101,10 @@ void UIDisplay::clear()
     ReleaseCOM( mVB );
     ReleaseCOM( mIB );
     ReleaseCOM( mTexture );
-    ReleaseCOM( mPixelShader );
-    ReleaseCOM( mVertexShader );
-    ReleaseCOM( mSampler );
+    ReleaseCOM( mFX );
+    //ReleaseCOM( mPixelShader );
+    //ReleaseCOM( mVertexShader );
+    //ReleaseCOM( mSampler );
     ReleaseCOM( mInputLayout );
 
     LOG_INFO << "Released UI Buffers, textures, shaders, sampler, and input layout" << LOG_ENDL;
@@ -166,21 +113,21 @@ void UIDisplay::clear()
 void UIDisplay::prepareUIRendering( ID3D11DeviceContext* device )
 {
     //Setup input layout and topology
-    device->IASetInputLayout( mInputLayout );
-    device->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+    //device->IASetInputLayout( mInputLayout );
+    //device->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
     //Setup vertex and pixel shaders
-	device->VSSetShader( mVertexShader, 0, 0 );
-	device->PSSetShader( mPixelShader, 0, 0 );
+	//device->VSSetShader( mVertexShader, 0, 0 );
+	//device->PSSetShader( mPixelShader, 0, 0 );
 
     //Setup sampler
-	device->PSSetSamplers( 0, 1, &mSampler );
+	//device->PSSetSamplers( 0, 1, &mSampler );
 
     //Setup blend state
-    float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-    uint sampleMask = 0xFFFFFFFF;
+    //float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    //uint sampleMask = 0xFFFFFFFF;
 
-    device->OMSetBlendState( mBlender, blendFactor, sampleMask );
+    //device->OMSetBlendState( mBlender, blendFactor, sampleMask );
 }
 
 void UIDisplay::buildWindowVB( UIWindow& window, float aspectRatio )
@@ -516,22 +463,33 @@ void UIDisplay::drawUI( ID3D11DeviceContext* device )
     uint stride = sizeof(FontVertex);
     uint offset = 0;
 
+    device->IASetInputLayout( mInputLayout );
+    device->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
+
     //Set vertex and index buffers
     device->IASetVertexBuffers( 0, 1, &mVB, &stride, &offset );
     device->IASetIndexBuffer( mIB, DXGI_FORMAT_R16_UINT, offset );
 
-    //Setup Texture
-    device->PSSetShaderResources( 0, 1, &mTexture );
+    ID3DX11EffectShaderResourceVariable* mfxTex = mFX->GetVariableByName("uiTexture")->AsShaderResource(); 
+    mfxTex->SetResource(mTexture);
 
-    XMMATRIX world =  XMMatrixTranslation(0.0f, 0.0f, 0.0f);
-    XMMATRIX worldTrans = XMMatrixTranspose( world );
-    device->UpdateSubresource( mWorldCB, 0, 0, &world, 0, 0 );
-	device->VSSetConstantBuffers( 0, 1, &mWorldCB );
+    XMMATRIX world = XMMatrixIdentity();
+
+    ID3DX11EffectMatrixVariable* mfxWorld = mFX->GetVariableByName("gWorld")->AsMatrix();
+	mfxWorld->SetMatrix(reinterpret_cast<float*>(&world));
 
     int indices = ( mVertsGenerated / 4 ) * 6;
 
-    //Draw the verts we generated wooo
-    device->DrawIndexed( indices, 0, 0 );
+    D3DX11_TECHNIQUE_DESC techDesc;
+	mTechnique->GetDesc( &techDesc );
+
+	for(ushort p = 0; p < techDesc.Passes; ++p)
+	{
+        mTechnique->GetPassByIndex(p)->Apply(0, device);
+        
+        //Draw the verts we generated wooo
+        device->DrawIndexed( indices, 0, 0 );
+    }
 
     mVertsGenerated = 0;
 
