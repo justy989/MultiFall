@@ -37,8 +37,6 @@ void World::moveEntity( WorldEntity* entity, XMVECTOR moveVec, float dist )
 
 bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition, XMVECTOR* outWallVector)
 {
-    Level& room = mDungeon.getLevel(); //Reference to Room
-
     float px = entity->getPosition().x; //Player X
     float py = entity->getPosition().y; //Player Y
     float pz = entity->getPosition().z; //Player Z
@@ -68,10 +66,10 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     i = bX + 1;
     j = bZ + 1;
     
-    if( i >= 0 && i < room.getWidth() &&
-        j >= 0 && j < room.getDepth() ){
+    if( i >= 0 && i < mLevel.getWidth() &&
+        j >= 0 && j < mLevel.getDepth() ){
 
-        blockHeight = static_cast<float>(room.getBlockHeight(i, j)) * 0.3f;
+        blockHeight = static_cast<float>(mLevel.getBlockHeight(i, j)) * 0.3f;
 
         if( blockHeight > pf ){
             if( WorldEntity::circlePointIntersect( 
@@ -86,7 +84,7 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     if( px - entity->getSolidity().radius < 0.0f ){
         wallX = XMVectorSet( -1.0f, 0.0f, 0.0f, 1.0f );
         collided = true;
-    }else if( px + entity->getSolidity().radius > 0.3f * room.getWidth() ){
+    }else if( px + entity->getSolidity().radius > 0.3f * mLevel.getWidth() ){
         wallX = XMVectorSet( 1.0f, 0.0f, 0.0f, 1.0f );
         collided = true;
     }
@@ -94,7 +92,7 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     if( pz - entity->getSolidity().radius < 0.0f ){
         wallZ = XMVectorSet( 0.0f, 0.0f, -1.0f, 1.0f );
         collided = true;
-    }else if( pz + entity->getSolidity().radius > 0.3f * room.getDepth() ){
+    }else if( pz + entity->getSolidity().radius > 0.3f * mLevel.getDepth() ){
         wallZ = XMVectorSet( 0.0f, 0.0f, 1.0f, 1.0f );
         collided = true;
     }
@@ -103,15 +101,15 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     i = bX - 1;
     j = bZ;
 
-    if( i >= 0 && i < room.getWidth() &&
-        j >= 0 && j < room.getDepth() ){
+    if( i >= 0 && i < mLevel.getWidth() &&
+        j >= 0 && j < mLevel.getDepth() ){
 
-        blockHeight = static_cast<float>( room.getBlockHeight(i, j) ) * 0.3f;
+        blockHeight = static_cast<float>( mLevel.getBlockHeight(i, j) ) * 0.3f;
 
         if( blockHeight > pf ||
             ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            ( room.getBlockRamp(i,j) == Level::Ramp::Front ||
-               room.getBlockRamp(i,j) == Level::Ramp::Back ) ) ){
+            ( mLevel.getBlockRamp(i,j) == Level::Ramp::Front ||
+               mLevel.getBlockRamp(i,j) == Level::Ramp::Back ) ) ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
@@ -132,15 +130,15 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     i = bX + 1;
     j = bZ;
 
-    if( i >= 0 && i < room.getWidth() &&
-        j >= 0 && j < room.getDepth() ){
+    if( i >= 0 && i < mLevel.getWidth() &&
+        j >= 0 && j < mLevel.getDepth() ){
 
-        blockHeight = static_cast<float>(room.getBlockHeight(i, j)) * 0.3f;
+        blockHeight = static_cast<float>(mLevel.getBlockHeight(i, j)) * 0.3f;
 
         if( blockHeight > pf ||
             ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            ( room.getBlockRamp(i,j) == Level::Ramp::Front ||
-               room.getBlockRamp(i,j) == Level::Ramp::Back ) ) ){
+            ( mLevel.getBlockRamp(i,j) == Level::Ramp::Front ||
+               mLevel.getBlockRamp(i,j) == Level::Ramp::Back ) ) ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
@@ -161,15 +159,15 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     i = bX;
     j = bZ - 1;
 
-    if( i >= 0 && i < room.getWidth() &&
-        j >= 0 && j < room.getDepth() ){
+    if( i >= 0 && i < mLevel.getWidth() &&
+        j >= 0 && j < mLevel.getDepth() ){
 
-        blockHeight = static_cast<float>(room.getBlockHeight(i, j)) * 0.3f;
+        blockHeight = static_cast<float>(mLevel.getBlockHeight(i, j)) * 0.3f;
 
         if( blockHeight > pf ||
             ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            ( room.getBlockRamp(i,j) == Level::Ramp::Left ||
-               room.getBlockRamp(i,j) == Level::Ramp::Right ) )  ){
+            ( mLevel.getBlockRamp(i,j) == Level::Ramp::Left ||
+               mLevel.getBlockRamp(i,j) == Level::Ramp::Right ) )  ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
@@ -190,15 +188,15 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     i = bX;
     j = bZ + 1;
 
-    if( i >= 0 && i < room.getWidth() &&
-        j >= 0 && j < room.getDepth() ){
+    if( i >= 0 && i < mLevel.getWidth() &&
+        j >= 0 && j < mLevel.getDepth() ){
 
-        blockHeight = static_cast<float>(room.getBlockHeight(i, j)) * 0.3f;
+        blockHeight = static_cast<float>(mLevel.getBlockHeight(i, j)) * 0.3f;
 
         if( blockHeight > pf ||
             ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            ( room.getBlockRamp(i,j) == Level::Ramp::Left ||
-               room.getBlockRamp(i,j) == Level::Ramp::Right ) ) ){
+            ( mLevel.getBlockRamp(i,j) == Level::Ramp::Left ||
+               mLevel.getBlockRamp(i,j) == Level::Ramp::Right ) ) ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;

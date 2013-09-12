@@ -11,7 +11,6 @@ App::App()
     camKeyDown[2] = false;
     camKeyDown[3] = false;
 
-    wireframe = false;
     collisionMode = false;
 
     FPSString[0] = '\0';
@@ -50,8 +49,8 @@ void App::handleInput( RAWINPUT* input )
                 }
 
                 WorldGenerator worldGen;
-                worldGen.genLevel( mWorld.getDungeon().getLevel(), mLevelPreset );
-                mWorldDisplay.getDungeonDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getDungeon().getLevel() );
+                worldGen.genLevel( mWorld.getLevel(), mLevelPreset );
+                mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f);
             }
             break;
         case 'A':
@@ -65,15 +64,6 @@ void App::handleInput( RAWINPUT* input )
             break;
         case 'S':
             camKeyDown[3] = !keyUp;
-            break;
-        case 'P': //Toggle wireframe
-            {
-                if( keyUp ){
-                    break;
-                }
-
-                wireframe = !wireframe;
-            }
             break;
         case 'O':
             if( keyUp ){
@@ -207,36 +197,6 @@ bool App::init( )
 
 	mTextManager.init(mWindow.getDevice());
 
-    D3D11_RASTERIZER_DESC rasterDesc;
-
-    // Setup the raster description which will determine how and what polygons will be drawn.
-    rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_NONE;
-    rasterDesc.DepthBias = 0;
-    rasterDesc.DepthBiasClamp = 0.0f;
-    rasterDesc.DepthClipEnable = true;
-    rasterDesc.FillMode = D3D11_FILL_SOLID;
-    rasterDesc.FrontCounterClockwise = false;
-    rasterDesc.MultisampleEnable = false;
-    rasterDesc.ScissorEnable = false;
-    rasterDesc.SlopeScaledDepthBias = 0.0f;
-
-    mWindow.getDevice()->CreateRasterizerState(&rasterDesc, &mWireFrameRS);
-
-    // Setup the raster description which will determine how and what polygons will be drawn.
-    rasterDesc.AntialiasedLineEnable = false;
-    rasterDesc.CullMode = D3D11_CULL_BACK;
-    rasterDesc.DepthBias = 0;
-    rasterDesc.DepthBiasClamp = 0.0f;
-    rasterDesc.DepthClipEnable = true;
-    rasterDesc.FillMode = D3D11_FILL_SOLID;
-    rasterDesc.FrontCounterClockwise = false;
-    rasterDesc.MultisampleEnable = false;
-    rasterDesc.ScissorEnable = false;
-    rasterDesc.SlopeScaledDepthBias = 0.0f;
-
-    mWindow.getDevice()->CreateRasterizerState(&rasterDesc, &mFillRS);
-
     //TMP Stuff
     mLevelPreset.roomCount.min = 8;
     mLevelPreset.roomCount.max = 16;
@@ -254,8 +214,8 @@ bool App::init( )
     mLevelPreset.doorScrubChance.max = 1.0f;
 
     WorldGenerator worldGen;
-    worldGen.genLevel( mWorld.getDungeon().getLevel(), mLevelPreset );
-    mWorldDisplay.getDungeonDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getDungeon().getLevel() );	
+    worldGen.genLevel( mWorld.getLevel(), mLevelPreset );
+    mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f );	
 
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
     mEntity.getSolidity().radius = 0.15f;
@@ -276,6 +236,17 @@ bool App::init( )
     mUIWindow.setText( text );
 
     mUIWindow.setMinDimensions( XMFLOAT2( 0.5f, 0.5f ) );
+
+    D3D11_BUFFER_DESC constDesc;
+    ZeroMemory( &constDesc, sizeof( constDesc ) );
+    constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    constDesc.ByteWidth = sizeof( XMMATRIX ) * 2;
+    constDesc.Usage = D3D11_USAGE_DEFAULT;
+    
+    if( FAILED( mWindow.getDevice()->CreateBuffer( &constDesc, 0, &mPerObjectCB ) ) ){
+        LOG_ERRO << "Failed to create constant buffer" << LOG_ENDL;
+        return false;
+    }
 
     return true;
 }
@@ -518,33 +489,33 @@ void App::update( float dt )
         int bx = static_cast<int>( mEntity.getPosition().x / 0.3f);
         int bz = static_cast<int>( mEntity.getPosition().z / 0.3f);
 
-        CLAMP( bx, 0, mWorld.getDungeon().getLevel().getWidth() - 1 );
-        CLAMP( bz, 0, mWorld.getDungeon().getLevel().getDepth() - 1 );
+        CLAMP( bx, 0, mWorld.getLevel().getWidth() - 1 );
+        CLAMP( bz, 0, mWorld.getLevel().getDepth() - 1 );
 
-        if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Ramp::None ){
+        if( mWorld.getLevel().getBlockRamp(bx, bz) == Level::Ramp::None ){
             //Make sure we are on the floor, otherwise bring us down through gravity
-            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
+            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getLevel().getBlockHeight(bx, bz)) * 0.3f;
 
             if( distFromGround > 0.05f ){
                 moveVec -= XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
             }
-        }else if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Ramp::Front ){
-            float blockHeight = static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
+        }else if( mWorld.getLevel().getBlockRamp(bx, bz) == Level::Ramp::Front ){
+            float blockHeight = static_cast<float>(mWorld.getLevel().getBlockHeight(bx, bz)) * 0.3f;
             float rampUp = fmod(mEntity.getPosition().z, 0.3f);
             rampUp *= 1.25f;
             mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
-        }else if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Ramp::Back ){
-            float blockHeight = static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
+        }else if( mWorld.getLevel().getBlockRamp(bx, bz) == Level::Ramp::Back ){
+            float blockHeight = static_cast<float>(mWorld.getLevel().getBlockHeight(bx, bz)) * 0.3f;
             float rampUp = fmod(mEntity.getPosition().z, 0.3f);
             rampUp = (0.3f - rampUp) * 1.25f;
             mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
-        }else if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Ramp::Left ){
-            float blockHeight = static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
+        }else if( mWorld.getLevel().getBlockRamp(bx, bz) == Level::Ramp::Left ){
+            float blockHeight = static_cast<float>(mWorld.getLevel().getBlockHeight(bx, bz)) * 0.3f;
             float rampUp = fmod(mEntity.getPosition().x, 0.3f);
             rampUp *= 1.25f;
             mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
-        }else if( mWorld.getDungeon().getLevel().getBlockRamp(bx, bz) == Level::Ramp::Right ){
-            float blockHeight = static_cast<float>(mWorld.getDungeon().getLevel().getBlockHeight(bx, bz)) * 0.3f;
+        }else if( mWorld.getLevel().getBlockRamp(bx, bz) == Level::Ramp::Right ){
+            float blockHeight = static_cast<float>(mWorld.getLevel().getBlockHeight(bx, bz)) * 0.3f;
             float rampUp = fmod(mEntity.getPosition().x, 0.3f);
             rampUp = (0.3f - rampUp) * 1.25f;
             mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
@@ -595,11 +566,13 @@ void App::update( float dt )
 
 void App::draw( )
 {
+    //Clear Back Buffer, Depth Buffer and Stencil buffer
     mWindow.clearBDS();
 
 	//save the previous render target and depth stencil
 	ID3D11RenderTargetView* prevRTV;
 	ID3D11DepthStencilView* prevDSV;
+
 	mWindow.getDeviceContext()->OMGetRenderTargets(1, &prevRTV, &prevDSV);
 
 	//set gbuffer render targets
@@ -611,22 +584,24 @@ void App::draw( )
 
 	mWindow.getDeviceContext()->ClearRenderTargetView(mGBufferRTVs[0], clearColor);
 	mWindow.getDeviceContext()->ClearRenderTargetView(mGBufferRTVs[1], clearNormal);
-	mWindow.getDeviceContext()->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH|D3D11_CLEAR_STENCIL, 1.0f, 0);
+    mWindow.getDeviceContext()->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH|D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	// Set constants
     XMMATRIX view  = XMLoadFloat4x4(&mCamera.getView());
     XMMATRIX proj  = XMLoadFloat4x4(&mCamera.getProj());
 	XMMATRIX viewProj = view * proj;
-	XMMATRIX trans = XMMatrixTranspose(viewProj);
+    XMMATRIX invViewProj = XMMatrixInverse(&XMMatrixDeterminant(viewProj), viewProj);
+	XMMATRIX transVP = XMMatrixTranspose(viewProj);
+    XMMATRIX transIVP = XMMatrixTranspose(invViewProj);
 
-	ID3DX11EffectMatrixVariable* mfxViewProj = mFX->GetVariableByName("gWorldViewProj")->AsMatrix();
+    XMMATRIX identity = XMMatrixIdentity();
+
+    //Set the View Projection Matrix and it's inverse
+	ID3DX11EffectMatrixVariable* mfxViewProj = mFX->GetVariableByName("gViewProj")->AsMatrix();
 	mfxViewProj->SetMatrix(reinterpret_cast<float*>(&viewProj));
     
-    if( wireframe ){
-        mWindow.getDeviceContext()->RSSetState( mWireFrameRS );
-    }else{
-        mWindow.getDeviceContext()->RSSetState( mFillRS );
-    }
+    ID3DX11EffectMatrixVariable* mfxInvViewProj = mFX->GetVariableByName("gInvViewProj")->AsMatrix();
+    mfxInvViewProj->SetMatrix(reinterpret_cast<float*>(&invViewProj));
 
 	//Start geometry fill pass
 	D3DX11_TECHNIQUE_DESC techDesc;
@@ -635,9 +610,7 @@ void App::draw( )
 	for(ushort p = 0; p < techDesc.Passes; ++p)
 	{
 		mRenderGBufferTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
-
-		mWorldDisplay.draw( mWindow.getDeviceContext(), mWorld );
-
+        mWorldDisplay.draw( mWindow.getDeviceContext(), mFX, mWorld );
         mTorch.draw( mWindow.getDeviceContext() );
 	}
 
@@ -660,12 +633,11 @@ void App::draw( )
 	ID3D11BlendState* prevBS;
 	FLOAT prevfloat[4];
 	UINT prevMask = 0;
+
 	mWindow.getDeviceContext()->OMGetBlendState(&prevBS, prevfloat, &prevMask);
-
 	mWindow.getDeviceContext()->OMSetBlendState(mBlendState, prevfloat, prevMask);
-
 	mWindow.getDeviceContext()->OMSetDepthStencilState(mDSState, 0);
-
+    
 	//start lighting pass
 	mDirLightTech->GetDesc( &techDesc );
     for(ushort p = 0; p < techDesc.Passes; ++p)
@@ -676,19 +648,19 @@ void App::draw( )
 		drawFSQuad();
 	}
 
+    
 	mPointLightTech->GetDesc( &techDesc );
     for(ushort p = 0; p < techDesc.Passes; ++p)
 	{
 		mPointLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
-
-		mWorldDisplay.DrawPointLights(mWindow.getDeviceContext(), &viewProj, &mCamera.getPosition());		
+		mWorldDisplay.drawPointLights(mWindow.getDeviceContext(), mFX, mCamera.getPosition(), mWorld);		
 	}
 
 	mWindow.getDeviceContext()->OMSetDepthStencilState(prevDSS, 0);
 
 	mWindow.getDeviceContext()->OMSetBlendState(prevBS, prevfloat, prevMask);
-
-    mWindow.getDeviceContext()->RSSetState( mFillRS );
+    
+    mWindow.getDeviceContext()->RSSetState( NULL );
 
     //mUIDisplay.prepareUIRendering( mWindow.getDeviceContext() );
 
@@ -697,11 +669,11 @@ void App::draw( )
     //mTextManager.DrawString(mWindow.getDeviceContext(), MousePosString, -1.0f, -0.9f);
     
     //For testing drawing windows
-    mUIDisplay.buildWindowVB( mUIWindow, mWindow.getAspectRatio() );
+    //mUIDisplay.buildWindowVB( mUIWindow, mWindow.getAspectRatio() );
 
     //Draw!
     //mUIDisplay.drawWindowText( mWindow.getDeviceContext(), mUIWindow, mTextManager );
-    mUIDisplay.drawUI( mWindow.getDeviceContext() );
+    //mUIDisplay.drawUI( mWindow.getDeviceContext() );
 
     mWindow.getSwapChain()->Present(0, 0);
 }
@@ -725,9 +697,6 @@ void App::clear( )
     mUIDisplay.clear();
 
     mTorch.clear();
-
-    ReleaseCOM( mFillRS );
-    ReleaseCOM( mWireFrameRS );
 
     mWindow.clear();
 }

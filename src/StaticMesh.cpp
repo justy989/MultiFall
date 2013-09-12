@@ -123,8 +123,8 @@ void StaticMesh::draw( ID3D11DeviceContext* device )
     uint stride = sizeof DungeonVertex;
     uint offset = 0;
 
+    device->PSSetShaderResources(0, 1, &mTexture );
     device->IASetVertexBuffers( 0, 1, &mVB, &stride, &offset );
-    device->PSSetShaderResources( 0, 1, &mTexture );
     device->Draw( mVertexCount, 0 );
 }
 
@@ -132,4 +132,6 @@ void StaticMesh::clear()
 {
     ReleaseCOM( mVB );
     ReleaseCOM( mTexture );
+
+    mVertexCount = 0;
 }

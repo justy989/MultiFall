@@ -4,6 +4,7 @@
 #include <DXGI.h>
 #include <D3D11.h>
 #include <D3DX11.h>
+#include <d3dx11effect.h>
 
 #include "Utils.h"
 

@@ -2,6 +2,9 @@
 #include "Log.h"
 
 LevelDisplay::LevelDisplay() :
+    mInputLayout(NULL),
+    mTextureSampler(NULL),
+    mWorldCB(NULL),
     mFloorVB(NULL),
     mFloorIB(NULL),
     mWallsVB(NULL),
@@ -23,11 +26,61 @@ LevelDisplay::~LevelDisplay()
 	clear();
 }
 
+bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique )
+{
+    clear();
+
+    // Create the vertex input layout.
+	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0}
+	};
+
+	//Create the input layout
+    D3DX11_PASS_DESC passDesc;
+    technique->GetPassByIndex(0)->GetDesc( &passDesc );
+
+    if(FAILED(device->CreateInputLayout(vertexDesc, 3, passDesc.pIAInputSignature, 
+		passDesc.IAInputSignatureSize, &mInputLayout))){
+            LOG_ERRO << "Failed to create Vertex Input Layout for Level" << LOG_ENDL;
+            return false;
+    }
+
+    //Describe and create the Texture Sampler
+	D3D11_SAMPLER_DESC samplerDesc;
+    ZeroMemory( &samplerDesc, sizeof( samplerDesc ) );
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+    
+    if( FAILED(device->CreateSamplerState( &samplerDesc, &mTextureSampler ) ) ){
+        LOG_ERRO << "Failed to create Texture Sampler for Level" << LOG_ENDL;
+        return false;
+    }
+
+    D3D11_BUFFER_DESC constDesc;
+    ZeroMemory( &constDesc, sizeof( constDesc ) );
+    constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    constDesc.ByteWidth = sizeof( XMMATRIX );
+    constDesc.Usage = D3D11_USAGE_DEFAULT;
+    
+	if( FAILED( device->CreateBuffer( &constDesc, 0, &mWorldCB ) ) ){
+        LOG_ERRO << "Failed to create constant buffer for Level" << LOG_ENDL;
+        return false;
+    }
+
+    LOG_INFO << "Created Input Description and Texture Sampler for Level" << LOG_ENDL;
+    return true;
+}
+
 bool LevelDisplay::setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, float floorClip, LPCWSTR wallTexturePath, float wallClip )
 {
     HRESULT hr;
-
-	mLightManager.init(device);
 
     //Release the current textures first
     ReleaseCOM( mFloorTexture );
@@ -60,6 +113,9 @@ bool LevelDisplay::setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, 
 
 void LevelDisplay::clear()
 {
+    ReleaseCOM( mInputLayout );
+    ReleaseCOM( mTextureSampler );
+    ReleaseCOM( mWorldCB );
     ReleaseCOM( mFloorVB );
     ReleaseCOM( mFloorIB );
     ReleaseCOM( mWallsVB );
@@ -87,44 +143,44 @@ bool LevelDisplay::createMeshFromLevel( ID3D11Device* device, Level& level, floa
     return true;
 }
 
-void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11EffectTechnique* tech, ID3D11SamplerState* textureSampler )
+void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx )
 {
     UINT stride = sizeof(DungeonVertex);
     UINT offset = 0;
 
-    /*D3DX11_TECHNIQUE_DESC techDesc;
-    tech->GetDesc( &techDesc );
+    //Update the world matrix
+    XMMATRIX world = XMMatrixIdentity();
+    ID3DX11EffectMatrixVariable* mFXWorld = fx->GetVariableByName("gWorld")->AsMatrix();
+	mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
 
-    for(ushort p = 0; p < techDesc.Passes; ++p){
-        tech->GetPassByIndex(p)->Apply(0, device);*/
+    //Set input layout and topology
+    device->IASetInputLayout( mInputLayout );
+    device->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
-        //Draw the floor and ramps
-        device->IASetIndexBuffer( mFloorIB, DXGI_FORMAT_R16_UINT, 0 );
-        device->IASetVertexBuffers(0, 1, &mFloorVB, &stride, &offset);
-        
-        device->PSSetSamplers(0, 1, &textureSampler );
-		device->PSSetShaderResources( 0, 1, &mFloorTexture );
+    //Update the world matrix
+    //device->UpdateSubresource( mWorldCB, 0, 0, &world, 0, 0 ); 
+    //device->VSSetConstantBuffers( 1, 1, &mWorldCB );
 
-        device->DrawIndexed(6 * mBlockCount, 0, 0);
+    //Set the floor texture
+    device->PSSetShaderResources(0, 1, &mFloorTexture );
+    device->PSSetSamplers( 0, 1, &mTextureSampler );
 
-        //Draw ramp walls separately
-		device->PSSetShaderResources( 0, 1, &mWallTexture );
+    //Draw the floor and ramps
+    device->IASetIndexBuffer( mFloorIB, DXGI_FORMAT_R16_UINT, 0 );
+    device->IASetVertexBuffers(0, 1, &mFloorVB, &stride, &offset);
+    device->DrawIndexed(6 * mBlockCount, 0, 0);
 
-        device->IASetVertexBuffers(0, 1, &mRampWallsVB, &stride, &offset);
-        device->Draw(mRampCount * 6, 0);
+    //Set the wall texture
+    device->PSSetShaderResources(0, 1, &mWallTexture );
 
-        //Draw the walls
-        device->IASetIndexBuffer( mWallsIB, DXGI_FORMAT_R16_UINT, 0 );
-        device->IASetVertexBuffers(0, 1, &mWallsVB, &stride, &offset);
+    //Draw ramp walls separately
+    device->IASetVertexBuffers(0, 1, &mRampWallsVB, &stride, &offset);
+    device->Draw(6 * mRampCount, 0);
 
-
-        device->DrawIndexed(6 *mWallCount, 0, 0);
-    //}
-}
-
-void LevelDisplay::DrawPointLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos)
-{
-	mLightManager.DrawPointLights(device, ViewProj, cameraPos);
+    //Draw the walls
+    device->IASetIndexBuffer( mWallsIB, DXGI_FORMAT_R16_UINT, 0 );
+    device->IASetVertexBuffers(0, 1, &mWallsVB, &stride, &offset);
+    device->DrawIndexed(6 * mWallCount, 0, 0);
 }
 
 bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  )
@@ -305,7 +361,9 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
 
 					if(i % 4 == 0 && j % 4 == 0)
 					{
-						mLightManager.addPointLight(verts[ v ].position, 2.0f);
+                        PointLight pl;
+                        pl.set( verts[v].position, pl.getRadius(), pl.getIntensity(), pl.getColor() );
+                        level.addLight( pl );
 					}
 					
                     v++;

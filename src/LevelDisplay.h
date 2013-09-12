@@ -7,14 +7,18 @@
 #include <d3dx11effect.h>
 #include <xnamath.h>
 
-#include "dungeon.h"
-#include "LightManager.h"
+#include "Level.h"
 
 class LevelDisplay{
 public:
 
+    //Constr/Destr
+
     LevelDisplay();
     ~LevelDisplay();
+
+    //Initialize input layout and set the wall and floor textures
+    bool init( ID3D11Device* device, ID3DX11EffectTechnique* technique );
 
     //Set the current textures used by the Level display
     bool setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, float floorClip, LPCWSTR wallTexturePath, float wallClip );
@@ -26,9 +30,7 @@ public:
     void clear();
 
     //Draw the Level Mesh that we generated
-    void draw( ID3D11DeviceContext* device, ID3DX11EffectTechnique* tech, ID3D11SamplerState* textureSampler );
-
-	void DrawPointLights(ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos);
+    void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx );
 
 protected:
 
@@ -37,9 +39,15 @@ protected:
 
 protected:
 
-	//lightmanager for the level
-	LightManager mLightManager;
+    //Input layout for the DungeonVertex
+    ID3D11InputLayout* mInputLayout;
+
+    //Texture sampler
+	ID3D11SamplerState* mTextureSampler;
     
+    //World Matrix Constant Buffer
+    ID3D11Buffer* mWorldCB;	
+
     //The floor that the player walks on, at every height
     ID3D11Buffer* mFloorVB;
     ID3D11Buffer* mFloorIB;

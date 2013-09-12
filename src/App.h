@@ -72,16 +72,12 @@ protected:
 
     //Tmp
     bool camKeyDown[4];
-    bool wireframe;
 
     bool collisionMode;
 
     char FPSString[128];
     char CameraPosString[128];
     char MousePosString[128];
-
-    ID3D11RasterizerState* mFillRS;
-    ID3D11RasterizerState* mWireFrameRS;
 
     WorldEntity mEntity;
 
@@ -106,6 +102,7 @@ protected:
 	ID3D11InputLayout* mInputLayout;
 	ID3D11Buffer* mFSQuadVB;
     ID3D11Buffer* mFSQuadIB;
+    ID3D11Buffer* mPerObjectCB;
 
 	XMFLOAT2 mHalfPixel;
 

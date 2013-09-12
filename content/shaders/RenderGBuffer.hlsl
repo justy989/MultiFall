@@ -1,20 +1,27 @@
-Texture2D stoneFloorTex_ : register( t0 );
+Texture2D texture_ : register( t0 );
 Texture2D colorBuffer : register( t1 );
 Texture2D normalBuffer : register( t2 );
 Texture2D depthBuffer : register ( t3 );
 
 SamplerState colorSampler_ : register( s0 );
 
-cbuffer cbPerObject : register (b0)
+cbuffer cbPerFrame : register( cb0 )
 {
-	float4x4 gWorldViewProj;	
+	float4x4 gViewProj;
+	float4x4 gInvViewProj;
+	float4x4 gWorld;
+	//float4 gCameraPos;
 };
 
-cbuffer cbPerLightPS : register(b1)
+cbuffer cbPerObject : register( cb1 )
 {
-	float4x4 gInvViewProj; //64 bytes
-	float4 lightPosition;	//16 bytes
-	float4 lightRadIntensity; //16 bytes
+	float4x4 omfg;
+};
+
+cbuffer cbPerLightPS : register( cb2 )
+{
+	float4 gLightPosition;	//16 bytes
+	float4 gLightRadIntensity; //16 bytes
 };
 
 struct VertexIn
@@ -46,28 +53,43 @@ struct GBufferOut
 VertexOut vs_main(VertexIn input)
 {
     VertexOut output;
-    
-    output.pos = mul(float4(input.pos, 1.0f), gWorldViewProj);
-    output.tex = input.tex;                            //pass the texture coordinates further
-    output.normal = input.normal;
 	
+    float4x4 worldViewProj = gWorld * gViewProj;
+    
+    output.pos = mul(float4(input.pos, 1.0f), worldViewProj);
+    output.tex = input.tex; //pass the texture coordinates further
+    output.normal = input.normal;
+
     return output;
 }
 
 PointVertexOut vs_point(VertexIn input)
 {
     PointVertexOut output;
+	
+    float4x4 worldViewProj = gWorld * gViewProj;
     
-    output.pos = mul(float4(input.pos, 1.0f), gWorldViewProj);
+    output.pos = mul(float4(input.pos, 1.0f), gViewProj);
     output.screenPos = output.pos;
 	
     return output;
 }
 
+/*
+float4 ps_main(VertexOut pin) : SV_Target
+{
+	//Sample the texture
+    float4 color = texture_.Sample( colorSampler_, pin.tex );
+
+    return color;
+}*/
+
+
 GBufferOut ps_main(VertexOut input)
 {
     GBufferOut output;
-    output.color = stoneFloorTex_.Sample( colorSampler_, input.tex ); //output Color
+	
+    output.color = texture_.Sample( colorSampler_, input.tex ); //output Color
     output.normal.rgb = 0.5f * (normalize(input.normal) + 1.0f);      //transform normal domain
 	output.normal.a = 1.0f;
 	
@@ -132,20 +154,20 @@ float4 ps_point(PointVertexOut pin) : SV_TARGET0
     position /= position.w;
 	
 	//surface-to-light vector
-    float3 lightVector = lightPosition - position;
+    float3 lightVector = gLightPosition - position;
 	
     //compute attenuation based on distance - linear attenuation
-    float attenuation = saturate(1.0f - length(lightVector)/lightRadIntensity.x); 
+    float attenuation = saturate( 1.0f - length(lightVector) / gLightRadIntensity.x ); 
 	
     //normalize light vector
     lightVector = normalize(lightVector); 
 	
     //compute diffuse light
-    float NdL = saturate(dot(normal,lightVector));
+    float NdL = saturate( dot( normal,lightVector ) );
 	float3 color = colorBuffer.Sample( colorSampler_, texCoord );
-    float3 diffuseLight = color;//NdL * color;
+    float3 diffuseLight = color;
 	
-	float4 colorfinal = float4(attenuation * lightRadIntensity.y * diffuseLight, 1.0f);
+	float4 colorfinal = float4(attenuation * gLightRadIntensity.y * diffuseLight, 1.0f);
 	
     return colorfinal;
 }

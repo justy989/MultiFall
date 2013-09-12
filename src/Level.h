@@ -2,6 +2,9 @@
 #define LEVEL_H
 
 #include "Utils.h"
+#include "Light.h"
+
+#define LEVEL_MAX_LIGHTS 128
 
 //Holds a level of a Dungeon
 class Level{
@@ -30,6 +33,9 @@ public:
     //initialize a room to certain dimensions
     bool init( short width, short depth, byte height );
 
+    //Add a light if there is room for it!
+    bool addLight( PointLight& light ); 
+
     //clear the room's allocated memory
     void clear();
 
@@ -52,17 +58,30 @@ public:
     inline short getDepth();
     inline byte getHeight();
 
+    inline ushort getNumLights();
+    inline PointLight& getLight( ushort index );
+
 protected:
 
+    //Environment Layout
     short mWidth;
     short mDepth;
     byte mHeight;
 
     Block** mBlocks;
+
+    //Lights
+    ushort mNumLights;
+    PointLight mLights[ LEVEL_MAX_LIGHTS ];
+
+    //Furniture
 };
 
 short Level::getWidth(){return mWidth;}
 short Level::getDepth(){return mDepth;}
 byte Level::getHeight(){return mHeight;}
+
+inline ushort Level::getNumLights(){return mNumLights;}
+inline PointLight& Level::getLight( ushort index ){return mLights[ index ];}
 
 #endif

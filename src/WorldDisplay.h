@@ -1,7 +1,8 @@
 #ifndef WORLD_DISPLAY_H
 #define WORLD_DISPLAY_H
 
-#include "DungeonDisplay.h"
+#include "LevelDisplay.h"
+#include "LightDisplay.h"
 
 class World;
 
@@ -15,31 +16,33 @@ public:
 	bool init( ID3D11Device* device, ID3DX11EffectTechnique* tech );
 
     //Draw the world in it's current state
-    void draw( ID3D11DeviceContext* device, World& world );
+    void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world );
 
-	void DrawPointLights( ID3D11DeviceContext* device, XMMATRIX* ViewProj, XMFLOAT4* cameraPos);
+    //Draw the point lights in a scene as sphere for deferred rendering
+	void drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* fx,
+                          XMFLOAT4& cameraPos, World& world );
 
     //Clear the different displays
     void clear();
 
     //Accessors
-
-    inline ID3DX11EffectTechnique* getTechnique();
-    inline ID3DX11Effect* getFX();
-
-    inline DungeonDisplay& getDungeonDisplay();
+    inline LevelDisplay& getLevelDisplay();
 
 protected:
 
-    ID3DX11Effect* mFX;
-	ID3DX11EffectTechnique* mTech;
+    //LevelDisplay: Draws Level, and Furniture
+    LevelDisplay mLevelDisplay;
 
-    DungeonDisplay mDungeonDisplay;
+    //LightDisplay: Draw Lights from the world
+    LightDisplay mLightDisplay;
+
+    //PopulationDisplay: Draws Characters
+
+    //ProjectileDisplay: Draws Projectiles
+
+    //Interactive Object Display: Draws Interactive Objects
 };
 
-inline ID3DX11EffectTechnique* WorldDisplay::getTechnique(){return mTech;}
-inline ID3DX11Effect* WorldDisplay::getFX(){return mFX;}
-
-inline DungeonDisplay& WorldDisplay::getDungeonDisplay(){return mDungeonDisplay;}
+inline LevelDisplay& WorldDisplay::getLevelDisplay(){return mLevelDisplay;}
 
 #endif

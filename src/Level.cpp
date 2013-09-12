@@ -6,7 +6,8 @@ Level::Level() :
     mWidth(0),
     mHeight(0),
     mDepth(0),
-    mBlocks(0)
+    mBlocks(0),
+    mNumLights(0)
 {
 
 }
@@ -39,6 +40,18 @@ bool Level::init( short width, short depth, byte height )
     return true;
 }
 
+bool Level::addLight( PointLight& light )
+{
+    if( mNumLights >= LEVEL_MAX_LIGHTS ){
+        return false;
+    }
+
+    mLights[ mNumLights ] = light;
+    mNumLights++;
+
+    return true;
+}
+
 void Level::clear()
 {
     if( mBlocks ){
@@ -50,6 +63,8 @@ void Level::clear()
         delete[] mBlocks;
         mBlocks = 0;
     }
+
+    mNumLights = 0;
 }
 
 void Level::setBlock( short i, short j, byte height, Ramp ramp )

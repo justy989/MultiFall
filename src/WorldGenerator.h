@@ -2,7 +2,7 @@
 #define WORLD_GENERATOR_H
 
 #include "Random.h"
-#include "Dungeon.h"
+#include "Level.h"
 
 class WorldGenerator{
 public:
