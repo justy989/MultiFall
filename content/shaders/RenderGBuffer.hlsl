@@ -5,20 +5,19 @@ Texture2D depthBuffer : register ( t3 );
 
 SamplerState colorSampler_ : register( s0 );
 
-cbuffer cbPerFrame : register( cb0 )
+cbuffer cbPerFrame : register( b0 )
 {
 	float4x4 gViewProj;
 	float4x4 gInvViewProj;
-	float4x4 gWorld;
 	//float4 gCameraPos;
 };
 
-cbuffer cbPerObject : register( cb1 )
+cbuffer cbPerObject : register( b1 )
 {
-	float4x4 omfg;
+	float4x4 gWorld;
 };
 
-cbuffer cbPerLightPS : register( cb2 )
+cbuffer cbPerLightPS : register( b2 )
 {
 	float4 gLightPosition;	//16 bytes
 	float4 gLightRadIntensity; //16 bytes
@@ -54,7 +53,7 @@ VertexOut vs_main(VertexIn input)
 {
     VertexOut output;
 	
-    float4x4 worldViewProj = gWorld * gViewProj;
+    float4x4 worldViewProj = mul(gWorld, gViewProj);
     
     output.pos = mul(float4(input.pos, 1.0f), worldViewProj);
     output.tex = input.tex; //pass the texture coordinates further
@@ -67,9 +66,9 @@ PointVertexOut vs_point(VertexIn input)
 {
     PointVertexOut output;
 	
-    float4x4 worldViewProj = gWorld * gViewProj;
+    float4x4 worldViewProj = mul(gWorld, gViewProj);
     
-    output.pos = mul(float4(input.pos, 1.0f), gViewProj);
+    output.pos = mul(float4(input.pos, 1.0f), worldViewProj);
     output.screenPos = output.pos;
 	
     return output;
