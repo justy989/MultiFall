@@ -3,7 +3,6 @@
 
 LevelDisplay::LevelDisplay() :
     mInputLayout(NULL),
-    mTextureSampler(NULL),
     mWorldCB(NULL),
     mFloorVB(NULL),
     mFloorIB(NULL),
@@ -46,22 +45,7 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
 		passDesc.IAInputSignatureSize, &mInputLayout))){
             LOG_ERRO << "Failed to create Vertex Input Layout for Level" << LOG_ENDL;
             return false;
-    }
-
-    //Describe and create the Texture Sampler
-	D3D11_SAMPLER_DESC samplerDesc;
-    ZeroMemory( &samplerDesc, sizeof( samplerDesc ) );
-    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-    samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-    
-    if( FAILED(device->CreateSamplerState( &samplerDesc, &mTextureSampler ) ) ){
-        LOG_ERRO << "Failed to create Texture Sampler for Level" << LOG_ENDL;
-        return false;
-    }
+    }    
 
     D3D11_BUFFER_DESC constDesc;
     ZeroMemory( &constDesc, sizeof( constDesc ) );
@@ -114,7 +98,6 @@ bool LevelDisplay::setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, 
 void LevelDisplay::clear()
 {
     ReleaseCOM( mInputLayout );
-    ReleaseCOM( mTextureSampler );
     ReleaseCOM( mWorldCB );
     ReleaseCOM( mFloorVB );
     ReleaseCOM( mFloorIB );
@@ -163,7 +146,6 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx )
 
     //Set the floor texture
     device->PSSetShaderResources(0, 1, &mFloorTexture );
-    device->PSSetSamplers( 0, 1, &mTextureSampler );
 
     //Draw the floor and ramps
     device->IASetIndexBuffer( mFloorIB, DXGI_FORMAT_R16_UINT, 0 );
@@ -359,7 +341,7 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                     verts[ v ].position.z = static_cast<float>(j) * blockDimension;
 					verts[ v ].tex = XMFLOAT2(1, 0);
 
-					if(i % 4 == 0 && j % 4 == 0)
+					if(i % 3 == 0 && j % 5 == 0)
 					{
                         PointLight pl;
                         pl.set( verts[v].position, pl.getRadius(), pl.getIntensity(), pl.getColor() );

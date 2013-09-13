@@ -171,29 +171,7 @@ bool App::init( )
 {
 	if( !mWorldDisplay.init( mWindow.getDevice(), mRenderGBufferTech ) ){
         return false;
-    }
-
-	D3D11_DEPTH_STENCIL_DESC dsDesc;
-	ZeroMemory(&dsDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-	// Depth test parameters
-	dsDesc.DepthEnable = true;
-	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	dsDesc.DepthFunc = D3D11_COMPARISON_ALWAYS;
-
-	mWindow.getDevice()->CreateDepthStencilState(&dsDesc, &mDSState);
-
-	D3D11_BLEND_DESC bdesc;
-	ZeroMemory(&bdesc, sizeof(D3D11_BLEND_DESC));
-	bdesc.RenderTarget[0].BlendEnable = true;
-	bdesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	bdesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-	bdesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-	bdesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-	bdesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	bdesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-	bdesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-
-	mWindow.getDevice()->CreateBlendState(&bdesc, &mBlendState);
+    }	
 
 	mTextManager.init(mWindow.getDevice());
 
@@ -635,8 +613,6 @@ void App::draw( )
 	UINT prevMask = 0;
 
 	mWindow.getDeviceContext()->OMGetBlendState(&prevBS, prevfloat, &prevMask);
-	mWindow.getDeviceContext()->OMSetBlendState(mBlendState, prevfloat, prevMask);
-	mWindow.getDeviceContext()->OMSetDepthStencilState(mDSState, 0);
     
 	//start lighting pass
 	mDirLightTech->GetDesc( &techDesc );

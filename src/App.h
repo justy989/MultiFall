@@ -88,11 +88,7 @@ protected:
 
     bool mLeftClick;
 
-protected:
-
-	// Create depth stencil state
-	ID3D11DepthStencilState * mDSState;
-	ID3D11BlendState* mBlendState;
+protected:	
 
 	ID3DX11Effect* mFX;
 	ID3DX11EffectTechnique* mRenderGBufferTech;

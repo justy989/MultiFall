@@ -41,9 +41,6 @@ protected:
 
     //Input layout for the DungeonVertex
     ID3D11InputLayout* mInputLayout;
-
-    //Texture sampler
-	ID3D11SamplerState* mTextureSampler;
     
     //World Matrix Constant Buffer
     ID3D11Buffer* mWorldCB;	
