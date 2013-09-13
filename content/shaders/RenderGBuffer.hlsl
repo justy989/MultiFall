@@ -3,7 +3,32 @@ Texture2D colorBuffer : register( t1 );
 Texture2D normalBuffer : register( t2 );
 Texture2D depthBuffer : register ( t3 );
 
-SamplerState colorSampler_ : register( s0 );
+DepthStencilState depthState
+{
+	DepthEnable = TRUE;
+	DepthWriteMask = 1;
+	DepthFunc = ALWAYS;
+};
+
+SamplerState colorSampler_
+{
+	Filter = MIN_MAG_MIP_POINT;
+	ComparisonFunc = NEVER;
+	AddressU = WRAP;
+	AddressV = WRAP;
+};
+
+BlendState blendState
+{
+	BlendEnable[0] = TRUE;
+	BlendOp[0] = ADD;
+	SrcBlend[0] = ONE;
+	DestBlend[0] = ONE;
+	RenderTargetWriteMask[0] = 0x0F;
+	SrcBlendAlpha[0] = ONE;
+	DestBlendAlpha[0] = ONE;
+	BlendOpAlpha[0] = ADD;
+};
 
 cbuffer cbPerFrame : register( b0 )
 {
@@ -185,6 +210,8 @@ technique11 DirLight
 {
     pass P0
     {
+		SetDepthStencilState(depthState, 0);
+		SetBlendState(blendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF );
         SetVertexShader( CompileShader( vs_5_0, vs_fsquad() ) );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_5_0, ps_directional() ) );
@@ -195,6 +222,8 @@ technique11 PointLight
 {
     pass P0
     {
+		SetDepthStencilState(depthState, 0);
+		SetBlendState(blendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF );
         SetVertexShader( CompileShader( vs_5_0, vs_point() ) );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_5_0, ps_point() ) );
