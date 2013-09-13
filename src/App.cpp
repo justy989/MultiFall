@@ -215,6 +215,11 @@ bool App::init( )
 
     mUIWindow.setMinDimensions( XMFLOAT2( 0.5f, 0.5f ) );
 
+    //mUIWindow.init( 3 );
+    //mUIWindow.initTab( 0, "First", 2 );
+    //mUIWindow.initTab( 1, "Second", 2 );
+    //mUIWindow.initTab( 2, "Third", 2 );
+
     D3D11_BUFFER_DESC constDesc;
     ZeroMemory( &constDesc, sizeof( constDesc ) );
     constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -669,6 +674,8 @@ void App::clear( )
 {
     mWorldDisplay.clear();
     mTextManager.clear();
+
+    mUIWindow.clear();
 
     mUIDisplay.clear();
 

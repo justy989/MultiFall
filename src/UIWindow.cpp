@@ -3,6 +3,16 @@
 float mTitleBarHeight = 0.1f;
 float mTabBarHeight = 0.1f;
 
+UIWindow::Tab::Tab() :
+    elements(NULL),
+    elementCount(0),
+    name(NULL),
+    width(0.0f),
+    size(0)
+{
+
+}
+
 UIWindow::UIWindow() :
     mTabs(NULL),
     mTabCount(0),

@@ -16,6 +16,12 @@
 
 #define UI_Z 0.0505f
 
+#define UI_BAR_TOP 0.0f
+#define UI_BAR_BOTTOM 0.0625f
+
+#define UI_CORNER_TOP 0.0626f
+#define UI_CORNER_BOTTOM 0.125f
+
 class UIDisplay{
 public:
 
@@ -51,8 +57,19 @@ protected:
     //Setup vertex buffers for the border of an element
     void buildBorderVB( UIElement* elem, float aspectRatio );
 
+    //Setup verticies for the current tab, show others as well
+    void buildTabVB( UIWindow& window, float aspectRatio );
+
     //Setup the background for the border of an element
     void buildBGVB(  UIElement* elem );
+
+    //Builds the various elements
+
+    void buildTopBarVB( float start, float end, float top, float aspectRatio );
+    void buildBottomBarVB( float start, float end, float top, float aspectRatio );
+    void buildLeftBarVB( float start, float end, float left, float aspectRatio );
+    void buildRightBarVB( float start, float end, float left, float aspectRatio );
+    void buildCornerVB( float x, float y, float aspectRatio );
 
 protected:
 

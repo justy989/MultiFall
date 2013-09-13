@@ -12,6 +12,9 @@ public:
 
     //Tab
     struct Tab{
+
+        Tab();
+
         UIElement** elements;
         int elementCount;
         int size;
@@ -60,6 +63,7 @@ public:
     inline Tab& getTab(uint tabIndex);
 
     inline int getCurrentTab();
+    inline int getTabCount();
 
     virtual ElemType getElemType(){return Window;}
     
@@ -102,6 +106,11 @@ inline int UIWindow::getCurrentTab()
 inline void UIWindow::setMinDimensions( XMFLOAT2 dim )
 {
     mMinDimensions = dim;
+}
+
+inline int UIWindow::getTabCount()
+{
+    return mTabCount;
 }
 
 #endif
