@@ -141,7 +141,9 @@ float4 ps_directional(VertexOut pin) : SV_TARGET0
 	//float3 lightDir;
 
 	float4 color = colorBuffer.Sample( colorSampler_, pin.tex );
-	float4 ambient = color * 0.12f;
+	float depth = depthBuffer.Sample( colorSampler_, pin.tex ).r;
+	float4 ambient = (saturate((1.0f - depth) * 20.0f)) * color * 0.12f;
+	
 	
 	//lightDir = float3(0.1f,0.02f,-0.05f);
 	//lightDir = normalize(lightDir);
@@ -191,7 +193,7 @@ float4 ps_point(PointVertexOut pin) : SV_TARGET0
 	float3 color = colorBuffer.Sample( colorSampler_, texCoord );
     float3 diffuseLight = color;
 	
-	float4 colorfinal = float4(attenuation * gLightRadIntensity.y * diffuseLight, 1.0f);
+	float4 colorfinal = float4((saturate((1.0f - depth) * 40.0f)) * attenuation * gLightRadIntensity.y * diffuseLight, 1.0f);
 	
     return colorfinal;
 }

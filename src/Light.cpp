@@ -1,7 +1,7 @@
 #include "Light.h"
 
 PointLight::PointLight() :
-    mRadius(0.5f),
+    mRadius(1.5f),
     mIntensity(0.75f)
 {
 	mPosition = XMFLOAT3(0,0,0);
