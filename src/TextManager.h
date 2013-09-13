@@ -10,7 +10,7 @@
 #include <string>
 
 #define FONTWIDTH	0.04
-#define FONTHEIGHT  0.045
+#define FONTHEIGHT  0.046
 
 struct FontVertex
 {
@@ -29,7 +29,7 @@ public:
     void clear();
 
 	//Draw string directly to the screen
-	void DrawString(ID3D11DeviceContext* device, std::string text, float x, float y) ;
+	void drawString(ID3D11DeviceContext* device, std::string text, float x, float y) ;
 
 protected:
 

@@ -168,7 +168,14 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
     //x += 1.0f; x /= 2.0f;
     //y += 1.0f; y /= 2.0f;
 
-    tm.DrawString( device, text->message, x, y );
+    D3DX11_TECHNIQUE_DESC techDesc;
+	mTechnique->GetDesc( &techDesc );
+
+	for(ushort p = 0; p < techDesc.Passes; ++p)
+	{
+        mTechnique->GetPassByIndex(p)->Apply(0, device);
+        tm.drawString( device, text->message, x, y );
+    }
 }
 
 void UIDisplay::buildBorderVB( UIElement* elem, float aspectRatio )
@@ -186,22 +193,22 @@ void UIDisplay::buildBorderVB( UIElement* elem, float aspectRatio )
     float b = t - borderHeight;
 
     //TLC
-    v->position = XMFLOAT4( l, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.25f, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.25f, 0.125f );
     v++;
 
-    v->position = XMFLOAT4( l, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.125f );
     v++;
@@ -214,22 +221,22 @@ void UIDisplay::buildBorderVB( UIElement* elem, float aspectRatio )
 
     float wrap = ( r - l ) / ( borderWidth * 4.0f );
 
-    v->position = XMFLOAT4( l, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.0f );
     v++;
 
-    v->position = XMFLOAT4( r, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( wrap, 0.0f );
     v++;
 
-    v->position = XMFLOAT4( r, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( wrap, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( l, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.0625f );
     v++;
@@ -240,22 +247,22 @@ void UIDisplay::buildBorderVB( UIElement* elem, float aspectRatio )
     l = r;
     r += borderWidth;
 
-    v->position = XMFLOAT4( l, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.25f, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.25f, 0.125f );
     v++;
 
-    v->position = XMFLOAT4( l, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.125f );
     v++;
@@ -268,22 +275,22 @@ void UIDisplay::buildBorderVB( UIElement* elem, float aspectRatio )
 
     wrap = ( b - t ) / ( borderHeight * 4.0f );
 
-    v->position = XMFLOAT4( l, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.00f );
     v++;
 
-    v->position = XMFLOAT4( r, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( wrap, 0.00f );
     v++;
 
-    v->position = XMFLOAT4( l, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( wrap, 0.0625f );
     v++;
@@ -294,22 +301,22 @@ void UIDisplay::buildBorderVB( UIElement* elem, float aspectRatio )
     t = b;
     b -= borderHeight;
 
-    v->position = XMFLOAT4( l, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.25f, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, b , 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, b , UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.25f, 0.125f );
     v++;
 
-    v->position = XMFLOAT4( l, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.125f );
     v++;
@@ -322,22 +329,22 @@ void UIDisplay::buildBorderVB( UIElement* elem, float aspectRatio )
 
     wrap = ( r - l ) / ( borderWidth * 4.0f );
 
-    v->position = XMFLOAT4( l, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( wrap, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( wrap, 0.0f );
     v++;
 
-    v->position = XMFLOAT4( l, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.0f );
     v++;
@@ -348,22 +355,22 @@ void UIDisplay::buildBorderVB( UIElement* elem, float aspectRatio )
     l = elem->getPosition().x;
     r = l + borderWidth;
 
-    v->position = XMFLOAT4( l, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.25f, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, b , 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, b , UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.25f, 0.125f );
     v++;
 
-    v->position = XMFLOAT4( l, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.125f );
     v++;
@@ -376,22 +383,22 @@ void UIDisplay::buildBorderVB( UIElement* elem, float aspectRatio )
 
     wrap = ( b - t ) / ( borderHeight * 4.0f );
 
-    v->position = XMFLOAT4( l, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( wrap, 0.00f );
     v++;
 
-    v->position = XMFLOAT4( r, t, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, t, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( wrap, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( r, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( r, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.0625f );
     v++;
 
-    v->position = XMFLOAT4( l, b, 0.0f, 1.0f );
+    v->position = XMFLOAT4( l, b, UI_Z, 1.0f );
     v->color = c;
     v->tex = XMFLOAT2( 0.0f, 0.00f );
     v++;
@@ -415,22 +422,22 @@ void UIDisplay::buildBGVB( UIElement* elem )
 {
     FontVertex* v = mVerts + mVertsGenerated;
 
-    v->position = XMFLOAT4( elem->getPosition().x, -elem->getPosition().y, 0.0f, 1.0f );
+    v->position = XMFLOAT4( elem->getPosition().x, -elem->getPosition().y, UI_Z, 1.0f );
     v->color = mBGColor;
     v->tex = XMFLOAT2( 0.0f, 0.75f );
     v++;
 
-    v->position = XMFLOAT4( elem->getPosition().x + elem->getDimension().x, -elem->getPosition().y, 0.0f, 1.0f );
+    v->position = XMFLOAT4( elem->getPosition().x + elem->getDimension().x, -elem->getPosition().y, UI_Z, 1.0f );
     v->color = mBGColor;
     v->tex = XMFLOAT2( 1.0f, 0.75f );
     v++;
 
-    v->position = XMFLOAT4( elem->getPosition().x + elem->getDimension().x, -elem->getPosition().y - elem->getDimension().y, 0.0f, 1.0f );
+    v->position = XMFLOAT4( elem->getPosition().x + elem->getDimension().x, -elem->getPosition().y - elem->getDimension().y, UI_Z, 1.0f );
     v->color = mBGColor;
     v->tex = XMFLOAT2( 1.0f, 0.765625f );
     v++;
 
-    v->position = XMFLOAT4( elem->getPosition().x, -elem->getPosition().y - elem->getDimension().y, 0.0f, 1.0f );
+    v->position = XMFLOAT4( elem->getPosition().x, -elem->getPosition().y - elem->getDimension().y, UI_Z, 1.0f );
     v->color = mBGColor;
     v->tex = XMFLOAT2( 0.0f, 0.765625f );
     v++;

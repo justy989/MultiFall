@@ -100,6 +100,7 @@ void TextManager::setupBuffers(ID3D11Device* device, std::string text)
 
 		//set font location starting at -1, 1 (top left)
 		//and move right (no wrapping)
+        //Set depth to be 0.01 to be in front of UI
 		fontQuads[i * 4].position		= XMFLOAT4((i*FONTWIDTH),				0.0f,			0.0f, 1);
 		fontQuads[i * 4 + 1].position	= XMFLOAT4((i*FONTWIDTH) + FONTWIDTH,	0.0f,			0.0f, 1);
 		fontQuads[i * 4 + 2].position	= XMFLOAT4((i*FONTWIDTH),				-FONTHEIGHT,	0.0f, 1);
@@ -158,7 +159,7 @@ void TextManager::setupBuffers(ID3D11Device* device, std::string text)
     delete[] inds;
 }
 
-void TextManager::DrawString(ID3D11DeviceContext* device, std::string text, float x, float y)
+void TextManager::drawString(ID3D11DeviceContext* device, std::string text, float x, float y)
 {
 	ID3D11Device* d;
 	device->GetDevice(&d);
@@ -170,7 +171,7 @@ void TextManager::DrawString(ID3D11DeviceContext* device, std::string text, floa
 	device->IASetIndexBuffer( mIndexBuffer, DXGI_FORMAT_R16_UINT, 0 );
 	device->IASetVertexBuffers(0, 1, &mVertexBuffer, &stride, &offset);
 
-	XMMATRIX world = XMMatrixTranslation(x, -y, 0);
+	XMMATRIX world = XMMatrixTranslation(x, -y, 0.0501f);
     XMMATRIX worldMat = world;
     worldMat = XMMatrixTranspose( worldMat );
 

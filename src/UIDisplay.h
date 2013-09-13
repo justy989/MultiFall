@@ -14,6 +14,8 @@
 #define UI_INDEX_COUNT MAX_UI_QUADS * 6
 #define UI_VERTEX_COUNT MAX_UI_QUADS * 4
 
+#define UI_Z 0.0505f
+
 class UIDisplay{
 public:
 
