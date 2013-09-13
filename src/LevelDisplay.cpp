@@ -150,16 +150,16 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx )
 
     //Update the world matrix
     XMMATRIX world = XMMatrixIdentity();
-    ID3DX11EffectMatrixVariable* mFXWorld = fx->GetVariableByName("gWorld")->AsMatrix();
-	mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
+    //ID3DX11EffectMatrixVariable* mFXWorld = fx->GetVariableByName("gWorld")->AsMatrix();
+	//mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
 
     //Set input layout and topology
     device->IASetInputLayout( mInputLayout );
     device->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
     //Update the world matrix
-    //device->UpdateSubresource( mWorldCB, 0, 0, &world, 0, 0 ); 
-    //device->VSSetConstantBuffers( 1, 1, &mWorldCB );
+    device->UpdateSubresource( mWorldCB, 0, 0, &world, 0, 0 ); 
+    device->VSSetConstantBuffers( 1, 1, &mWorldCB );
 
     //Set the floor texture
     device->PSSetShaderResources(0, 1, &mFloorTexture );

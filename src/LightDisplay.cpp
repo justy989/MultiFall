@@ -102,8 +102,8 @@ void LightDisplay::drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* 
         //ID3DX11EffectMatrixVariable* mFXWorld = fx->GetVariableByName("gWorld")->AsMatrix();
 	    //mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
 
-        //device->UpdateSubresource( mWorldCB, 0, 0, &world, 0, 0 );
-		//device->VSSetConstantBuffers( 1, 1, &mWorldCB );
+        device->UpdateSubresource( mWorldCB, 0, 0, &world, 0, 0 );
+		device->VSSetConstantBuffers( 1, 1, &mWorldCB );
 
         //Update the Light Constant Buffer
 		XMFLOAT4 lightPosition = XMFLOAT4( level.getLight(i).getPosition().x, level.getLight(i).getPosition().y, level.getLight(i).getPosition().z, 1);
