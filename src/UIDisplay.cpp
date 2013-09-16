@@ -135,10 +135,13 @@ void UIDisplay::buildWindowVB( UIWindow& window, float aspectRatio )
     //Build window border
     buildBorderVB( &window, aspectRatio );
 
+
+
     if( window.getTabCount() > 1 ){
+        //Buil Tabs after subtracting the title bar and border
         buildTabVB( window, aspectRatio );
     }else{
-        //Build window Body by subtracting the title bar and the border
+        //Calculate the inside of a window
         UIWindow w;
         float borderWidth = mBorderDimension;
         float borderHeight = borderWidth * aspectRatio;
@@ -152,11 +155,6 @@ void UIDisplay::buildWindowVB( UIWindow& window, float aspectRatio )
     buildBGVB( &window );
 
     //Loop through and build elements in the current tab
-}
-
-void UIDisplay::buildTabVB( UIWindow& window, float aspectRatio )
-{
-    
 }
 
 void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, TextManager& tm )
@@ -183,6 +181,15 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
 	{
         mTechnique->GetPassByIndex(p)->Apply(0, device);
         tm.drawString( device, text->message, x, y );
+
+        float len = 0.0f;
+
+        for(uint i = 0; i < window.getTabCount(); i++){
+            tm.drawString( device, window.getTab(i).name, 
+                window.getPosition().x +(mBorderDimension * 2.0f) + len, 
+                window.getPosition().y + (UIWINDOW_TITLE_BAR_HEIGHT * 2.0f) - ( FONTHEIGHT * 1.5f ));
+            len += static_cast<float>(strlen(window.getTab(i).name)) * FONTWIDTH + ( FONTWIDTH / 2.0f );
+        }
     }
 }
 
@@ -301,6 +308,106 @@ void UIDisplay::buildBorderVB( UIElement* elem, float aspectRatio )
     b = (-elem->getPosition().y - elem->getDimension().y) + borderHeight;
 
     buildLeftBarVB( t, b, l, aspectRatio );
+}
+
+
+void UIDisplay::buildTabVB( UIWindow& window, float aspectRatio )
+{
+    float borderWidth = mBorderDimension;
+    float borderHeight = borderWidth * aspectRatio;
+
+    float l = window.getPosition().x + borderWidth;
+    float t = -window.getPosition().y - UIWINDOW_TITLE_BAR_HEIGHT;
+    float r = l + borderWidth;
+    float b = t - borderHeight;
+
+    //Top Left corner
+    buildCornerVB( l, t, aspectRatio );
+
+    //Build Top Left Bar
+    buildLeftBarVB( b, b - UIWINDOW_TITLE_BAR_HEIGHT + borderHeight, l, aspectRatio );
+
+    //Tab Borders
+    for(uint i = 0; i < window.getTabCount(); i++){
+        float len = static_cast<float>(strlen(window.getTab(i).name)) * FONTWIDTH;
+        float saveCorner = l;
+
+        //Move over our box
+        l = r;
+        r = r + len;
+
+        //Top Bar for tab
+        buildTopBarVB( l, r, t, aspectRatio );
+
+        l = r;
+        r += borderWidth;
+
+        //Top Right Corner for tab
+        buildCornerVB( l, t, aspectRatio );
+
+        b = t - UIWINDOW_TITLE_BAR_HEIGHT;
+
+        //Right bar for tab
+        buildRightBarVB( t, b, l, aspectRatio );
+
+        //Draw the top bars on either side of the current tab
+        if( i == window.getCurrentTab() ){
+            //Left Top Bar
+            buildTopBarVB( window.getPosition().x + ( borderWidth * 2.0f ), saveCorner, b, aspectRatio );
+            buildCornerVB( saveCorner, b, aspectRatio );
+
+            //Right top bar
+            buildTopBarVB( r, window.getPosition().x + window.getDimension().x - (borderWidth * 2.0f), b, aspectRatio );
+            buildCornerVB( l, b, aspectRatio );
+        }
+    }
+
+    l = window.getPosition().x + window.getDimension().x - ( borderWidth * 2.0f );
+    r = l + borderWidth;
+
+    //buildTopBarVB( l, r, b, aspectRatio );
+
+    //Top Right Corner
+    //l = r;
+    //r += borderWidth;
+
+    buildCornerVB( l, b, aspectRatio );
+
+    //RB
+    t = b;
+    b = (-window.getPosition().y - window.getDimension().y) + (borderHeight * 2.0f);
+
+    buildRightBarVB( t, b, l, aspectRatio );
+
+    //BRC
+    t = b;
+    b -= borderHeight;
+
+    buildCornerVB( l, t, aspectRatio );
+
+    //BB
+    l = window.getPosition().x + ( borderWidth * 2.0f ); 
+    r = (window.getPosition().x + window.getDimension().x) - (borderWidth * 2.0f);
+
+    buildBottomBarVB( l, r, t, aspectRatio );
+
+    //BLC
+    l = window.getPosition().x + borderWidth;
+    r = l + borderWidth;
+
+    buildCornerVB( l, t, aspectRatio );
+
+    //LB
+    t = -window.getPosition().y - ( UIWINDOW_TITLE_BAR_HEIGHT * 2.0f) - borderHeight;
+    b = (-window.getPosition().y - window.getDimension().y) + borderHeight;
+
+    buildLeftBarVB( t, b, l, aspectRatio );
+
+    t += borderHeight;
+
+    //Top Left Corner
+    buildCornerVB( l, t, aspectRatio );
+
 }
 
 void UIDisplay::buildTopBarVB( float start, float end, float top, float aspectRatio )

@@ -215,10 +215,12 @@ bool App::init( )
 
     mUIWindow.setMinDimensions( XMFLOAT2( 0.5f, 0.5f ) );
 
-    //mUIWindow.init( 3 );
-    //mUIWindow.initTab( 0, "First", 2 );
-    //mUIWindow.initTab( 1, "Second", 2 );
-    //mUIWindow.initTab( 2, "Third", 2 );
+    mUIWindow.init( 3 );
+    mUIWindow.initTab( 0, "First", 2 );
+    mUIWindow.initTab( 1, "Second", 2 );
+    mUIWindow.initTab( 2, "Third", 2 );
+    
+    mUIWindow.setCurrentTab( 0 );
 
     D3D11_BUFFER_DESC constDesc;
     ZeroMemory( &constDesc, sizeof( constDesc ) );

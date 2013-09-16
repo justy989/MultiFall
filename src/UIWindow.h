@@ -62,8 +62,9 @@ public:
     inline UIElement** getTabElement(uint tabIndex, uint elemIndex);
     inline Tab& getTab(uint tabIndex);
 
-    inline int getCurrentTab();
-    inline int getTabCount();
+    inline void setCurrentTab( uint tab );
+    inline uint getCurrentTab();
+    inline uint getTabCount();
 
     virtual ElemType getElemType(){return Window;}
     
@@ -72,9 +73,9 @@ public:
 protected:
 
     Tab* mTabs;
-    int mTabCount;
+    uint mTabCount;
 
-    int mCurrentTab;
+    uint mCurrentTab;
 
     XMFLOAT2 mMinDimensions;
 
@@ -98,9 +99,15 @@ inline UIWindow::Tab& UIWindow::getTab(uint tabIndex )
     return mTabs[ tabIndex ];
 }
 
-inline int UIWindow::getCurrentTab()
+inline uint UIWindow::getCurrentTab()
 {
     return mCurrentTab;
+}
+
+inline void UIWindow::setCurrentTab( uint tab )
+{
+    assert( tab < mTabCount );
+    mCurrentTab = tab;
 }
 
 inline void UIWindow::setMinDimensions( XMFLOAT2 dim )
@@ -108,7 +115,7 @@ inline void UIWindow::setMinDimensions( XMFLOAT2 dim )
     mMinDimensions = dim;
 }
 
-inline int UIWindow::getTabCount()
+inline uint UIWindow::getTabCount()
 {
     return mTabCount;
 }
