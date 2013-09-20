@@ -213,12 +213,26 @@ bool App::init( )
     mUIWindow.setDimension( XMFLOAT2( 0.75f, 0.75f ) );
     mUIWindow.setText( text );
 
-    mUIWindow.setMinDimensions( XMFLOAT2( 0.5f, 0.5f ) );
+    mUIWindow.setMinDimensions( XMFLOAT2( 0.8f, 0.5f ) );
 
     mUIWindow.init( 3 );
     mUIWindow.initTab( 0, "First", 2 );
     mUIWindow.initTab( 1, "Second", 2 );
     mUIWindow.initTab( 2, "Third", 2 );
+
+    UIButton* btn = new UIButton();
+
+    XMFLOAT2 pos(0.1f, 0.3f);
+    XMFLOAT2 dim(0.3f, 0.1f);
+
+    btn->setPosition( pos );
+    btn->setDimension( dim );
+
+    text.message = "Button";
+
+    mUIWindow.addElem( btn, 0 );
+
+    btn->setText(text);
     
     mUIWindow.setCurrentTab( 0 );
 
@@ -645,7 +659,7 @@ void App::draw( )
     
     mWindow.getDeviceContext()->RSSetState( NULL );
 
-    mUIDisplay.prepareUIRendering( mWindow.getDeviceContext() );
+    //mUIDisplay.prepareUIRendering( mWindow.getDeviceContext() );
 
     //mTextManager.DrawString(mWindow.getDeviceContext(), FPSString, -1.0f, -1.0f);
     //mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, -1.0f, -0.95f);

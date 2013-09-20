@@ -69,4 +69,4 @@ protected:
     int mRampCount; //How many ramps are there?
 };
 
-#endif
+#endif  

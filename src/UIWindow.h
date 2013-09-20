@@ -37,10 +37,10 @@ public:
                                bool keyPress, byte key );
 
     //Set the position of the UI Element
-    virtual void setPosition( XMFLOAT2 pos );
+    virtual void setPosition( XMFLOAT2& pos );
 
     //Set the dimension
-    virtual void setDimension( XMFLOAT2 dim );
+    virtual void setDimension( XMFLOAT2& dim );
 
     //Set the text for a component
     virtual void setText( Text& text );

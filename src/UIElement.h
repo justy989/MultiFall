@@ -53,8 +53,8 @@ public:
                                bool keyPress, byte key ) = 0;
 
     //Set the position of the UI Element
-    virtual void setPosition( XMFLOAT2 pos ) = 0;
-    virtual void setDimension( XMFLOAT2 dim ) = 0;
+    virtual void setPosition( XMFLOAT2& pos ) = 0;
+    virtual void setDimension( XMFLOAT2& dim ) = 0;
 
     //Get Text from the element, to draw
     virtual void getText( Text** text, int* textCount ){
@@ -108,7 +108,8 @@ public:
     virtual UserChange update( bool mouseClick, XMFLOAT2 mousePosition, 
                                bool keyPress, byte key );
 
-    virtual void setPosition( XMFLOAT2 pos );
+    virtual void setPosition( XMFLOAT2& pos );
+    virtual void setDimension( XMFLOAT2& dim );
     virtual void getText( Text** text, int* textCount );
     virtual void setText( Text& text );
 

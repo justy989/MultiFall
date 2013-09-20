@@ -1,5 +1,7 @@
 #include "UIWindow.h"
 
+#include "TextManager.h"
+
 float mTitleBarHeight = 0.1f;
 float mTabBarHeight = 0.1f;
 
@@ -66,6 +68,25 @@ UIWindow::UserChange UIWindow::update( bool mouseClick, XMFLOAT2 mousePosition,
                 mResizeClickPos = mousePosition;
             }
         }
+
+        float len = 0.0f;
+        float lastLen = 0.0f;
+
+        //Are we inside one of the tab locations?
+        for(uint i = 0; i < mTabCount; i++){
+
+            len += static_cast<float>( strlen( mTabs[i].name ) ) * FONTWIDTH;
+
+            if( mousePosition.x >= mPosition.x + lastLen && mousePosition.x <= mPosition.x + len &&
+                mousePosition.y >= mPosition.y + UIWINDOW_TITLE_BAR_HEIGHT && 
+                mousePosition.y <= mPosition.y + ( 2.0f * UIWINDOW_TITLE_BAR_HEIGHT ) ){
+                mCurrentTab = i;
+                break;
+            }
+
+            lastLen = len;
+        }
+
     }else{
         mTitleClickPos.x = -2.0f;
         mResizeClickPos.x = -2.0f;
@@ -90,7 +111,7 @@ UIWindow::UserChange UIWindow::update( bool mouseClick, XMFLOAT2 mousePosition,
     return change;
 }
 
-void UIWindow::setPosition( XMFLOAT2 pos )
+void UIWindow::setPosition( XMFLOAT2& pos )
 {
     /*
     //Loops through tabs and each element in them. Set the position
@@ -107,7 +128,7 @@ void UIWindow::setPosition( XMFLOAT2 pos )
     mPosition = pos;
 }
 
-void UIWindow::setDimension( XMFLOAT2 dim )
+void UIWindow::setDimension( XMFLOAT2& dim )
 {
     mDimensions = dim;
 }
@@ -138,6 +159,11 @@ void UIWindow::initTab( uint tabIndex, char* name, uint elemCount )
     mTabs[ tabIndex ].elementCount = 0;
     mTabs[ tabIndex ].size = elemCount;
     mTabs[ tabIndex ].name = name;
+
+    //Init elements in tabs to NULL
+    for(uint i = 0; i < elemCount; i++){
+        mTabs[ tabIndex ].elements[i] = NULL;
+    }
 }
 
 void UIWindow::addElem( UIElement* element, uint tabIndex )
@@ -153,6 +179,12 @@ void UIWindow::clear()
 {
     if( mTabs ){
         for(int t = 0; t < mTabCount; t++){
+            for(int e = 0; e < mTabs[t].elementCount; e++){
+                if( mTabs[t].elements[e] ){
+                    delete[] mTabs[t].elements[e];
+                }
+            }
+
             delete[] mTabs[t].elements;
             mTabs[t].elements = NULL;
             mTabs[t].elementCount = 0;

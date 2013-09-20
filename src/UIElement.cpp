@@ -36,9 +36,16 @@ UIElement::UserChange UIButton::update( bool mouseClick, XMFLOAT2 mousePosition,
     return change;
 }
 
-void UIButton::setPosition( XMFLOAT2 pos )
+void UIButton::setPosition( XMFLOAT2& pos )
 {
     mPosition = pos;
+
+    centerText();
+}
+
+void UIButton::setDimension( XMFLOAT2& dim )
+{
+    mDimensions = dim;
 
     centerText();
 }
@@ -53,4 +60,10 @@ void UIButton::setText( Text& text )
 void UIButton::centerText()
 {
 
+}
+
+void UIButton::getText( Text** text, int* textCount )
+{
+    *textCount = 0;
+    *text = &mText;
 }
