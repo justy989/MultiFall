@@ -22,6 +22,7 @@ bool WorldDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tech )
     }
 
     if( !mLevelDisplay.setTextures( device, L"content/textures/stonefloorsheet1.png", 0.25f, L"content/textures/stonewall1.png", 1.0f ) ){
+    //if( !mLevelDisplay.setTextures( device, L"content/textures/wood_floor.png", 0.5f, L"content/textures/brick_wall.png", 1.0f ) ){
         return false;
     }
 

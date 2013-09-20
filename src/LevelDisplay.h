@@ -67,6 +67,8 @@ protected:
     int mBlockCount; //How many blocks are there that we needed to draw
     int mWallCount; //How many walls are there?
     int mRampCount; //How many ramps are there?
+
+    int mFloorTileRows; //Number of rows in the floor tile texture
 };
 
 #endif  

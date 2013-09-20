@@ -17,6 +17,7 @@
 #define UI_Z 0.0505f
 #define UI_ELEMS_Z 0.05025f
 
+//Determine which Z coord to use based on whether we are currently building elements in a window or the window itself
 #define UI_DETERMINE_Z mBuildingElements ? UI_ELEMS_Z : UI_Z
 
 #define UI_BAR_TOP 0.0f
@@ -33,9 +34,6 @@ public:
 
     //Init input layout, shaders, sampler, and texture
     bool init( ID3D11Device* device, LPCWSTR uiTexturePath, LPCWSTR uiShaderPath );
-
-    //Set input layout, shaders and sampler for UI and text
-    void prepareUIRendering( ID3D11DeviceContext* device );
     
     //Setup VB for drawing a window
     void buildWindowVB( UIWindow& window, float aspectRatio );

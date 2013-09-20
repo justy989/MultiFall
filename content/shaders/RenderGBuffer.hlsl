@@ -99,16 +99,6 @@ PointVertexOut vs_point(VertexIn input)
     return output;
 }
 
-/*
-float4 ps_main(VertexOut pin) : SV_Target
-{
-	//Sample the texture
-    float4 color = texture_.Sample( colorSampler_, pin.tex );
-
-    return color;
-}*/
-
-
 GBufferOut ps_main(VertexOut input)
 {
     GBufferOut output;
@@ -131,32 +121,12 @@ VertexOut vs_fsquad(VertexIn input)
     return output;
 }
 
-float4 ps_directional(VertexOut pin) : SV_TARGET0
+float4 ps_ambient(VertexOut pin) : SV_TARGET0
 {
-    //float4 n = normalBuffer.Sample( colorSampler_, pin.tex );
-	//float3 normal = 2.0f * n.xyz - 1.0f; //transform back into (-1, 1)
-	//normal = normalize(normal);
-	
-	//float lightIntensity;
-	//float3 lightDir;
-
 	float4 color = colorBuffer.Sample( colorSampler_, pin.tex );
 	float depth = depthBuffer.Sample( colorSampler_, pin.tex ).r;
-	float4 ambient = (saturate((1.0f - depth) * 20.0f)) * color * 0.12f;
 	
-	
-	//lightDir = float3(0.1f,0.02f,-0.05f);
-	//lightDir = normalize(lightDir);
-	
-	// Calculate the amount of light on this pixel.
-    //lightIntensity = saturate(dot(normal, lightDir));
-	
-	//if(lightIntensity > 0)
-	//{
-		color = ambient;//0.1f *saturate(lightIntensity * color + ambient);
-	//}
-	
-    return color;
+    return ( saturate((1.0f - depth) * 20.0f) ) * color * 0.4f;
 }
 
 float4 ps_point(PointVertexOut pin) : SV_TARGET0
@@ -190,12 +160,9 @@ float4 ps_point(PointVertexOut pin) : SV_TARGET0
 	
     //compute diffuse light
     float NdL = saturate( dot( normal,lightVector ) );
-	float3 color = colorBuffer.Sample( colorSampler_, texCoord );
-    float3 diffuseLight = color;
-	
-	float4 colorfinal = float4((saturate((1.0f - depth) * 40.0f)) * attenuation * gLightRadIntensity.y * diffuseLight, 1.0f);
-	
-    return colorfinal;
+	float3 ambientLight = colorBuffer.Sample( colorSampler_, texCoord );
+
+    return float4((saturate((1.0f - depth) * 40.0f)) * attenuation * gLightRadIntensity.y * ambientLight, 1.0f);
 }
 
 technique11 GeoPass
@@ -208,7 +175,7 @@ technique11 GeoPass
     }
 }
 
-technique11 DirLight
+technique11 AmbientLight
 {
     pass P0
     {
@@ -216,7 +183,7 @@ technique11 DirLight
 		SetBlendState(blendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF );
         SetVertexShader( CompileShader( vs_5_0, vs_fsquad() ) );
 		SetGeometryShader( NULL );
-        SetPixelShader( CompileShader( ps_5_0, ps_directional() ) );
+        SetPixelShader( CompileShader( ps_5_0, ps_ambient() ) );
     }
 }
 

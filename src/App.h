@@ -74,6 +74,8 @@ protected:
     bool camKeyDown[4];
 
     bool collisionMode;
+    bool drawUI;
+    bool freeLook;
 
     char FPSString[128];
     char CameraPosString[128];
@@ -82,6 +84,7 @@ protected:
     WorldEntity mEntity;
 
     WorldGenerator::LevelPreset mLevelPreset;
+    WorldGenerator mWorldGen;
 
     UIDisplay mUIDisplay;
     UIWindow mUIWindow;
@@ -92,7 +95,7 @@ protected:
 
 	ID3DX11Effect* mFX;
 	ID3DX11EffectTechnique* mRenderGBufferTech;
-	ID3DX11EffectTechnique* mDirLightTech;
+	ID3DX11EffectTechnique* mAmbientLightTech;
 	ID3DX11EffectTechnique* mPointLightTech;
 
 	ID3D11InputLayout* mInputLayout;

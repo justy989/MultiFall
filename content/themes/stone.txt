@@ -1,0 +1,2 @@
+stonewall1.png 1.0
+stonefloorsheet1.png 0.25ick 

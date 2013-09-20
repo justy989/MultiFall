@@ -99,21 +99,12 @@ void LightDisplay::drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* 
 
 		world = XMMatrixTranspose( world );
 
-        //ID3DX11EffectMatrixVariable* mFXWorld = fx->GetVariableByName("gWorld")->AsMatrix();
-	    //mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
-
         device->UpdateSubresource( mWorldCB, 0, 0, &world, 0, 0 );
 		device->VSSetConstantBuffers( 1, 1, &mWorldCB );
 
         //Update the Light Constant Buffer
 		XMFLOAT4 lightPosition = XMFLOAT4( level.getLight(i).getPosition().x, level.getLight(i).getPosition().y, level.getLight(i).getPosition().z, 1);
 		XMFLOAT4 lightRadIntensity = XMFLOAT4( level.getLight(i).getRadius(), level.getLight(i).getIntensity(), 0, 0);
-
-        //ID3DX11EffectVectorVariable* mFXLightPosition = fx->GetVariableByName("gLightPosition")->AsVector();
-        //mFXLightPosition->SetFloatVector(reinterpret_cast<float*>(&lightPosition));
-
-        //ID3DX11EffectVectorVariable* mFXRadIntensity = fx->GetVariableByName("gRadIntensity")->AsVector();
-        //mFXRadIntensity->SetFloatVector(reinterpret_cast<float*>(&lightRadIntensity));
 
         plCB.position = lightPosition;
         plCB.radIntensity = lightRadIntensity;

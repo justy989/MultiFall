@@ -15,7 +15,8 @@ LevelDisplay::LevelDisplay() :
     mWallCount(0),
     mRampCount(0),
     mFloorClip(1.0f),
-    mWallClip(1.0f)
+    mWallClip(1.0f),
+    mFloorTileRows(4)
 {
 
 }
@@ -89,6 +90,8 @@ bool LevelDisplay::setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, 
 
     mFloorClip = floorClip;
     mWallClip = wallClip;
+
+    mFloorTileRows = static_cast<int>( 1.0f / floorClip );
 
     LOG_INFO << "Loaded Level Floor Texture: " << LOG_WC_TO_C(floorTexturePath) << LOG_ENDL;
     LOG_INFO << "Loaded Level Wall Texture: " << LOG_WC_TO_C(wallTexturePath) << LOG_ENDL;
@@ -187,8 +190,8 @@ bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float bl
             }
 
 			byte id = level.getBlockTileID(i,j);
-			float row = id / 4;
-			float column = id % 4;
+            float row = id / mFloorTileRows;
+			float column = id % mFloorTileRows;
 
             //Front left
             verts[ v ].position.x = static_cast<float>(i) * blockDimension;

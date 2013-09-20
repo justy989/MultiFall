@@ -1,0 +1,2 @@
+brick_wall.png 1.0
+wood_floor.png 0.5

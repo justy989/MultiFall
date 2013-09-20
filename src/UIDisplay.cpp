@@ -111,26 +111,6 @@ void UIDisplay::clear()
     LOG_INFO << "Released UI Buffers, textures, shaders, sampler, and input layout" << LOG_ENDL;
 }
 
-void UIDisplay::prepareUIRendering( ID3D11DeviceContext* device )
-{
-    //Setup input layout and topology
-    //device->IASetInputLayout( mInputLayout );
-    //device->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
-
-    //Setup vertex and pixel shaders
-	//device->VSSetShader( mVertexShader, 0, 0 );
-	//device->PSSetShader( mPixelShader, 0, 0 );
-
-    //Setup sampler
-	//device->PSSetSamplers( 0, 1, &mSampler );
-
-    //Setup blend state
-    //float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-    //uint sampleMask = 0xFFFFFFFF;
-
-    //device->OMSetBlendState( mBlender, blendFactor, sampleMask );
-}
-
 void UIDisplay::buildWindowVB( UIWindow& window, float aspectRatio )
 {
     //Build window border

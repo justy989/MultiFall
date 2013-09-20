@@ -2,7 +2,7 @@
 #include "Log.h"
 #include "Utils.h"
 
-#include "WorldGenerator.h"
+#include "LevelThemeLoader.h"
 
 App::App()
 {
@@ -12,6 +12,8 @@ App::App()
     camKeyDown[3] = false;
 
     collisionMode = false;
+    freeLook = true;
+    drawUI = false;
 
     FPSString[0] = '\0';
     CameraPosString[0] = '\0';
@@ -27,9 +29,10 @@ void App::handleInput( RAWINPUT* input )
         long mx = input->data.mouse.lLastX;
         long my = input->data.mouse.lLastY;
 
-        //0.001f is hardcoded, but we should use a sensitivity configuration setting
-        mCamera.modPitch( (float)(mx) * mConfig.getSensitivity() );
-        mCamera.modYaw( (float)(my) * -mConfig.getSensitivity() );
+        if( freeLook ){
+            mCamera.modPitch( (float)(mx) * mConfig.getSensitivity() );
+            mCamera.modYaw( (float)(my) * -mConfig.getSensitivity() );
+        }
 
         if( input->data.mouse.ulButtons & RI_MOUSE_LEFT_BUTTON_DOWN ){
             mLeftClick = true;
@@ -42,17 +45,6 @@ void App::handleInput( RAWINPUT* input )
         bool keyUp = input->data.keyboard.Flags & RI_KEY_BREAK;
 
         switch( VKey ){
-        case 'R':
-            {
-                if( keyUp ){
-                    break;
-                }
-
-                WorldGenerator worldGen;
-                worldGen.genLevel( mWorld.getLevel(), mLevelPreset );
-                mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f);
-            }
-            break;
         case 'A':
             camKeyDown[0] = !keyUp;
             break;
@@ -65,6 +57,24 @@ void App::handleInput( RAWINPUT* input )
         case 'S':
             camKeyDown[3] = !keyUp;
             break;
+        case 'U':
+            if( keyUp ){
+                break;
+            }
+
+            drawUI = !drawUI;
+
+            break;
+        case 'R':
+            {
+                if( keyUp ){
+                    break;
+                }
+
+                mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
+                mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f);
+            }
+            break;
         case 'O':
             if( keyUp ){
                 break;
@@ -75,6 +85,14 @@ void App::handleInput( RAWINPUT* input )
             if( collisionMode ){
                 mEntity.getPosition() = mCamera.getPosition();
             }
+            break;
+        case 'I':
+            if( keyUp ){
+                break;
+            }
+
+            freeLook = !freeLook;
+
             break;
         default:
             break;
@@ -191,10 +209,6 @@ bool App::init( )
     mLevelPreset.doorScrubChance.min = 0.0f;
     mLevelPreset.doorScrubChance.max = 1.0f;
 
-    WorldGenerator worldGen;
-    worldGen.genLevel( mWorld.getLevel(), mLevelPreset );
-    mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f );	
-
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
     mEntity.getSolidity().radius = 0.15f;
     mEntity.getSolidity().height = 0.25f;
@@ -247,6 +261,13 @@ bool App::init( )
         return false;
     }
 
+    LevelThemeLoader ltl;
+
+    ltl.loadTheme("content/themes/stone.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
+
+    mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
+    mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f );	
+
     return true;
 }
 
@@ -287,7 +308,7 @@ bool App::initShaders()
 	// Done with compiled shader.
 	ReleaseCOM(compiledShader);
 	mRenderGBufferTech = mFX->GetTechniqueByName("GeoPass");
-	mDirLightTech = mFX->GetTechniqueByName("DirLight");
+	mAmbientLightTech = mFX->GetTechniqueByName("AmbientLight");
 	mPointLightTech = mFX->GetTechniqueByName("PointLight");
 
     LOG_INFO << "Loaded color.fx shader Successfully" << LOG_ENDL;
@@ -302,7 +323,7 @@ bool App::initShaders()
 
 	//Create the input layout
     D3DX11_PASS_DESC passDesc;
-    mDirLightTech->GetPassByIndex(0)->GetDesc( &passDesc );
+    mAmbientLightTech->GetPassByIndex(0)->GetDesc( &passDesc );
 
     if(FAILED(mWindow.getDevice()->CreateInputLayout(vertexDesc, 3, passDesc.pIAInputSignature, 
 		passDesc.IAInputSignatureSize, &mInputLayout))){
@@ -497,6 +518,8 @@ void App::update( float dt )
 
             if( distFromGround > 0.05f ){
                 moveVec -= XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+            }else if(distFromGround < -0.05f ){
+                moveVec += XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
             }
         }else if( mWorld.getLevel().getBlockRamp(bx, bz) == Level::Ramp::Front ){
             float blockHeight = static_cast<float>(mWorld.getLevel().getBlockHeight(bx, bz)) * 0.3f;
@@ -637,10 +660,10 @@ void App::draw( )
 	mWindow.getDeviceContext()->OMGetBlendState(&prevBS, prevfloat, &prevMask);
     
 	//start lighting pass
-	mDirLightTech->GetDesc( &techDesc );
+	mAmbientLightTech->GetDesc( &techDesc );
     for(ushort p = 0; p < techDesc.Passes; ++p)
 	{
-		mDirLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());		
+		mAmbientLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());		
 		
 		//draw fullscreen quad to spawn the lighting post process
 		drawFSQuad();
@@ -659,19 +682,36 @@ void App::draw( )
 	mWindow.getDeviceContext()->OMSetBlendState(prevBS, prevfloat, prevMask);
     
     mWindow.getDeviceContext()->RSSetState( NULL );
-
-    //mUIDisplay.prepareUIRendering( mWindow.getDeviceContext() );
-
-    //mTextManager.DrawString(mWindow.getDeviceContext(), FPSString, -1.0f, -1.0f);
-    //mTextManager.DrawString(mWindow.getDeviceContext(), CameraPosString, -1.0f, -0.95f);
-    //mTextManager.DrawString(mWindow.getDeviceContext(), MousePosString, -1.0f, -0.9f);
     
     //For testing drawing windows
-    mUIDisplay.buildWindowVB( mUIWindow, mWindow.getAspectRatio() );
+    if( drawUI ){
+        mUIDisplay.buildWindowVB( mUIWindow, mWindow.getAspectRatio() );
+    }
 
     //Draw!
     mUIDisplay.drawUI( mWindow.getDeviceContext() );
-    mUIDisplay.drawWindowText( mWindow.getDeviceContext(), mUIWindow, mTextManager );
+
+    if( drawUI ){
+        mUIDisplay.drawWindowText( mWindow.getDeviceContext(), mUIWindow, mTextManager );
+    }
+
+    mTextManager.drawString(mWindow.getDeviceContext(), FPSString, -1.0f, -1.0f);
+    mTextManager.drawString(mWindow.getDeviceContext(), CameraPosString, -1.0f, -0.95f);
+    mTextManager.drawString(mWindow.getDeviceContext(), MousePosString, -1.0f, -0.9f);
+    
+    char buffer[128];
+
+    sprintf(buffer, "Toggle UI Drawing: U : %s", drawUI ? "On" : "Off");
+    mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.8f);
+
+    sprintf(buffer, "Toggle Free Look: I : %s", freeLook ? "On" : "Off");
+    mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.85f);
+
+    sprintf(buffer, "Toggle Collision: O : %s", collisionMode ? "On" : "Off");
+    mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.9f);
+
+    sprintf(buffer, "Generate New Dungeon: R");
+    mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.95f);
 
     mWindow.getSwapChain()->Present(0, 0);
 }

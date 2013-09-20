@@ -41,6 +41,8 @@ public:
     //Generate a room's exits and floor layout
     void genLevel( Level& level, LevelPreset& preset );
 
+    inline void setTileIDMax( uint tileIDMax );
+
 protected:
 
     struct Room{
@@ -84,6 +86,10 @@ protected:
 
     Door* mDoors;
     int mDoorCount;
+
+    uint mTileIDMax;
 };
+
+inline void WorldGenerator::setTileIDMax( uint tileIDMax ){mTileIDMax = tileIDMax;}
 
 #endif

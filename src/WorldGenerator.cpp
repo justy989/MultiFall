@@ -6,7 +6,8 @@
 
 WorldGenerator::WorldGenerator() : 
     mRooms(NULL),
-    mRoomCount(0)
+    mRoomCount(0),
+    mTileIDMax(16)
 {
     mRand.seed( time( 0 ) );
 
@@ -510,8 +511,8 @@ void WorldGenerator::genLevelRoomHeights( Level& level, LevelPreset& preset, Roo
     for( short i = room.left; i <= room.right; i++){
         for(short j = room.top; j <= room.bottom; j++){
 
-			//cus there's no good place for this
-			level.setBlockTileID(i,j, mRand.gen(0, 16));
+			//When generating the floor height, generate a random floor tile ID as well
+            level.setBlockTileID(i,j, mRand.gen(0, mTileIDMax));
 
             short nextI = i;
             short nextJ = j - 1;
