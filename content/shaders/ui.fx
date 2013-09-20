@@ -16,12 +16,11 @@ BlendState blendState
 	BlendOp[0] = ADD;
 	SrcBlend[0] = SRC_ALPHA;
 	DestBlend[0] = INV_SRC_ALPHA;
-	RenderTargetWriteMask[0] = 0x0F;
+	RenderTargetWriteMask[0] = 0xFF;
 	SrcBlendAlpha[0] = ONE;
 	DestBlendAlpha[0] = ONE;
 	BlendOpAlpha[0] = ADD;
 };
-
 
 cbuffer cbPerObject
 {

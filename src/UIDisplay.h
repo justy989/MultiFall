@@ -15,6 +15,9 @@
 #define UI_VERTEX_COUNT MAX_UI_QUADS * 4
 
 #define UI_Z 0.0505f
+#define UI_ELEMS_Z 0.05025f
+
+#define UI_DETERMINE_Z mBuildingElements ? UI_ELEMS_Z : UI_Z
 
 #define UI_BAR_TOP 0.0f
 #define UI_BAR_BOTTOM 0.0625f
@@ -55,7 +58,7 @@ public:
 protected:
 
     //Setup vertex buffers for the border of an element
-    void buildBorderVB( UIElement* elem, float aspectRatio );
+    void buildBorderVB( UIElement* elem, float aspectRatio, XMFLOAT2 offset = XMFLOAT2(0.0f, 0.0f) );
 
     //Setup verticies for the current tab, show others as well
     void buildTabVB( UIWindow& window, float aspectRatio );
@@ -101,6 +104,8 @@ protected:
     float mBorderDimension;
 
     XMFLOAT4 mBGColor;
+
+    bool mBuildingElements;
 };
 
 inline void UIDisplay::setBorderDimension( float b ){mBorderDimension = b;}

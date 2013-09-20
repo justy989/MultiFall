@@ -2,7 +2,7 @@
 
 PointLight::PointLight() :
     mRadius(1.5f),
-    mIntensity(0.75f)
+    mIntensity(1.0f)
 {
 	mPosition = XMFLOAT3(0,0,0);
     mColor = XMFLOAT3(1,1,1);
