@@ -14,24 +14,50 @@ void World::moveEntity( WorldEntity* entity, XMVECTOR moveVec, float dist )
 {
     //Try to move the entity in the world along the moveVec
     XMVECTOR pos = XMLoadFloat4( &entity->getPosition() );
-    XMVECTOR desiredPos = pos;
     XMVECTOR wall = XMVectorZero();
+    XMVECTOR vel = XMVectorScale( moveVec, dist );
+    XMVECTOR desiredPos;
+    XMFLOAT4 check;
+    XMFLOAT4 negativeCheck;
 
     int checks = 0;
     int maxChecks = 10;
     float saveDist = dist;
     float distInterval = dist / static_cast<float>(maxChecks);
 
-    //Move along by the movement vector until collision is detected
-    XMVECTOR vel = XMVectorScale( moveVec, dist );
+    XMStoreFloat4( &check, XMVector3Length(moveVec) );
 
-    if( checkEntityCollision( entity, desiredPos, &wall ) ){
-        XMVECTOR invWall = XMVectorNegate( wall );
-        wall = wall * XMVector3Length( moveVec * invWall );
-        vel = (moveVec - wall) * dist;
+    //Don't bother doing anything if there is no movement direction
+    if( check.x <= 0.0f ){
+        return;
     }
-    
+
+    //Check collision at where we plan to be
+    if( checkEntityCollision( entity, pos, &wall ) ){
+        XMStoreFloat4( &check, wall );
+        XMStoreFloat4( &negativeCheck, vel );
+
+        //Check the negative bit of the x and z values and see if they are equal, if they are, then stop movement
+        bool negativeXWall = *(int*)(&check.x) < 0;
+        bool negativeZWall = *(int*)(&check.z) < 0;
+
+        bool negativeXVel = *(int*)(&negativeCheck.x) < 0;
+        bool negativeZVel = *(int*)(&negativeCheck.z) < 0;
+
+        //If we are not in a corner, collide with the wall, otherwise stop movement
+        if(check.w <= 1.5f ||
+           ( negativeXWall != negativeXVel || 
+             negativeZWall != negativeZVel ) ){
+            XMVECTOR invWall = XMVectorNegate( wall );
+            wall = wall * XMVector3Length( moveVec * invWall );
+            vel = (moveVec - wall) * dist;
+        }else{
+            vel = XMVectorZero();
+        }
+    }
+
     desiredPos = pos + vel;
+    
     XMStoreFloat4( &entity->getPosition(), desiredPos );
 }
 
