@@ -546,6 +546,7 @@ void App::update( float dt )
 
     POINT p;
     GetCursorPos( &p );
+    ScreenToClient(mWindow.getWindowHandle(), &p);
 
     XMFLOAT2 mousePos( 
         static_cast<float>(p.x) / static_cast<float>(mWindow.getWindowWidth()), 
@@ -555,8 +556,8 @@ void App::update( float dt )
     mousePos.y *= 2.0f; mousePos.y -= 1.0f;
 
     //Hack!
-    mousePos.x -= 0.01f;
-    mousePos.y -= 0.06f;
+    //mousePos.x -= 0.01f;
+    //mousePos.y -= 0.06f;
 
     sprintf(MousePosString, "Mouse: %.2f, %.2f", mousePos.x, mousePos.y);
 
