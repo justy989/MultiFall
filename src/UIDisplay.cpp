@@ -199,23 +199,25 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
 
 void UIDisplay::drawUI( ID3D11DeviceContext* device )
 {
-    //Setup the vertex buffer
-    D3D11_BUFFER_DESC vbd;
-    vbd.Usage = D3D11_USAGE_IMMUTABLE;
-    vbd.ByteWidth = sizeof(FontVertex) * mVertsGenerated;
-    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vbd.CPUAccessFlags = 0;
-    vbd.MiscFlags = 0;
-	vbd.StructureByteStride = 0;
+    if( mVertsGenerated > 0 ){
+        //Setup the vertex buffer
+        D3D11_BUFFER_DESC vbd;
+        vbd.Usage = D3D11_USAGE_IMMUTABLE;
+        vbd.ByteWidth = sizeof(FontVertex) * mVertsGenerated;
+        vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        vbd.CPUAccessFlags = 0;
+        vbd.MiscFlags = 0;
+	    vbd.StructureByteStride = 0;
 
-    D3D11_SUBRESOURCE_DATA vinitData;
-    vinitData.pSysMem = mVerts;
-    ID3D11Device* dev;
-    device->GetDevice(&dev);
+        D3D11_SUBRESOURCE_DATA vinitData;
+        vinitData.pSysMem = mVerts;
+        ID3D11Device* dev;
+        device->GetDevice(&dev);
 
-    if( FAILED(dev->CreateBuffer(&vbd, &vinitData, &mVB) ) ){
-        LOG_ERRO << "Unable to allocate Vertex Buffer for UI" << LOG_ENDL;
-        //return false;
+        if( FAILED(dev->CreateBuffer(&vbd, &vinitData, &mVB) ) ){
+            LOG_ERRO << "Unable to allocate Vertex Buffer for UI" << LOG_ENDL;
+            //return false;
+        }
     }
 
     //Setup temp vars
@@ -246,8 +248,10 @@ void UIDisplay::drawUI( ID3D11DeviceContext* device )
 	{
         mTechnique->GetPassByIndex(p)->Apply(0, device);
         
-        //Draw the verts we generated wooo
-        device->DrawIndexed( indices, 0, 0 );
+        if( mVertsGenerated > 0 ){
+            //Draw the verts we generated wooo
+            device->DrawIndexed( indices, 0, 0 );
+        }
     }
 
     mVertsGenerated = 0;
