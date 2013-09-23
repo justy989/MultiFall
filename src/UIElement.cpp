@@ -78,3 +78,54 @@ void UIButton::getText( Text** text, int* textCount )
     *textCount = 0;
     *text = &mText;
 }
+
+UISlider::UISlider() :
+    mPercent(0.0f)
+{
+
+}
+
+UIElement::UserChange UISlider::update( bool mouseClick, XMFLOAT2 mousePosition, 
+                            bool keyPress, byte key )
+{
+    UIElement::UserChange change;
+    change.action = UIElement::UserChange::Action::None;
+
+    if( pointCheckInside( mousePosition ) ){
+        mSelected = UIElement::SelectedState::Highlighted;
+
+        if( mouseClick ){
+            setPercent( (mousePosition.x - mPosition.x) / (mDimensions.x) );
+            change.action = UIElement::UserChange::Action::MoveSlider;
+        }
+    }
+
+    return change;
+}
+
+void UISlider::setPosition( XMFLOAT2& pos )
+{
+    mPosition = pos;
+}
+
+void UISlider::setDimension( XMFLOAT2& dim )
+{
+    mDimensions = dim;
+}
+
+void UISlider::getText( Text** text, int* textCount )
+{
+    *textCount = 0;
+    *text = &mText;
+}
+
+void UISlider::setText( Text& text )
+{
+    mText = text;
+}
+
+void UISlider::setPercent( float val )
+{
+    CLAMP( val, 0.0f, 1.0f );
+    mPercent = val;
+}

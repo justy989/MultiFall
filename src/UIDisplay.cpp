@@ -103,9 +103,6 @@ void UIDisplay::clear()
     ReleaseCOM( mIB );
     ReleaseCOM( mTexture );
     ReleaseCOM( mFX );
-    //ReleaseCOM( mPixelShader );
-    //ReleaseCOM( mVertexShader );
-    //ReleaseCOM( mSampler );
     ReleaseCOM( mInputLayout );
 
     LOG_INFO << "Released UI Buffers, textures, shaders, sampler, and input layout" << LOG_ENDL;
@@ -131,7 +128,7 @@ void UIDisplay::buildWindowVB( UIWindow& window, float aspectRatio )
     }
 
     //Build BG
-    buildBGVB( &window );
+    buildBGVB( &window, mBGColor );
 
     UIWindow::Tab& t = window.getTab( window.getCurrentTab() );
 
@@ -140,6 +137,18 @@ void UIDisplay::buildWindowVB( UIWindow& window, float aspectRatio )
     //Loop through and build elements in the current tab
     for(int i = 0; i < t.elementCount; i++){
         buildBorderVB( t.elements[i], aspectRatio, window.getPosition() );
+
+        if( t.elements[i]->getElemType() == UIElement::ElemType::Slider ){
+            UISlider* slider = *(UISlider**)(t.elements + i);
+
+            UIWindow w;
+            w.setPosition( XMFLOAT2( slider->getPosition().x + window.getPosition().x, slider->getPosition().y + window.getPosition().y ) );
+            w.setDimension( XMFLOAT2( slider->getDimension().x * slider->getPercent(), slider->getDimension().y ) );
+
+            XMFLOAT4 pctColor = XMFLOAT4( 1.0f, 0.0f, 0.0f, 0.3f );
+
+            buildBGVB( &w, pctColor );
+        }
     }
 
     mBuildingElements = false;
@@ -200,8 +209,8 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
 
             //Draw the text bro
             tm.drawString( device, text->message,
-                t.elements[i]->getPosition().x + window.getPosition().x + xOffset, 
-                t.elements[i]->getPosition().y + window.getPosition().y + yOffset,
+                t.elements[i]->getPosition().x + window.getPosition().x + xOffset + text->offset.x, 
+                t.elements[i]->getPosition().y + window.getPosition().y + yOffset + text->offset.y,
                 colors[ t.elements[i]->getSelectedState() ]);
         }
     }
@@ -628,27 +637,27 @@ void UIDisplay::buildCornerVB( float x, float y, float aspectRatio )
     mVertsGenerated += 4;
 }
 
-void UIDisplay::buildBGVB( UIElement* elem )
+void UIDisplay::buildBGVB( UIElement* elem, XMFLOAT4& color )
 {
     FontVertex* v = mVerts + mVertsGenerated;
 
     v->position = XMFLOAT4( elem->getPosition().x, -elem->getPosition().y, UI_DETERMINE_Z, 1.0f );
-    v->color = mBGColor;
+    v->color = color;
     v->tex = XMFLOAT2( 0.0f, 0.75f );
     v++;
 
     v->position = XMFLOAT4( elem->getPosition().x + elem->getDimension().x, -elem->getPosition().y, UI_DETERMINE_Z, 1.0f );
-    v->color = mBGColor;
+    v->color = color;
     v->tex = XMFLOAT2( 1.0f, 0.75f );
     v++;
 
     v->position = XMFLOAT4( elem->getPosition().x + elem->getDimension().x, -elem->getPosition().y - elem->getDimension().y, UI_DETERMINE_Z, 1.0f );
-    v->color = mBGColor;
+    v->color = color;
     v->tex = XMFLOAT2( 1.0f, 0.765625f );
     v++;
 
     v->position = XMFLOAT4( elem->getPosition().x, -elem->getPosition().y - elem->getDimension().y, UI_DETERMINE_Z, 1.0f );
-    v->color = mBGColor;
+    v->color = color;
     v->tex = XMFLOAT2( 0.0f, 0.765625f );
     v++;
 

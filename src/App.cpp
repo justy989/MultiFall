@@ -223,16 +223,19 @@ bool App::init( )
 
     UIWindow::Text text;
     text.message = "Window Title";
+    text.offset.x = 0.0f;
+    text.offset.y = 0.0f;
+
     mUIWindow.setPosition( XMFLOAT2( -0.75f, -0.75f ) );
-    mUIWindow.setDimension( XMFLOAT2( 0.75f, 0.75f ) );
+    mUIWindow.setDimension( XMFLOAT2( 1.0f, 0.6f ) );
     mUIWindow.setText( text );
 
-    mUIWindow.setMinDimensions( XMFLOAT2( 0.8f, 0.5f ) );
+    mUIWindow.setMinDimensions( XMFLOAT2( 0.9f, 0.5f ) );
 
     mUIWindow.init( 3 );
-    mUIWindow.initTab( 0, "First", 2 );
-    mUIWindow.initTab( 1, "Second", 2 );
-    mUIWindow.initTab( 2, "Third", 2 );
+    mUIWindow.initTab( 0, "Generator", 2 );
+    mUIWindow.initTab( 1, "Settings", 2 );
+    mUIWindow.initTab( 2, "Third?", 2 );
 
     UIButton* btn = new UIButton();
 
@@ -249,6 +252,25 @@ bool App::init( )
     btn->setText(text);
     
     mUIWindow.setCurrentTab( 0 );
+
+    mSlider = new UISlider();
+    
+    pos.x += 0.2f;
+
+    mSlider->setPosition( pos );
+
+    dim.x += 0.2f;
+
+    mSlider->setDimension( dim );
+
+    text.message = "FOV";
+    text.offset.x = -8.0f * FONTWIDTH;
+    text.offset.y = 0.0f;
+
+    mSlider->setPercent( 0.5f );
+    mSlider->setText( text );
+
+    mUIWindow.addElem( mSlider, 1 );
 
     D3D11_BUFFER_DESC constDesc;
     ZeroMemory( &constDesc, sizeof( constDesc ) );
@@ -590,6 +612,9 @@ void App::update( float dt )
         change.id == 0 ){
         mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
         mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f);
+    }else if( change.action == UIWindow::UserChange::Action::MoveSlider &&
+        change.id == 0 ){
+        mCamera.setFOV( 40.0f + ( 20.0f * mSlider->getPercent() ) );
     }
 }
 

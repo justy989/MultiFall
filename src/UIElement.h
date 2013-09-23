@@ -30,7 +30,7 @@ public:
 
     struct Text{
         char* message;
-        XMFLOAT2 position;
+        XMFLOAT2 offset;
     };
 
     enum ElemType{
@@ -150,9 +150,22 @@ public:
     virtual UserChange update( bool mouseClick, XMFLOAT2 mousePosition, 
                                bool keyPress, byte key );
 
-protected:
+    virtual void setPosition( XMFLOAT2& pos );
+    virtual void setDimension( XMFLOAT2& dim );
+    virtual void getText( Text** text, int* textCount );
+    virtual void setText( Text& text );
 
+    void setPercent( float val );
+    inline float getPercent();
+
+    virtual ElemType getElemType(){return Slider;}
+
+protected:
+    
+    float mPercent;
 };
+
+inline float UISlider::getPercent(){return mPercent;}
 
 class UIDropMenu : public UIElement{
 public:

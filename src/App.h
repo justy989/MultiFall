@@ -19,6 +19,7 @@
 #include "StaticMesh.h"
 
 #include "UIDisplay.h"
+#include "UIElement.h"
 
 #include <d3dx11effect.h>
 
@@ -88,6 +89,7 @@ protected:
 
     UIDisplay mUIDisplay;
     UIWindow mUIWindow;
+    UISlider* mSlider;
 
     bool mLeftClick;
 

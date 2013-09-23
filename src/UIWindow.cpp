@@ -141,10 +141,6 @@ void UIWindow::setDimension( XMFLOAT2& dim )
 void UIWindow::setText( Text& text )
 {
     mText = text;
-
-    //Position the text
-    mText.position.x = mPosition.x + 0.01f;
-    mText.position.y = mPosition.y + 0.01f;
 }
 
 void UIWindow::init( uint tabCount )

@@ -62,7 +62,7 @@ protected:
     void buildTabVB( UIWindow& window, float aspectRatio );
 
     //Setup the background for the border of an element
-    void buildBGVB(  UIElement* elem );
+    void buildBGVB(  UIElement* elem, XMFLOAT4& color );
 
     //Builds the various elements
 
