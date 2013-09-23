@@ -158,9 +158,12 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
     y = window.getPosition().y + (UIWINDOW_TITLE_BAR_HEIGHT / 2.0f) - ( FONTHEIGHT / 2.0f );
     x = window.getPosition().x + ( window.getDimension().x / 2.0f ) - ( len / 2.0f );
 
-    //Convert to weird text manager cooords :D
-    //x += 1.0f; x /= 2.0f;
-    //y += 1.0f; y /= 2.0f;
+    XMFLOAT4 colors[3] = 
+    {
+        XMFLOAT4(1,1,1,1), //Not selected: White
+        XMFLOAT4(1,1,0,1), //Highlighted: Yellow
+        XMFLOAT4(0,0,1,1)  //Selected: Blue
+    };
 
     D3DX11_TECHNIQUE_DESC techDesc;
 	mTechnique->GetDesc( &techDesc );
@@ -177,19 +180,13 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
         for(uint i = 0; i < window.getTabCount(); i++){
             tm.drawString( device, window.getTab(i).name, 
                 window.getPosition().x +(mBorderDimension * 2.0f) + len, 
-                window.getPosition().y + (UIWINDOW_TITLE_BAR_HEIGHT * 2.0f) - ( FONTHEIGHT * 1.5f ));
+                window.getPosition().y + (UIWINDOW_TITLE_BAR_HEIGHT * 2.0f) - ( FONTHEIGHT * 1.5f ),
+                i == window.getCurrentTab() ? colors[2] : window.getTab(i).highlighted ? colors[1] : colors[0]);
             len += static_cast<float>(strlen(window.getTab(i).name)) * FONTWIDTH + ( FONTWIDTH / 2.0f );
         }
 
         //Draw UI Text
         UIWindow::Tab& t = window.getTab( window.getCurrentTab() );
-
-        XMFLOAT4 colors[3] = 
-        {
-            XMFLOAT4(1,1,1,1), //Not selected: White
-            XMFLOAT4(1,1,0,1), //Highlighted: Yellow
-            XMFLOAT4(0,0,1,1)  //Selected: Blue
-        };
 
         //Loop through and build elements in the current tab
         for(int i = 0; i < t.elementCount; i++){

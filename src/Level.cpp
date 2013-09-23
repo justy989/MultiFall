@@ -59,6 +59,7 @@ bool Level::addTorch(XMFLOAT3 pos, float rotAbootYAxis)
 	{
 		return false;
 	}
+
 	float scale = 0.1f;
 	XMMATRIX w = XMMatrixScaling(scale, scale, scale) * XMMatrixRotationAxis(XMVectorSet(0,1,0,1), rotAbootYAxis) * XMMatrixTranslation(pos.x, pos.y, pos.z);
 	TorchInfo t;

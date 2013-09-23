@@ -10,7 +10,8 @@ UIWindow::Tab::Tab() :
     elementCount(0),
     name(NULL),
     width(0.0f),
-    size(0)
+    size(0),
+    highlighted(false)
 {
 
 }
@@ -68,28 +69,34 @@ UIWindow::UserChange UIWindow::update( bool mouseClick, XMFLOAT2 mousePosition,
                 mResizeClickPos = mousePosition;
             }
         }
-
-        float len = 0.0f;
-        float lastLen = 0.0f;
-
-        //Are we inside one of the tab locations?
-        for(uint i = 0; i < mTabCount; i++){
-
-            len += static_cast<float>( strlen( mTabs[i].name ) ) * FONTWIDTH;
-
-            if( mousePosition.x >= mPosition.x + lastLen && mousePosition.x <= mPosition.x + len &&
-                mousePosition.y >= mPosition.y + UIWINDOW_TITLE_BAR_HEIGHT && 
-                mousePosition.y <= mPosition.y + ( 2.0f * UIWINDOW_TITLE_BAR_HEIGHT ) ){
-                mCurrentTab = i;
-                break;
-            }
-
-            lastLen = len;
-        }
-
     }else{
         mTitleClickPos.x = -2.0f;
         mResizeClickPos.x = -2.0f;
+    }
+
+    
+    float len = 0.0f;
+    float lastLen = 0.0f;
+
+    //Are we inside one of the tab locations?
+    for(uint i = 0; i < mTabCount; i++){
+
+        //Init highlighted to false
+        mTabs[i].highlighted = false;
+
+        len += static_cast<float>( strlen( mTabs[i].name ) ) * FONTWIDTH;
+
+        if( mousePosition.x >= mPosition.x + lastLen && mousePosition.x <= mPosition.x + len &&
+            mousePosition.y >= mPosition.y + UIWINDOW_TITLE_BAR_HEIGHT && 
+            mousePosition.y <= mPosition.y + ( 2.0f * UIWINDOW_TITLE_BAR_HEIGHT ) ){
+            if(mouseClick ){
+                mCurrentTab = i;
+            }else{
+                mTabs[i].highlighted = true;
+            }
+        }
+
+        lastLen = len;
     }
 
     for(int i = 0; i < mTabs[ mCurrentTab ].elementCount; i++){

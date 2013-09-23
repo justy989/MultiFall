@@ -114,6 +114,8 @@ void LevelDisplay::clear()
     ReleaseCOM( mFloorTexture );
     ReleaseCOM( mWallTexture );
 
+    mTorch.clear();
+
     LOG_INFO << "Released Level Display Assets and buffers" << LOG_ENDL;
 }
 

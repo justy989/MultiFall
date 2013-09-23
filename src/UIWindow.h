@@ -23,6 +23,8 @@ public:
 
         float width;
 
+        bool highlighted;
+
         XMFLOAT4 color;
     };
 
