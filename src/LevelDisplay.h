@@ -9,6 +9,14 @@
 
 #include "Level.h"
 
+//Fog parameters
+struct Fog{
+    XMFLOAT4 color; //Fog blending color
+
+    float start; //No fog < start
+    float end; //Max fog >= end
+};
+
 class LevelDisplay{
 public:
 
@@ -31,6 +39,9 @@ public:
 
     //Draw the Level Mesh that we generated
     void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx );
+
+    //Set the fog we are going to display
+    void setFog( XMFLOAT4& fogColor, float fogStart, float fogEnd );
 
 protected:
 
@@ -69,6 +80,10 @@ protected:
     int mRampCount; //How many ramps are there?
 
     int mFloorTileRows; //Number of rows in the floor tile texture
+
+    //Passed to the shader for fog
+    //NOTE: will need to be moved to world display eventually
+    Fog mFog;
 };
 
 #endif  

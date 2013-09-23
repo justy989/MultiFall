@@ -1,2 +1,9 @@
-brick_wall.png 1.0
-wood_floor.png 0.5
+WallTexture = brick_wall.png 
+WallClip = 1.0
+FloorTexture = wood_floor.png
+FloorClip = 0.5
+FogStart = 5.0
+FogEnd = 15.0
+FogColorRed = 0.0
+FogColorBlue = 0.0
+FogColorGreen = 0.0

@@ -129,6 +129,15 @@ bool LevelDisplay::createMeshFromLevel( ID3D11Device* device, Level& level, floa
     return true;
 }
 
+void LevelDisplay::setFog( XMFLOAT4& fogColor, float fogStart, float fogEnd )
+{
+    mFog.color = fogColor;
+    mFog.start = fogStart;
+    mFog.end = fogEnd;
+
+    //Update constant buffer
+}
+
 void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx )
 {
     UINT stride = sizeof(DungeonVertex);

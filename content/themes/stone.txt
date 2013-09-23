@@ -1,2 +1,9 @@
-stonewall1.png 1.0
-stonefloorsheet1.png 0.25ick 
+WallTexture = stonewall1.png 
+WallClip = 1.0
+FloorTexture = stonefloorsheet1.png 
+FloorClip = 0.25
+FogStart = 5.0
+FogEnd = 15.0
+FogColorRed = 0.0
+FogColorBlue = 0.0
+FogColorGreen = 0.0
