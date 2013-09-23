@@ -196,9 +196,15 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
             UIElement::Text* text;
             int tCount;
             t.elements[i]->getText(&text, &tCount );
+
+            //Center the text
+            float xOffset = (t.elements[i]->getDimension().x / 2.0f) - (static_cast<float>(strlen(text->message)) * FONTWIDTH / 2.0f);
+            float yOffset = (t.elements[i]->getDimension().y / 2.0f) -  FONTHEIGHT / 2.0f;
+
+            //Draw the text bro
             tm.drawString( device, text->message,
-                t.elements[i]->getPosition().x + window.getPosition().x, 
-                t.elements[i]->getPosition().y + window.getPosition().y,
+                t.elements[i]->getPosition().x + window.getPosition().x + xOffset, 
+                t.elements[i]->getPosition().y + window.getPosition().y + yOffset,
                 colors[ t.elements[i]->getSelectedState() ]);
         }
     }
