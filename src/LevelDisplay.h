@@ -8,6 +8,7 @@
 #include <xnamath.h>
 
 #include "Level.h"
+#include "World.h"
 
 //Fog parameters
 struct Fog{
@@ -38,7 +39,7 @@ public:
     void clear();
 
     //Draw the Level Mesh that we generated
-    void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx );
+    void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world );
 
     //Set the fog we are going to display
     void setFog( XMFLOAT4& fogColor, float fogStart, float fogEnd );
@@ -84,6 +85,8 @@ protected:
     //Passed to the shader for fog
     //NOTE: will need to be moved to world display eventually
     Fog mFog;
+
+	StaticMesh mTorch;
 };
 
 #endif  

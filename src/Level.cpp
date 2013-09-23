@@ -7,7 +7,8 @@ Level::Level() :
     mHeight(0),
     mDepth(0),
     mBlocks(0),
-    mNumLights(0)
+    mNumLights(0),
+	mNumTorches(0)
 {
 
 }
@@ -50,6 +51,24 @@ bool Level::addLight( PointLight& light )
     mNumLights++;
 
     return true;
+}
+
+bool Level::addTorch(XMFLOAT3 pos, float rotAbootYAxis)
+{
+	if(mNumTorches >= LEVEL_MAX_LIGHTS)
+	{
+		return false;
+	}
+	float scale = 0.1f;
+	XMMATRIX w = XMMatrixScaling(scale, scale, scale) * XMMatrixRotationAxis(XMVectorSet(0,1,0,1), rotAbootYAxis) * XMMatrixTranslation(pos.x, pos.y, pos.z);
+	TorchInfo t;
+	t.world = w;
+	t.mesh = 0;
+
+	mTorches[mNumTorches] = t;
+	mNumTorches++;
+
+	return true;
 }
 
 void Level::clear()

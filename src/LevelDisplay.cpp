@@ -59,6 +59,10 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
         return false;
     }
 
+	if( !mTorch.loadFromObj(device, "content/meshes/torch.obj", L"content/textures/torch_texture.png") ){
+        return false;
+    }
+
     LOG_INFO << "Created Input Description and Texture Sampler for Level" << LOG_ENDL;
     return true;
 }
@@ -138,13 +142,13 @@ void LevelDisplay::setFog( XMFLOAT4& fogColor, float fogStart, float fogEnd )
     //Update constant buffer
 }
 
-void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx )
+void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world )
 {
     UINT stride = sizeof(DungeonVertex);
     UINT offset = 0;
 
     //Update the world matrix
-    XMMATRIX world = XMMatrixIdentity();
+    XMMATRIX worldm = XMMatrixIdentity();
     //ID3DX11EffectMatrixVariable* mFXWorld = fx->GetVariableByName("gWorld")->AsMatrix();
 	//mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
 
@@ -153,7 +157,7 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx )
     device->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST );
 
     //Update the world matrix
-    device->UpdateSubresource( mWorldCB, 0, 0, &world, 0, 0 ); 
+    device->UpdateSubresource( mWorldCB, 0, 0, &worldm, 0, 0 ); 
     device->VSSetConstantBuffers( 1, 1, &mWorldCB );
 
     //Set the floor texture
@@ -175,6 +179,24 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx )
     device->IASetIndexBuffer( mWallsIB, DXGI_FORMAT_R16_UINT, 0 );
     device->IASetVertexBuffers(0, 1, &mWallsVB, &stride, &offset);
     device->DrawIndexed(6 * mWallCount, 0, 0);
+
+	Level& level = world.getLevel();
+	for(int i = 0; i < level.getNumTorches(); i++)
+	{
+		worldm = level.getTorch(i).world;
+
+		worldm = XMMatrixTranspose( worldm );
+
+		device->UpdateSubresource( mWorldCB, 0, 0, &worldm, 0, 0 ); 
+		device->VSSetConstantBuffers( 1, 1, &mWorldCB );
+
+		if(level.getTorch(i).mesh == 0)
+		{
+			mTorch.draw(device);
+		}
+		
+	}
+
 }
 
 bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  )
@@ -353,11 +375,16 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                     verts[ v ].position.z = static_cast<float>(j) * blockDimension;
 					verts[ v ].tex = XMFLOAT2(1, 0);
 
-					if(i % 3 == 0 && j % 5 == 0)
+					if(i % 3 == 0 && j % 4 == 0 && (level.getBlockHeight( i, j ) - level.getBlockHeight( nextI, nextJ )) > 1)
 					{
                         PointLight pl;
-                        pl.set( verts[v].position, pl.getRadius(), pl.getIntensity(), pl.getColor() );
+						XMFLOAT3 pos = verts[v].position;
+						pos.y -= 0.5f * blockDimension;
+						pos.z += 0.5f * blockDimension;
+                        pl.set( pos, pl.getRadius(), pl.getIntensity(), pl.getColor() );
                         level.addLight( pl );
+
+						level.addTorch(pos, XMConvertToRadians(-90.0f));
 					}
 					
                     v++;

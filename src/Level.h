@@ -3,6 +3,7 @@
 
 #include "Utils.h"
 #include "Light.h"
+#include "StaticMesh.h"
 
 #define LEVEL_MAX_LIGHTS 128
 
@@ -30,11 +31,20 @@ public:
         byte wallID; //ID wall texture selection
     };
 
+	struct TorchInfo
+	{
+		XMMATRIX world;
+		ushort mesh;
+		//potentially other stuff like texture maybe
+	};
+
     //initialize a room to certain dimensions
     bool init( short width, short depth, byte height );
 
     //Add a light if there is room for it!
-    bool addLight( PointLight& light ); 
+    bool addLight( PointLight& light );
+
+	bool addTorch(XMFLOAT3 pos, float rotAbootYAxis);
 
     //clear the room's allocated memory
     void clear();
@@ -61,6 +71,9 @@ public:
     inline ushort getNumLights();
     inline PointLight& getLight( ushort index );
 
+	inline ushort getNumTorches();
+	inline TorchInfo& getTorch( ushort index );
+
 protected:
 
     //Environment Layout
@@ -75,6 +88,8 @@ protected:
     PointLight mLights[ LEVEL_MAX_LIGHTS ];
 
     //Furniture
+	ushort mNumTorches;
+	TorchInfo mTorches[ LEVEL_MAX_LIGHTS ];
 };
 
 short Level::getWidth(){return mWidth;}
@@ -83,5 +98,8 @@ byte Level::getHeight(){return mHeight;}
 
 inline ushort Level::getNumLights(){return mNumLights;}
 inline PointLight& Level::getLight( ushort index ){return mLights[ index ];}
+
+inline ushort Level::getNumTorches(){return mNumTorches;}
+inline Level::TorchInfo& Level::getTorch( ushort index ){return mTorches[ index ];}
 
 #endif

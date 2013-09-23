@@ -263,7 +263,7 @@ bool App::init( )
 
     LevelThemeLoader ltl;
 
-    ltl.loadTheme("content/themes/stone.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
+    ltl.loadTheme("content/themes/brick_wood.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
 
     mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
     mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f );	
