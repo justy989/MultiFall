@@ -29,11 +29,11 @@ public:
     void clear();
 
 	//Draw string directly to the screen
-	void drawString(ID3D11DeviceContext* device, std::string text, float x, float y) ;
+	void drawString(ID3D11DeviceContext* device, std::string text, float x, float y, XMFLOAT4 color = XMFLOAT4(1,1,1,1) );
 
 protected:
 
-	void setupBuffers(ID3D11Device* device, std::string text);
+	void setupBuffers(ID3D11Device* device, std::string text, XMFLOAT4 color);
 
 	bool setFontQuad(char c, FontVertex* fontQuad);
 

@@ -92,18 +92,16 @@ UIWindow::UserChange UIWindow::update( bool mouseClick, XMFLOAT2 mousePosition,
         mResizeClickPos.x = -2.0f;
     }
 
-
-
-    /*
     for(int i = 0; i < mTabs[ mCurrentTab ].elementCount; i++){
         change = mTabs[ mCurrentTab ].elements[ i ]->update( mouseClick,
-            mousePosition,
+            XMFLOAT2( mousePosition.x - mPosition.x, mousePosition.y - mPosition.y ),
             keyPress, key );
 
         if( change.action != UserChange::Action::None ){
+            change.id = i;
             return change;
         }
-    }*/
+    }
 
     change.action = UserChange::Action::None;
     change.dropOptionIndex = 0;

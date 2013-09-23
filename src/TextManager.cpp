@@ -78,7 +78,7 @@ void TextManager::clear()
     LOG_INFO << "Released Text Assets and Buffers" << LOG_ENDL;
 }
 
-void TextManager::setupBuffers(ID3D11Device* device, std::string text)
+void TextManager::setupBuffers(ID3D11Device* device, std::string text, XMFLOAT4 color)
 {
 	//each char in the string needs it's own quad
 	int length = text.length()*4;
@@ -93,10 +93,10 @@ void TextManager::setupBuffers(ID3D11Device* device, std::string text)
 	for(int i = 0; i < text.length(); i++)
 	{
 		//set default font color
-		fontQuads[i * 4].color		= XMFLOAT4(1,1,1,1);
-		fontQuads[i * 4 + 1].color	= XMFLOAT4(1,1,1,1);
-		fontQuads[i * 4 + 2].color	= XMFLOAT4(1,1,1,1);
-		fontQuads[i * 4 + 3].color	= XMFLOAT4(1,1,1,1);
+		fontQuads[i * 4].color		= color;
+		fontQuads[i * 4 + 1].color	= color;
+		fontQuads[i * 4 + 2].color	= color;
+		fontQuads[i * 4 + 3].color	= color;
 
 		//set font location starting at -1, 1 (top left)
 		//and move right (no wrapping)
@@ -159,11 +159,11 @@ void TextManager::setupBuffers(ID3D11Device* device, std::string text)
     delete[] inds;
 }
 
-void TextManager::drawString(ID3D11DeviceContext* device, std::string text, float x, float y)
+void TextManager::drawString(ID3D11DeviceContext* device, std::string text, float x, float y, XMFLOAT4 color)
 {
 	ID3D11Device* d;
 	device->GetDevice(&d);
-	setupBuffers(d, text);	
+	setupBuffers(d, text, color);	
 
 	UINT stride = sizeof(FontVertex);
     UINT offset = 0;

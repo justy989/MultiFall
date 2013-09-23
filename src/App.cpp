@@ -242,7 +242,7 @@ bool App::init( )
     btn->setPosition( pos );
     btn->setDimension( dim );
 
-    text.message = "Button";
+    text.message = "Gen";
 
     mUIWindow.addElem( btn, 0 );
 
@@ -584,7 +584,13 @@ void App::update( float dt )
 
     sprintf(MousePosString, "Mouse: %.2f, %.2f", mousePos.x, mousePos.y);
 
-    mUIWindow.update( mLeftClick, mousePos, false, 0 );
+    UIWindow::UserChange change = mUIWindow.update( mLeftClick, mousePos, false, 0 );
+
+    if( change.action == UIWindow::UserChange::Action::ClickButton &&
+        change.id == 0 ){
+        mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
+        mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f);
+    }
 }
 
 void App::draw( )

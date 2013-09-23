@@ -24,6 +24,8 @@ public:
             int dropOptionIndex;
             float sliderValue;
         };
+
+        int id;
     };
 
     struct Text{
@@ -40,6 +42,12 @@ public:
         InputBox,
         TextBox,
         Window
+    };
+
+    enum SelectedState{
+        Idle,
+        Highlighted,
+        Selected
     };
 
     //Constructor
@@ -78,6 +86,8 @@ public:
 
     inline void setActive( bool active );
 
+    inline SelectedState getSelectedState();
+
 protected:
 
     //Checks if a point is inside the component
@@ -89,13 +99,13 @@ protected:
     XMFLOAT2 mDimensions;
 
     bool mIsActive;
-    bool mIsHighlighted;
+    SelectedState mSelected;
 
     Text mText;
 };
 
 inline bool UIElement::isActive(){return mIsActive;}
-inline bool UIElement::isHighlighted(){return mIsHighlighted;}
+inline UIElement::SelectedState UIElement::getSelectedState(){return mSelected;}
 
 inline void UIElement::setActive( bool active ){mIsActive = active;}
 
@@ -117,7 +127,7 @@ public:
 
 protected:
 
-    void centerText();
+    bool mClicked;
 };
 
 class UICheckbox : public UIElement{

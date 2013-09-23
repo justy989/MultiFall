@@ -184,6 +184,13 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
         //Draw UI Text
         UIWindow::Tab& t = window.getTab( window.getCurrentTab() );
 
+        XMFLOAT4 colors[3] = 
+        {
+            XMFLOAT4(1,1,1,1), //Not selected: White
+            XMFLOAT4(1,1,0,1), //Highlighted: Yellow
+            XMFLOAT4(0,0,1,1)  //Selected: Blue
+        };
+
         //Loop through and build elements in the current tab
         for(int i = 0; i < t.elementCount; i++){
             UIElement::Text* text;
@@ -191,7 +198,8 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
             t.elements[i]->getText(&text, &tCount );
             tm.drawString( device, text->message,
                 t.elements[i]->getPosition().x + window.getPosition().x, 
-                t.elements[i]->getPosition().y + window.getPosition().y);
+                t.elements[i]->getPosition().y + window.getPosition().y,
+                colors[ t.elements[i]->getSelectedState() ]);
         }
     }
 }

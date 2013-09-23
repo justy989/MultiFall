@@ -2,7 +2,7 @@
 
 UIElement::UIElement() :
     mIsActive(true),
-    mIsHighlighted(false)
+    mSelected(SelectedState::Idle)
 {
     mPosition.x = 0.0f;
     mPosition.y = 0.0f;
@@ -29,8 +29,30 @@ UIElement::UserChange UIButton::update( bool mouseClick, XMFLOAT2 mousePosition,
     UserChange change;
     change.action = UserChange::Action::None;
 
-    if( mouseClick && pointCheckInside( mousePosition ) ){
-        change.action = UserChange::Action::ClickButton;
+    mSelected = SelectedState::Idle;
+
+    //Is the mouse inside the button?
+    if( pointCheckInside( mousePosition ) ){
+
+        //Is the mouse clicked?
+        if( mouseClick ){
+            //Tell the display the button is selected
+            mSelected = SelectedState::Selected;
+
+            //Only send event if this is the first click
+            if( !mClicked ){
+                change.action = UserChange::Action::ClickButton;
+                mClicked = true;
+            }
+        }else{
+            //Highlight the button
+            mSelected = SelectedState::Highlighted;
+        }
+    }
+
+    //Reset the mClicked when the mouse is released
+    if( !mouseClick ){
+        mClicked = false;
     }
 
     return change;
@@ -39,27 +61,16 @@ UIElement::UserChange UIButton::update( bool mouseClick, XMFLOAT2 mousePosition,
 void UIButton::setPosition( XMFLOAT2& pos )
 {
     mPosition = pos;
-
-    centerText();
 }
 
 void UIButton::setDimension( XMFLOAT2& dim )
 {
     mDimensions = dim;
-
-    centerText();
 }
 
 void UIButton::setText( Text& text )
 {
     mText = text;
-
-    centerText();
-}
-
-void UIButton::centerText()
-{
-
 }
 
 void UIButton::getText( Text** text, int* textCount )
