@@ -13,6 +13,7 @@ public:
             ClickButton,
             CheckBox,
             UncheckBox,
+            DroppedDown,
             SelectDropOption,
             MoveSlider,
             TextboxSelected
@@ -61,17 +62,14 @@ public:
                                bool keyPress, byte key ) = 0;
 
     //Set the position of the UI Element
-    virtual void setPosition( XMFLOAT2& pos ) = 0;
-    virtual void setDimension( XMFLOAT2& dim ) = 0;
+    virtual void setPosition( XMFLOAT2& pos );
+    virtual void setDimension( XMFLOAT2& dim );
 
-    //Get Text from the element, to draw
-    virtual void getText( Text** text, int* textCount ){
-        *text = &mText;
-        *textCount = 0;
-    }
+    //Get Text from the element, to draw, for most elements it is only
+    virtual void getText( Text** text, uint* textCount );
 
     //Set the text for a component
-    virtual void setText( Text& text ) = 0;
+    virtual void setText( Text& text, uint index = 0 );
 
     //Get the position of the element
     inline const XMFLOAT2& getPosition();
@@ -118,11 +116,6 @@ public:
     virtual UserChange update( bool mouseClick, XMFLOAT2 mousePosition, 
                                bool keyPress, byte key );
 
-    virtual void setPosition( XMFLOAT2& pos );
-    virtual void setDimension( XMFLOAT2& dim );
-    virtual void getText( Text** text, int* textCount );
-    virtual void setText( Text& text );
-
     virtual ElemType getElemType(){return Button;}
 
 protected:
@@ -137,11 +130,6 @@ public:
 
     virtual UserChange update( bool mouseClick, XMFLOAT2 mousePosition, 
                                bool keyPress, byte key );
-    
-    virtual void setPosition( XMFLOAT2& pos );
-    virtual void setDimension( XMFLOAT2& dim );
-    virtual void getText( Text** text, int* textCount );
-    virtual void setText( Text& text );
 
     virtual ElemType getElemType(){return CheckBox;}
 
@@ -165,11 +153,6 @@ public:
     virtual UserChange update( bool mouseClick, XMFLOAT2 mousePosition, 
                                bool keyPress, byte key );
 
-    virtual void setPosition( XMFLOAT2& pos );
-    virtual void setDimension( XMFLOAT2& dim );
-    virtual void getText( Text** text, int* textCount );
-    virtual void setText( Text& text );
-
     void setPercent( float val );
     inline float getPercent();
 
@@ -190,9 +173,35 @@ public:
     virtual UserChange update( bool mouseClick, XMFLOAT2 mousePosition, 
                                bool keyPress, byte key );
 
+    void setOptions( char** options, uint optionCount );
+    char* getOption( uint index );
+    uint getOptionCount();
+
+    virtual ElemType getElemType(){return DropMenu;}
+
+    inline void setSelectedOption( uint option );
+    inline uint getSelectedOption();
+    inline uint getHightlightedOption();
+    inline bool isDropped();
+
 protected:
 
+    char** mOptions;
+    uint mOptionCount;
+
+    uint mSelectedOption;
+    uint mHighlightedOption;
+
+    bool mIsDropped;
+    bool mClicked;
+
+    float mSavedHeight;
 };
+
+inline void UIDropMenu::setSelectedOption( uint option ){mSelectedOption = option;}
+inline uint UIDropMenu::getSelectedOption(){return mSelectedOption;}
+inline uint UIDropMenu::getHightlightedOption(){return mHighlightedOption;}
+inline bool UIDropMenu::isDropped(){return mIsDropped;}
 
 class UIInputBox : public UIElement{
 public:

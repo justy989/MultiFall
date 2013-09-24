@@ -167,7 +167,7 @@ void UIDisplay::buildWindowVB( UIWindow& window, float aspectRatio )
 void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, TextManager& tm )
 {
     UIWindow::Text* text;
-    int textCount;
+    uint textCount;
     window.getText( &text, &textCount );
 
     float x = 0.0f;
@@ -210,7 +210,7 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
         //Loop through and build elements in the current tab
         for(int i = 0; i < t.elementCount; i++){
             UIElement::Text* text;
-            int tCount;
+            uint tCount;
             t.elements[i]->getText(&text, &tCount );
 
             //Center the text

@@ -1,4 +1,7 @@
 #include "UIElement.h"
+#include "TextManager.h"
+
+#include <assert.h>
 
 UIElement::UIElement() :
     mIsActive(true),
@@ -21,6 +24,28 @@ bool UIElement::pointCheckInside( XMFLOAT2 point )
 {
     return ( point.x >= mPosition.x && point.x <= ( mPosition.x + mDimensions.x ) &&
              point.y >= mPosition.y && point.y <= ( mPosition.y + mDimensions.y ) );
+}
+
+
+void UIElement::setPosition( XMFLOAT2& pos )
+{
+    mPosition = pos;
+}
+
+void UIElement::setDimension( XMFLOAT2& dim )
+{
+    mDimensions = dim;
+}
+
+void UIElement::getText( Text** text, uint* textCount )
+{
+    *textCount = 0;
+    *text = &mText;
+}
+
+void UIElement::setText( Text& text, uint index )
+{
+    mText = text;
 }
 
 UIElement::UserChange UIButton::update( bool mouseClick, XMFLOAT2 mousePosition, 
@@ -58,27 +83,6 @@ UIElement::UserChange UIButton::update( bool mouseClick, XMFLOAT2 mousePosition,
     return change;
 }
 
-void UIButton::setPosition( XMFLOAT2& pos )
-{
-    mPosition = pos;
-}
-
-void UIButton::setDimension( XMFLOAT2& dim )
-{
-    mDimensions = dim;
-}
-
-void UIButton::setText( Text& text )
-{
-    mText = text;
-}
-
-void UIButton::getText( Text** text, int* textCount )
-{
-    *textCount = 0;
-    *text = &mText;
-}
-
 UISlider::UISlider() :
     mPercent(0.0f)
 {
@@ -103,27 +107,6 @@ UIElement::UserChange UISlider::update( bool mouseClick, XMFLOAT2 mousePosition,
     }
 
     return change;
-}
-
-void UISlider::setPosition( XMFLOAT2& pos )
-{
-    mPosition = pos;
-}
-
-void UISlider::setDimension( XMFLOAT2& dim )
-{
-    mDimensions = dim;
-}
-
-void UISlider::getText( Text** text, int* textCount )
-{
-    *textCount = 0;
-    *text = &mText;
-}
-
-void UISlider::setText( Text& text )
-{
-    mText = text;
 }
 
 void UISlider::setPercent( float val )
@@ -166,23 +149,74 @@ UIElement::UserChange UICheckbox::update( bool mouseClick, XMFLOAT2 mousePositio
     return change;
 }
 
-void UICheckbox::setPosition( XMFLOAT2& pos )
+UIDropMenu::UIDropMenu() :
+    mOptions(NULL),
+    mOptionCount(0),
+    mIsDropped(false),
+    mSelectedOption(0),
+    mHighlightedOption(0),
+    mSavedHeight(0.0f),
 {
-    mPosition = pos;
+
 }
 
-void UICheckbox::setDimension( XMFLOAT2& dim )
+UIDropMenu::UserChange UIDropMenu::update( bool mouseClick, XMFLOAT2 mousePosition, 
+                                           bool keyPress, byte key )
 {
-    mDimensions = dim;
+    UIElement::UserChange change;
+    change.action = UIElement::UserChange::None;
+
+    mSelected = UIElement::SelectedState::Idle;
+
+    if( !mIsDropped ){
+        if( pointCheckInside( mousePosition ) ){
+            mSelected = UIElement::SelectedState::Highlighted;
+
+            if( mouseClick ){
+                if( !mClicked ){
+                    change.action = UserChange::Action::DroppedDown;
+                    mClicked = true;
+                    mIsDropped = true;
+                    mSavedHeight = mDimensions.y;
+                    mDimensions.y = FONTHEIGHT * static_cast<float>(mOptionCount);
+                }
+            }
+        }
+    }else{
+        if( pointCheckInside( mousePosition ) ){
+            mSelected = UIElement::SelectedState::Highlighted;
+
+            if( mouseClick ){
+                if( !mClicked ){
+                    change.action = UserChange::Action::SelectDropOption;
+                    mSelectedOption = static_cast<uint>( ( mousePosition.y - mPosition.y ) / FONTHEIGHT );
+                }
+            }
+        }
+    }
+
+    //Reset the mClicked when the mouse is released
+    if( !mouseClick ){
+        mClicked = false;
+    }
+
+    return change;
 }
 
-void UICheckbox::getText( Text** text, int* textCount )
+void UIDropMenu::setOptions( char** options, uint optionCount )
 {
-    *textCount = 0;
-    *text = &mText;
+    mOptions = options;
+    mOptionCount = optionCount;
 }
 
-void UICheckbox::setText( Text& text )
+char* UIDropMenu::getOption( uint index )
 {
-    mText = text;
+    assert( index < mOptionCount );
+
+    return mOptions[ index ];
+}
+
+uint UIDropMenu::getOptionCount()
+{
+    return mOptionCount;
 }
