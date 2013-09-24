@@ -91,6 +91,8 @@ UIElement::UserChange UISlider::update( bool mouseClick, XMFLOAT2 mousePosition,
     UIElement::UserChange change;
     change.action = UIElement::UserChange::Action::None;
 
+    mSelected = UIElement::SelectedState::Idle;
+
     if( pointCheckInside( mousePosition ) ){
         mSelected = UIElement::SelectedState::Highlighted;
 
@@ -128,4 +130,59 @@ void UISlider::setPercent( float val )
 {
     CLAMP( val, 0.0f, 1.0f );
     mPercent = val;
+}
+
+UICheckbox::UICheckbox() :
+    mChecked(false)
+{
+
+}
+
+UIElement::UserChange UICheckbox::update( bool mouseClick, XMFLOAT2 mousePosition, 
+                            bool keyPress, byte key )
+{
+    UIElement::UserChange change;
+    change.action = UIElement::UserChange::None;
+
+    mSelected = UIElement::SelectedState::Idle;
+
+    if( pointCheckInside( mousePosition ) ){
+        mSelected = UIElement::SelectedState::Highlighted;
+
+        if( mouseClick ){
+            if( !mClicked ){
+                change.action = UserChange::Action::CheckBox;
+                mClicked = true;
+                mChecked = !mChecked;
+            }
+        }
+    }
+
+    //Reset the mClicked when the mouse is released
+    if( !mouseClick ){
+        mClicked = false;
+    }
+
+    return change;
+}
+
+void UICheckbox::setPosition( XMFLOAT2& pos )
+{
+    mPosition = pos;
+}
+
+void UICheckbox::setDimension( XMFLOAT2& dim )
+{
+    mDimensions = dim;
+}
+
+void UICheckbox::getText( Text** text, int* textCount )
+{
+    *textCount = 0;
+    *text = &mText;
+}
+
+void UICheckbox::setText( Text& text )
+{
+    mText = text;
 }

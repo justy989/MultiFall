@@ -90,6 +90,7 @@ protected:
     UIDisplay mUIDisplay;
     UIWindow mUIWindow;
     UISlider* mSlider;
+    UICheckbox* mCheckBox;
 
     bool mLeftClick;
 

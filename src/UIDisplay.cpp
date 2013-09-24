@@ -148,6 +148,16 @@ void UIDisplay::buildWindowVB( UIWindow& window, float aspectRatio )
             XMFLOAT4 pctColor = XMFLOAT4( 1.0f, 0.0f, 0.0f, 0.3f );
 
             buildBGVB( &w, pctColor );
+        }else if( t.elements[i]->getElemType() == UIElement::ElemType::CheckBox ){
+            UICheckbox* cb = *(UICheckbox**)(t.elements + i);
+
+            if( cb->isChecked() ){
+                UICheckbox b;
+
+                b.setPosition( XMFLOAT2( cb->getPosition().x + window.getPosition().x, cb->getPosition().y + window.getPosition().y ) );
+                b.setDimension( XMFLOAT2( cb->getDimension().x, cb->getDimension().y ) );
+                buildCheckboxVB( &b );
+            }
         }
     }
 
@@ -659,6 +669,34 @@ void UIDisplay::buildBGVB( UIElement* elem, XMFLOAT4& color )
     v->position = XMFLOAT4( elem->getPosition().x, -elem->getPosition().y - elem->getDimension().y, UI_DETERMINE_Z, 1.0f );
     v->color = color;
     v->tex = XMFLOAT2( 0.0f, 0.765625f );
+    v++;
+
+    mVertsGenerated += 4;
+}
+
+void UIDisplay::buildCheckboxVB( UICheckbox* elem )
+{
+    FontVertex* v = mVerts + mVertsGenerated;
+    XMFLOAT4 color = XMFLOAT4( 1.0f, 1.0f, 1.0f, 1.0f );
+
+    v->position = XMFLOAT4( elem->getPosition().x, -elem->getPosition().y, UI_DETERMINE_Z, 1.0f );
+    v->color = color;
+    v->tex = XMFLOAT2( UI_CHECKBOX_LEFT, UI_CHECKBOX_TOP );
+    v++;
+
+    v->position = XMFLOAT4( elem->getPosition().x + elem->getDimension().x, -elem->getPosition().y, UI_DETERMINE_Z, 1.0f );
+    v->color = color;
+    v->tex = XMFLOAT2( UI_CHECKBOX_RIGHT, UI_CHECKBOX_TOP );
+    v++;
+
+    v->position = XMFLOAT4( elem->getPosition().x + elem->getDimension().x, -elem->getPosition().y - elem->getDimension().y, UI_DETERMINE_Z, 1.0f );
+    v->color = color;
+    v->tex = XMFLOAT2( UI_CHECKBOX_RIGHT, UI_CHECKBOX_BOTTOM );
+    v++;
+
+    v->position = XMFLOAT4( elem->getPosition().x, -elem->getPosition().y - elem->getDimension().y, UI_DETERMINE_Z, 1.0f );
+    v->color = color;
+    v->tex = XMFLOAT2( UI_CHECKBOX_LEFT, UI_CHECKBOX_BOTTOM );
     v++;
 
     mVertsGenerated += 4;

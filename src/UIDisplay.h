@@ -26,6 +26,11 @@
 #define UI_CORNER_TOP 0.0626f
 #define UI_CORNER_BOTTOM 0.125f
 
+#define UI_CHECKBOX_TOP 0.25f
+#define UI_CHECKBOX_BOTTOM 0.5f
+#define UI_CHECKBOX_LEFT 0.0f
+#define UI_CHECKBOX_RIGHT 1.0f
+
 class UIDisplay{
 public:
 
@@ -58,11 +63,14 @@ protected:
     //Setup vertex buffers for the border of an element
     void buildBorderVB( UIElement* elem, float aspectRatio, XMFLOAT2 offset = XMFLOAT2(0.0f, 0.0f) );
 
-    //Setup verticies for the current tab, show others as well
+    //Setup vertices for the current tab, show others as well
     void buildTabVB( UIWindow& window, float aspectRatio );
 
     //Setup the background for the border of an element
     void buildBGVB(  UIElement* elem, XMFLOAT4& color );
+
+    //Setup vertices for checkbox
+    void buildCheckboxVB( UICheckbox* checkbox );
 
     //Builds the various elements
 

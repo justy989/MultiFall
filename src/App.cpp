@@ -272,6 +272,27 @@ bool App::init( )
 
     mUIWindow.addElem( mSlider, 1 );
 
+    mCheckBox = new UICheckbox();
+
+    text.message = "Draw Stats";
+    text.offset.x = -7.0f * FONTWIDTH;
+
+    mCheckBox->setText( text );
+
+    pos.y += 0.15f;
+    pos.x += 0.25f;
+
+    mCheckBox->setPosition( pos );
+
+    dim.x = 0.1f;
+    dim.y = 0.1f;
+
+    mCheckBox->setDimension( dim );
+
+    mUIWindow.addElem( mCheckBox, 1 );
+
+    mCheckBox->setChecked(true);
+
     D3D11_BUFFER_DESC constDesc;
     ZeroMemory( &constDesc, sizeof( constDesc ) );
     constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -589,10 +610,12 @@ void App::update( float dt )
         }
     }
 
+    //Get the Cursor position on the window 
     POINT p;
     GetCursorPos( &p );
     ScreenToClient(mWindow.getWindowHandle(), &p);
 
+    //Convert it to -1 to 1 
     XMFLOAT2 mousePos( 
         static_cast<float>(p.x) / static_cast<float>(mWindow.getWindowWidth()), 
         static_cast<float>(p.y) / static_cast<float>(mWindow.getWindowHeight()) );
@@ -600,21 +623,21 @@ void App::update( float dt )
     mousePos.x *= 2.0f; mousePos.x -= 1.0f;
     mousePos.y *= 2.0f; mousePos.y -= 1.0f;
 
-    //Hack!
-    //mousePos.x -= 0.01f;
-    //mousePos.y -= 0.06f;
-
+    //Print coords
     sprintf(MousePosString, "Mouse: %.2f, %.2f", mousePos.x, mousePos.y);
 
-    UIWindow::UserChange change = mUIWindow.update( mLeftClick, mousePos, false, 0 );
+    //Don't update the UI if we aren't drawing it... duh
+    if( drawUI ){
+        UIWindow::UserChange change = mUIWindow.update( mLeftClick, mousePos, false, 0 );
 
-    if( change.action == UIWindow::UserChange::Action::ClickButton &&
-        change.id == 0 ){
-        mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
-        mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f);
-    }else if( change.action == UIWindow::UserChange::Action::MoveSlider &&
-        change.id == 0 ){
-        mCamera.setFOV( 40.0f + ( 20.0f * mSlider->getPercent() ) );
+        if( change.action == UIWindow::UserChange::Action::ClickButton &&
+            change.id == 0 ){
+            mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
+            mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f);
+        }else if( change.action == UIWindow::UserChange::Action::MoveSlider &&
+            change.id == 0 ){
+            mCamera.setFOV( 40.0f + ( 20.0f * mSlider->getPercent() ) );
+        }
     }
 }
 
@@ -726,23 +749,26 @@ void App::draw( )
         mUIDisplay.drawWindowText( mWindow.getDeviceContext(), mUIWindow, mTextManager );
     }
 
-    mTextManager.drawString(mWindow.getDeviceContext(), FPSString, -1.0f, -1.0f);
-    mTextManager.drawString(mWindow.getDeviceContext(), CameraPosString, -1.0f, -0.95f);
-    mTextManager.drawString(mWindow.getDeviceContext(), MousePosString, -1.0f, -0.9f);
+    if( mCheckBox->isChecked() ){
+        mTextManager.drawString(mWindow.getDeviceContext(), FPSString, -1.0f, -1.0f);
+        mTextManager.drawString(mWindow.getDeviceContext(), CameraPosString, -1.0f, -0.95f);
+        mTextManager.drawString(mWindow.getDeviceContext(), MousePosString, -1.0f, -0.9f);
     
-    char buffer[128];
+        char buffer[128];
 
-    sprintf(buffer, "Toggle UI Drawing: U : %s", drawUI ? "On" : "Off");
-    mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.8f);
+        sprintf(buffer, "Toggle UI Drawing: U : %s", drawUI ? "On" : "Off");
+        mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.8f);
 
-    sprintf(buffer, "Toggle Free Look: I : %s", freeLook ? "On" : "Off");
-    mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.85f);
+        sprintf(buffer, "Toggle Free Look: I : %s", freeLook ? "On" : "Off");
+        mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.85f);
 
-    sprintf(buffer, "Toggle Collision: O : %s", collisionMode ? "On" : "Off");
-    mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.9f);
+        sprintf(buffer, "Toggle Collision: O : %s", collisionMode ? "On" : "Off");
+        mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.9f);
 
-    sprintf(buffer, "Generate New Dungeon: R");
-    mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.95f);
+        sprintf(buffer, "Generate New Dungeon: R");
+        mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.95f);
+
+    }
 
     mWindow.getSwapChain()->Present(0, 0);
 }

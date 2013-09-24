@@ -137,10 +137,25 @@ public:
 
     virtual UserChange update( bool mouseClick, XMFLOAT2 mousePosition, 
                                bool keyPress, byte key );
+    
+    virtual void setPosition( XMFLOAT2& pos );
+    virtual void setDimension( XMFLOAT2& dim );
+    virtual void getText( Text** text, int* textCount );
+    virtual void setText( Text& text );
+
+    virtual ElemType getElemType(){return CheckBox;}
+
+    inline bool isChecked();
+    inline void setChecked( bool val );
 
 protected:
 
+    bool mClicked;
+    bool mChecked;
 };
+
+inline bool UICheckbox::isChecked(){return mChecked;}
+inline void UICheckbox::setChecked( bool val ){mChecked = val;}
 
 class UISlider : public UIElement{
 public:
