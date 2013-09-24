@@ -85,6 +85,7 @@ void Level::clear()
     }
 
     mNumLights = 0;
+	mNumTorches = 0;
 }
 
 void Level::setBlock( short i, short j, byte height, Ramp ramp )

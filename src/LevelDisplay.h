@@ -13,9 +13,7 @@
 //Fog parameters
 struct Fog{
     XMFLOAT4 color; //Fog blending color
-
-    float start; //No fog < start
-    float end; //Max fog >= end
+    float scale;
 };
 
 class LevelDisplay{
@@ -42,7 +40,9 @@ public:
     void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world );
 
     //Set the fog we are going to display
-    void setFog( XMFLOAT4& fogColor, float fogStart, float fogEnd );
+	void setFog(XMFLOAT4& fogColor, float fogScale );
+
+	void applyFog( ID3D11DeviceContext* device);
 
 protected:
 
@@ -55,7 +55,10 @@ protected:
     ID3D11InputLayout* mInputLayout;
     
     //World Matrix Constant Buffer
-    ID3D11Buffer* mWorldCB;	
+    ID3D11Buffer* mWorldCB;
+
+	//Fog data Constant Buffer
+	ID3D11Buffer* mFogCB;	
 
     //The floor that the player walks on, at every height
     ID3D11Buffer* mFloorVB;

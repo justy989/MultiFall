@@ -10,7 +10,7 @@ class LevelThemeLoader{
 public:
     LevelThemeLoader();
 
-    bool loadTheme( char* themePath, ID3D11Device* device, WorldGenerator* worldGen, LevelDisplay* levelDisplay );
+	bool loadTheme( char* themePath, ID3D11Device* device, WorldGenerator* worldGen, LevelDisplay* levelDisplay );
 
 protected:
 

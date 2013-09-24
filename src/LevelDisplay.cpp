@@ -59,6 +59,12 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
         return false;
     }
 
+	constDesc.ByteWidth = sizeof( XMFLOAT4 );
+	if( FAILED( device->CreateBuffer( &constDesc, 0, &mFogCB ) ) ){
+        LOG_ERRO << "Failed to create constant buffer for Level" << LOG_ENDL;
+        return false;
+    }
+
 	if( !mTorch.loadFromObj(device, "content/meshes/torch.obj", L"content/textures/torch_texture.png") ){
         return false;
     }
@@ -135,13 +141,16 @@ bool LevelDisplay::createMeshFromLevel( ID3D11Device* device, Level& level, floa
     return true;
 }
 
-void LevelDisplay::setFog( XMFLOAT4& fogColor, float fogStart, float fogEnd )
+void LevelDisplay::setFog( XMFLOAT4& fogColor, float fogScale )
 {
-    mFog.color = fogColor;
-    mFog.start = fogStart;
-    mFog.end = fogEnd;
+	mFog.color = XMFLOAT4(fogColor.x, fogColor.y, fogColor.z, fogScale);
+}
 
-    //Update constant buffer
+void LevelDisplay::applyFog(ID3D11DeviceContext* device)
+{
+	//Update constant buffer
+	device->UpdateSubresource( mFogCB, 0, 0, &mFog.color, 0, 0 ); 
+	device->PSSetConstantBuffers( 3, 1, &mFogCB );
 }
 
 void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world )

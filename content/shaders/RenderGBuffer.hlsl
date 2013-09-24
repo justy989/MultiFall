@@ -48,6 +48,11 @@ cbuffer cbPerLightPS : register( b2 )
 	float4 gLightRadIntensity; //16 bytes
 };
 
+cbuffer cbFogPS : register( b3 )
+{
+	float4 gFogData;	//16 bytes
+};
+
 struct VertexIn
 {
 	float3 pos  : POSITION;
@@ -126,7 +131,7 @@ float4 ps_ambient(VertexOut pin) : SV_TARGET0
 	float4 color = colorBuffer.Sample( colorSampler_, pin.tex );
 	float depth = depthBuffer.Sample( colorSampler_, pin.tex ).r;
 	
-    return ( saturate((1.0f - depth) * 20.0f) ) * color * 0.4f;
+    return ( float4(gFogData.xyz, 0) * saturate((1.0 - depth) * gFogData.w) ) * color * 0.5f;
 }
 
 float4 ps_point(PointVertexOut pin) : SV_TARGET0
@@ -162,7 +167,7 @@ float4 ps_point(PointVertexOut pin) : SV_TARGET0
     float NdL = saturate( dot( normal,lightVector ) );
 	float3 ambientLight = colorBuffer.Sample( colorSampler_, texCoord );
 
-    return float4((saturate((1.0f - depth) * 40.0f)) * attenuation * gLightRadIntensity.y * ambientLight, 1.0f);
+    return float4(float4(normalize(gFogData.xyz), 0) * (saturate((1.0f - depth) * 2.0f * gFogData.w)) * attenuation * gLightRadIntensity.y * ambientLight, 1.0f);
 }
 
 technique11 GeoPass

@@ -105,7 +105,7 @@ void App::handleInput( RAWINPUT* input )
 int App::run( HINSTANCE hInstance, int nCmdShow )
 {
     MSG msg = {0};
-    float fpsDelay = 0.0f;
+    float fpsDelay = 0.0f;	
 
     //Load the configuration
     if( !mConfig.load( "content/multifall.cfg" ) ){
@@ -124,9 +124,10 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 
     if( !mWindow.init( L"MultiFall", mConfig.getWindow().width, mConfig.getWindow().height, hInstance, nCmdShow, this ) ){
         return 1;
-    }
+    }    
 
-    if( !initShaders() ){
+	//so tired of stuff being dependent on this
+	if( !initShaders() ){
         return 1;
     }
 
@@ -306,7 +307,7 @@ bool App::init( )
 
     LevelThemeLoader ltl;
 
-    ltl.loadTheme("content/themes/brick_wood.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
+	ltl.loadTheme("content/themes/stone.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
 
     mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
     mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f );	
@@ -318,10 +319,10 @@ bool App::initShaders()
 {
 	//Compile shader
     DWORD shaderFlags = 0;
-#if defined( DEBUG ) || defined( _DEBUG )
+//#if defined( DEBUG ) || defined( _DEBUG )
     shaderFlags |= D3D10_SHADER_DEBUG;
 	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
+//#endif
  
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
@@ -712,12 +713,13 @@ void App::draw( )
 	UINT prevMask = 0;
 
 	mWindow.getDeviceContext()->OMGetBlendState(&prevBS, prevfloat, &prevMask);
-    
+	   
 	//start lighting pass
 	mAmbientLightTech->GetDesc( &techDesc );
     for(ushort p = 0; p < techDesc.Passes; ++p)
 	{
-		mAmbientLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());		
+		mAmbientLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());	
+		mWorldDisplay.getLevelDisplay().applyFog(mWindow.getDeviceContext()); 
 		
 		//draw fullscreen quad to spawn the lighting post process
 		drawFSQuad();
@@ -728,6 +730,7 @@ void App::draw( )
     for(ushort p = 0; p < techDesc.Passes; ++p)
 	{
 		mPointLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
+		mWorldDisplay.getLevelDisplay().applyFog(mWindow.getDeviceContext()); 
 		mWorldDisplay.drawPointLights(mWindow.getDeviceContext(), mFX, mCamera.getPosition(), mWorld);		
 	}
 
