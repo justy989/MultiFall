@@ -16,6 +16,8 @@
 
 #define BYTE_MAX 255
 
+#define MAX_PARTICLES 1000
+
 //Typedefs
 typedef unsigned char byte;
 typedef unsigned short ushort;
