@@ -291,3 +291,60 @@ UIElement::UserChange UIInputBox::update( bool mouseClick, XMFLOAT2 mousePositio
 
     return change;
 }
+
+UITextBox::UITextBox() :
+    mLineCount(0)
+{
+
+}
+
+UIElement::UserChange UITextBox::update( bool mouseClick, XMFLOAT2 mousePosition, 
+                            bool keyPress, byte key )
+{
+    //Nothin to do broski, its a textboxxxxxxxxx
+    UIElement::UserChange change;
+    change.action = UIElement::UserChange::Action::None;
+    return change;
+}
+
+void UITextBox::getText( Text** text, uint* textCount )
+{
+    *text = mTextLines;
+    *textCount = mLineCount;
+}
+
+void UITextBox::setText( char* text, uint len )
+{
+    //Make a copy of the text in order to insert new lines
+    strcpy( mFullText, text );
+
+    uint lineLen = static_cast<int>( mDimensions.x / FONTWIDTH );
+    uint textItr = 0;
+
+    //The best kind of inifite loops, while( true ) is overrated
+    while( textItr < len ){
+       //Start at the end of the line and loop back until we find a space
+        for(uint c = textItr + lineLen; c > textItr; c--){
+            if( c >= len ){
+                mTextLines[ mLineCount ].message = mFullText + textItr;
+                mTextLines[ mLineCount ].offset.x = 0.0f;
+                mTextLines[ mLineCount ].offset.y = mLineCount * (FONTHEIGHT * 1.5f);
+                mLineCount++;
+                textItr = len;
+                break;
+            }
+
+            if( text[c] == ' ' ){
+                if( c >= 0 ){
+                    mFullText[ c ] = '\0';
+                    mTextLines[ mLineCount ].message = mFullText + textItr;
+                    mTextLines[ mLineCount ].offset.x = 0.0f;
+                    mTextLines[ mLineCount ].offset.y = mLineCount * (FONTHEIGHT * 1.5f);
+                    mLineCount++;
+                    textItr = c + 1;
+                    break;
+                }
+            }
+       }
+    }
+}

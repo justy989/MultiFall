@@ -237,10 +237,10 @@ bool App::init( )
     text.offset.y = 0.0f;
 
     mUIWindow.setPosition( XMFLOAT2( -0.75f, -0.75f ) );
-    mUIWindow.setDimension( XMFLOAT2( 1.0f, 0.6f ) );
+    mUIWindow.setDimension( XMFLOAT2( 1.0f, 1.5f ) );
     mUIWindow.setText( text );
 
-    mUIWindow.setMinDimensions( XMFLOAT2( 0.9f, 0.5f ) );
+    mUIWindow.setMinDimensions( XMFLOAT2( 1.0f, 1.5f ) );
 
     mUIWindow.init( 3 );
     mUIWindow.initTab( 0, "Generator", 2 );
@@ -343,6 +343,28 @@ bool App::init( )
     mInputBox->setDimension( dim );
 
     mUIWindow.addElem( mInputBox, 0 );
+
+    mTextBox = new UITextBox();
+
+    pos.y = 0.4f;
+    pos.x = 0.2f;
+
+    mTextBox->setPosition( pos );
+
+    dim.x = 0.7f;
+    dim.y = 1.0f;
+
+    mTextBox->setDimension( dim );
+
+    char* textBoxText = "Now, this is a story all about how "
+                 "my life got flipped-turned upside down "
+                 "and I'd like to take a minute "
+                 "just sit right there "
+                 "I'll tell you how I became the prince of a town called Bel Air";
+
+    mTextBox->setText( textBoxText, (uint)strlen( textBoxText ) );
+
+    mUIWindow.addElem( mTextBox, 2 );
 
     D3D11_BUFFER_DESC constDesc;
     ZeroMemory( &constDesc, sizeof( constDesc ) );

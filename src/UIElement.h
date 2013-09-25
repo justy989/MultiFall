@@ -225,16 +225,29 @@ protected:
 
 inline char* UIInputBox::getInput(){return mInput;}
 
-class UITextbox : public UIElement{
+#define TEXTBOX_MAX_LINES 128
+#define TEXTBOX_MAX_TEXT_LEN 1024
+
+class UITextBox : public UIElement{
 public:
 
-    UITextbox();
+    UITextBox();
 
     virtual UserChange update( bool mouseClick, XMFLOAT2 mousePosition, 
                                bool keyPress, byte key );
 
+    virtual void getText( Text** text, uint* textCount );
+
+    virtual ElemType getElemType(){return TextBox;}
+
+    void setText( char* text, uint len );
+
 protected:
 
+    char mFullText[TEXTBOX_MAX_TEXT_LEN];
+
+    Text mTextLines[TEXTBOX_MAX_LINES];
+    uint mLineCount;
 };
 
 #endif

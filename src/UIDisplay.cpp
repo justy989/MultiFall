@@ -209,19 +209,34 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
 
         //Loop through and build elements in the current tab
         for(int i = 0; i < t.elementCount; i++){
-            UIElement::Text* text;
-            uint tCount;
-            t.elements[i]->getText(&text, &tCount );
 
-            //Center the text
-            float xOffset = (t.elements[i]->getDimension().x / 2.0f) - (static_cast<float>(strlen(text->message)) * FONTWIDTH / 2.0f);
-            float yOffset = (t.elements[i]->getDimension().y / 2.0f) -  FONTHEIGHT / 2.0f;
+            if( t.elements[i]->getElemType() == UIElement::ElemType::TextBox ){
+                UIElement::Text* text;
+                uint textCount;
 
-            //Draw the text bro
-            tm.drawString( device, text->message,
-                t.elements[i]->getPosition().x + window.getPosition().x + xOffset + text->offset.x, 
-                t.elements[i]->getPosition().y + window.getPosition().y + yOffset + text->offset.y,
-                colors[ t.elements[i]->getSelectedState() ]);
+                t.elements[i]->getText( &text, &textCount );
+
+                for(uint l = 0; l < textCount; l++){
+                    tm.drawString( device, text[l].message,
+                        t.elements[i]->getPosition().x + text[l].offset.x + window.getPosition().x + FONTWIDTH / 2.0f, 
+                        t.elements[i]->getPosition().y + text[l].offset.y + window.getPosition().y + (FONTHEIGHT / 2.0f),
+                        colors[0] );
+                }
+            }else{
+                UIElement::Text* text;
+                uint tCount;
+                t.elements[i]->getText(&text, &tCount );
+
+                //Center the text
+                float xOffset = (t.elements[i]->getDimension().x / 2.0f) - (static_cast<float>(strlen(text->message)) * FONTWIDTH / 2.0f);
+                float yOffset = (t.elements[i]->getDimension().y / 2.0f) -  FONTHEIGHT / 2.0f;
+
+                //Draw the text bro
+                tm.drawString( device, text->message,
+                    t.elements[i]->getPosition().x + window.getPosition().x + xOffset + text->offset.x, 
+                    t.elements[i]->getPosition().y + window.getPosition().y + yOffset + text->offset.y,
+                    colors[ t.elements[i]->getSelectedState() ]);
+            }
 
             //If it is a drop menu, draw the options
             if( t.elements[i]->getElemType() == UIElement::ElemType::DropMenu ){

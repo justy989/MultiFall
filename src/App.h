@@ -93,6 +93,7 @@ protected:
     UICheckbox* mCheckBox;
     UIDropMenu* mDropBox;
     UIInputBox* mInputBox;
+    UITextBox* mTextBox;
 
     bool mLeftClick;
 
