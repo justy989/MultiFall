@@ -92,8 +92,12 @@ protected:
     UISlider* mSlider;
     UICheckbox* mCheckBox;
     UIDropMenu* mDropBox;
+    UIInputBox* mInputBox;
 
     bool mLeftClick;
+
+    bool mKeyPress;
+    USHORT mKeyChar;
 
 protected:	
 

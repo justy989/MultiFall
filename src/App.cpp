@@ -50,6 +50,9 @@ void App::handleInput( RAWINPUT* input )
         USHORT VKey = input->data.keyboard.VKey;
         bool keyUp = input->data.keyboard.Flags & RI_KEY_BREAK;
 
+        mKeyPress = !keyUp;
+        mKeyChar = VKey;
+
         switch( VKey ){
         case 'A':
             camKeyDown[0] = !keyUp;
@@ -242,7 +245,7 @@ bool App::init( )
     mUIWindow.init( 3 );
     mUIWindow.initTab( 0, "Generator", 2 );
     mUIWindow.initTab( 1, "Settings", 2 );
-    mUIWindow.initTab( 2, "Third?", 2 );
+    mUIWindow.initTab( 2, "Fog", 2 );
 
     UIButton* btn = new UIButton();
 
@@ -321,6 +324,25 @@ bool App::init( )
     mDropBox->setOptions( gDropDownOptions, 3 );
 
     mUIWindow.addElem( mDropBox, 2 );
+
+    mInputBox = new UIInputBox();
+
+    text.message = "Name:";
+    text.offset.x = -7.0f * FONTWIDTH;
+
+    mInputBox->setText( text );
+
+    pos.y = 0.45f;
+    pos.x = 0.3f;
+
+    mInputBox->setPosition( pos );
+
+    dim.x = 0.4f;
+    dim.y = 0.1f;
+
+    mInputBox->setDimension( dim );
+
+    mUIWindow.addElem( mInputBox, 0 );
 
     D3D11_BUFFER_DESC constDesc;
     ZeroMemory( &constDesc, sizeof( constDesc ) );
@@ -657,7 +679,12 @@ void App::update( float dt )
 
     //Don't update the UI if we aren't drawing it... duh
     if( drawUI ){
-        UIWindow::UserChange change = mUIWindow.update( mLeftClick, mousePos, false, 0 );
+        UIWindow::UserChange change = mUIWindow.update( mLeftClick, mousePos, mKeyPress, (byte)mKeyChar );
+
+        //Reset key press if it is true so we don't spam it
+        if( mKeyPress ){
+            mKeyPress = false;
+        }
 
         if( change.action == UIWindow::UserChange::Action::ClickButton &&
             change.id == 0 ){

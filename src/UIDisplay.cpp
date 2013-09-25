@@ -242,6 +242,15 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
                     tx, ty, 
                     colors[2]);
                 }
+            }else if( t.elements[i]->getElemType() == UIElement::ElemType::InputBox ){
+                UIInputBox* d = *(UIInputBox**)(t.elements + i);
+
+                float tx = t.elements[i]->getPosition().x + window.getPosition().x + (FONTWIDTH / 2.0f);
+                float ty = t.elements[i]->getPosition().y + window.getPosition().y + (FONTHEIGHT / 2.0f);
+
+                tm.drawString( device, d->getInput(),
+                    tx, ty, 
+                    colors[0]);
             }
         }
     }

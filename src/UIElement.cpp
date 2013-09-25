@@ -248,3 +248,46 @@ uint UIDropMenu::getOptionCount()
 {
     return mOptionCount;
 }
+
+UIInputBox::UIInputBox() :
+    mCursor(0)
+{
+    //Init first char to NULL terminator
+    mInput[0] = '\0';
+}
+
+UIElement::UserChange UIInputBox::update( bool mouseClick, XMFLOAT2 mousePosition, 
+                               bool keyPress, byte key )
+{
+    UIElement::UserChange change;
+    change.action = UIElement::UserChange::None;
+
+    if( keyPress ){
+        if( mSelected == UIElement::SelectedState::Selected ){
+            if( key == VK_BACK ){
+                if( mCursor > 0 ){
+                    mCursor--;
+                    mInput[ mCursor ] = '\0';
+                }
+            }else{
+                if( mCursor < (INPUTBOX_MAX_INPUT_LEN - 1) ){
+                    mInput[ mCursor ] = key; 
+                    mCursor++;
+                    mInput[ mCursor ] = '\0';
+                }
+            }
+        }
+    }
+
+    if( pointCheckInside( mousePosition ) ){
+        if( mouseClick ){
+            mSelected = UIElement::SelectedState::Selected;
+        }
+    }else{
+        if( mouseClick ){
+            mSelected = UIElement::SelectedState::Idle;
+        }
+    }
+
+    return change;
+}

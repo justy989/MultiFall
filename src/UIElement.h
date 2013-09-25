@@ -203,6 +203,8 @@ inline uint UIDropMenu::getSelectedOption(){return mSelectedOption;}
 inline uint UIDropMenu::getHightlightedOption(){return mHighlightedOption;}
 inline bool UIDropMenu::isDropped(){return mIsDropped;}
 
+#define INPUTBOX_MAX_INPUT_LEN 128
+
 class UIInputBox : public UIElement{
 public:
 
@@ -211,9 +213,17 @@ public:
     virtual UserChange update( bool mouseClick, XMFLOAT2 mousePosition, 
                                bool keyPress, byte key );
 
+    virtual ElemType getElemType(){return InputBox;}
+
+    inline char* getInput();
+
 protected:
 
+    char mInput[ INPUTBOX_MAX_INPUT_LEN ];
+    uint mCursor;
 };
+
+inline char* UIInputBox::getInput(){return mInput;}
 
 class UITextbox : public UIElement{
 public:

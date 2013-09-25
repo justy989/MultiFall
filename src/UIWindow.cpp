@@ -99,6 +99,8 @@ UIWindow::UserChange UIWindow::update( bool mouseClick, XMFLOAT2 mousePosition,
         lastLen = len;
     }
 
+    change.action = UserChange::Action::None;
+
     for(int i = 0; i < mTabs[ mCurrentTab ].elementCount; i++){
         change = mTabs[ mCurrentTab ].elements[ i ]->update( mouseClick,
             XMFLOAT2( mousePosition.x - mPosition.x, mousePosition.y - mPosition.y ),
@@ -106,12 +108,8 @@ UIWindow::UserChange UIWindow::update( bool mouseClick, XMFLOAT2 mousePosition,
 
         if( change.action != UserChange::Action::None ){
             change.id = i;
-            return change;
         }
     }
-
-    change.action = UserChange::Action::None;
-    change.dropOptionIndex = 0;
 
     return change;
 }
