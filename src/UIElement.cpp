@@ -155,7 +155,7 @@ UIDropMenu::UIDropMenu() :
     mIsDropped(false),
     mSelectedOption(0),
     mHighlightedOption(0),
-    mSavedHeight(0.0f),
+    mSavedHeight(0.0f)
 {
 
 }
@@ -168,29 +168,57 @@ UIDropMenu::UserChange UIDropMenu::update( bool mouseClick, XMFLOAT2 mousePositi
 
     mSelected = UIElement::SelectedState::Idle;
 
+    //If we aren't dropped
     if( !mIsDropped ){
+
+        //If we have the mouse inside the box
         if( pointCheckInside( mousePosition ) ){
             mSelected = UIElement::SelectedState::Highlighted;
 
+            //If the mouse is clicked
             if( mouseClick ){
                 if( !mClicked ){
+
+                    //Set the action
                     change.action = UserChange::Action::DroppedDown;
-                    mClicked = true;
-                    mIsDropped = true;
-                    mSavedHeight = mDimensions.y;
-                    mDimensions.y = FONTHEIGHT * static_cast<float>(mOptionCount);
+                    mClicked = true; //Has been clicked, avoids spamming action
+                    mIsDropped = true; //Set the state to dropped
+                    mSavedHeight = mDimensions.y; //Save the original dimension
+                    mDimensions.y = mSavedHeight * static_cast<float>(mOptionCount); //Expand by fontheight * optionCount
                 }
             }
         }
-    }else{
+    }else{ //If we have dropped, the user wants to select an option
+
+        //If the click is inside the mouse position
         if( pointCheckInside( mousePosition ) ){
             mSelected = UIElement::SelectedState::Highlighted;
+            mHighlightedOption = static_cast<uint>( ( mousePosition.y - mPosition.y ) / mSavedHeight );
 
+            //If the mouse is clicked
             if( mouseClick ){
                 if( !mClicked ){
+                    //Set the action
                     change.action = UserChange::Action::SelectDropOption;
-                    mSelectedOption = static_cast<uint>( ( mousePosition.y - mPosition.y ) / FONTHEIGHT );
+
+                    //Determine which option is selected
+                    mSelectedOption = static_cast<uint>( ( mousePosition.y - mPosition.y ) / mSavedHeight );
+
+                    //Reset to collapsed state
+                    mIsDropped = false;
+                    mDimensions.y = mSavedHeight;
+
+                    mClicked = true;
                 }
+            }
+        }else{
+
+            //IF the click is outside the box
+            if( mouseClick ){
+                //Undrop the box
+                mDimensions.y = mSavedHeight;
+                mIsDropped = false;
+                mClicked = true;
             }
         }
     }

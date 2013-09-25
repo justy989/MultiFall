@@ -4,6 +4,12 @@
 
 #include "LevelThemeLoader.h"
 
+char* gDropDownOptions[] = {
+    "Red",
+    "Green",
+    "Blue"
+};
+
 App::App()
 {
     camKeyDown[0] = false;
@@ -293,6 +299,28 @@ bool App::init( )
     mUIWindow.addElem( mCheckBox, 1 );
 
     mCheckBox->setChecked(true);
+
+    mDropBox = new UIDropMenu();
+
+    text.message = "Fog Color";
+    text.offset.x = -10.0f * FONTWIDTH;
+
+    mDropBox->setText( text );
+
+    pos.y = 0.25f;
+    pos.x = 0.5f;
+
+    mDropBox->setPosition( pos );
+
+    dim.x = 0.4f;
+    dim.y = 0.1f;
+
+    mDropBox->setDimension( dim );
+
+    mDropBox->setSelectedOption(0);
+    mDropBox->setOptions( gDropDownOptions, 3 );
+
+    mUIWindow.addElem( mDropBox, 2 );
 
     D3D11_BUFFER_DESC constDesc;
     ZeroMemory( &constDesc, sizeof( constDesc ) );
@@ -638,6 +666,20 @@ void App::update( float dt )
         }else if( change.action == UIWindow::UserChange::Action::MoveSlider &&
             change.id == 0 ){
             mCamera.setFOV( 40.0f + ( 20.0f * mSlider->getPercent() ) );
+        }else if(change.action == UIWindow::UserChange::Action::SelectDropOption && change.id == 0 ){
+            switch( mDropBox->getSelectedOption() ){
+            case 0:
+                mWorldDisplay.getLevelDisplay().setFog( XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), 15.0f );
+                break;
+            case 1:
+                mWorldDisplay.getLevelDisplay().setFog( XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), 15.0f );
+                break;
+            case 2:
+                mWorldDisplay.getLevelDisplay().setFog( XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), 15.0f );
+                break;
+            default:
+                break;
+            }
         }
     }
 }

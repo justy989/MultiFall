@@ -91,6 +91,7 @@ protected:
     UIWindow mUIWindow;
     UISlider* mSlider;
     UICheckbox* mCheckBox;
+    UIDropMenu* mDropBox;
 
     bool mLeftClick;
 

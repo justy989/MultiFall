@@ -222,6 +222,27 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
                 t.elements[i]->getPosition().x + window.getPosition().x + xOffset + text->offset.x, 
                 t.elements[i]->getPosition().y + window.getPosition().y + yOffset + text->offset.y,
                 colors[ t.elements[i]->getSelectedState() ]);
+
+            //If it is a drop menu, draw the options
+            if( t.elements[i]->getElemType() == UIElement::ElemType::DropMenu ){
+                UIDropMenu* d = *(UIDropMenu**)(t.elements + i);
+
+                float tx = t.elements[i]->getPosition().x + window.getPosition().x + (FONTWIDTH / 2.0f);
+                float ty = t.elements[i]->getPosition().y + window.getPosition().y + (FONTHEIGHT / 2.0f);
+
+                if( d->isDropped() ){
+                    for(uint o = 0; o < d->getOptionCount(); o++){
+                        tm.drawString( device, d->getOption(o),
+                            tx, ty, 
+                            d->getSelectedOption() == o ? colors[2] : d->getHightlightedOption() == o ? colors[1] : colors[0] );
+                        ty += 0.1f;
+                    }
+                }else{
+                    tm.drawString( device, d->getOption(d->getSelectedOption()),
+                    tx, ty, 
+                    colors[2]);
+                }
+            }
         }
     }
 }
