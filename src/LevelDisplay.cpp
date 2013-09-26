@@ -69,6 +69,18 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
         return false;
     }
 
+	if( !mFurniture[0].loadFromObj(device, "content/meshes/chair_1.obj", L"content/textures/furniture_wood.png") ){
+        return false;
+    }
+
+	if( !mFurniture[1].loadFromObj(device, "content/meshes/desk_1.obj", L"content/textures/furniture_wood.png") ){
+        return false;
+    }
+
+	if( !mFurniture[2].loadFromObj(device, "content/meshes/table_1.obj", L"content/textures/furniture_wood.png") ){
+        return false;
+    }
+
     LOG_INFO << "Created Input Description and Texture Sampler for Level" << LOG_ENDL;
     return true;
 }
@@ -192,7 +204,7 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
     device->DrawIndexed(6 * mWallCount, 0, 0);
 
 	Level& level = world.getLevel();
-	for(int i = 0; i < level.getNumTorches(); i++)
+	for(uint i = 0; i < level.getNumTorches(); i++)
 	{
 		worldm = level.getTorch(i).world;
 
@@ -205,9 +217,20 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
 		{
 			mTorch.draw(device);
 		}
-		
 	}
 
+    for(uint i = 0; i < level.getNumFurniture(); i++)
+	{
+        Level::Furniture& f = level.getFurniture(i);
+
+        worldm = XMMatrixScaling(0.1f, 0.1f, 0.1f) * XMMatrixRotationY( f.yRotation ) * XMMatrixTranslation( f.position.x, f.position.y, f.position.z );
+		worldm = XMMatrixTranspose( worldm );
+
+		device->UpdateSubresource( mWorldCB, 0, 0, &worldm, 0, 0 ); 
+		device->VSSetConstantBuffers( 1, 1, &mWorldCB );
+
+        mFurniture[ f.type - 1 ].draw(device);
+	}
 }
 
 bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  )

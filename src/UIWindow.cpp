@@ -102,12 +102,14 @@ UIWindow::UserChange UIWindow::update( bool mouseClick, XMFLOAT2 mousePosition,
     change.action = UserChange::Action::None;
 
     for(int i = 0; i < mTabs[ mCurrentTab ].elementCount; i++){
-        change = mTabs[ mCurrentTab ].elements[ i ]->update( mouseClick,
+        UserChange userChange = mTabs[ mCurrentTab ].elements[ i ]->update( mouseClick,
             XMFLOAT2( mousePosition.x - mPosition.x, mousePosition.y - mPosition.y ),
             keyPress, key );
 
-        if( change.action != UserChange::Action::None ){
-            change.id = i;
+        //Overwrite the change that is returned only if something happened
+        if( userChange.action != UserChange::Action::None ){
+            userChange.id = i;
+            change = userChange;
         }
     }
 

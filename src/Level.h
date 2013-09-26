@@ -6,6 +6,7 @@
 #include "StaticMesh.h"
 
 #define LEVEL_MAX_LIGHTS 128
+#define LEVEL_MAX_FURNITURE 128
 
 //Holds a level of a Dungeon
 class Level{
@@ -38,13 +39,30 @@ public:
 		//potentially other stuff like texture maybe
 	};
 
+    struct Furniture{
+        enum Type{
+            None,
+            Chair,
+            Desk,
+            Table
+        };
+
+        Type type;
+        XMFLOAT3 position;
+        float yRotation;
+    };
+
     //initialize a room to certain dimensions
     bool init( short width, short depth, byte height );
 
     //Add a light if there is room for it!
     bool addLight( PointLight& light );
 
-	bool addTorch(XMFLOAT3 pos, float rotAbootYAxis);
+    //Add a torch
+	bool addTorch( XMFLOAT3 pos, float rotAbootYAxis );
+
+    //Add a piece of furniture
+    bool addFurniture( Furniture::Type type, XMFLOAT3 position, float yRot );
 
     //clear the room's allocated memory
     void clear();
@@ -73,6 +91,9 @@ public:
 
 	inline ushort getNumTorches();
 	inline TorchInfo& getTorch( ushort index );
+    
+    inline ushort getNumFurniture();
+	inline Furniture& getFurniture( ushort index );
 
 protected:
 
@@ -90,6 +111,9 @@ protected:
     //Furniture
 	ushort mNumTorches;
 	TorchInfo mTorches[ LEVEL_MAX_LIGHTS ];
+
+    ushort mNumFurniture;
+    Furniture mFurniture[ LEVEL_MAX_FURNITURE ];
 };
 
 short Level::getWidth(){return mWidth;}
@@ -101,5 +125,8 @@ inline PointLight& Level::getLight( ushort index ){return mLights[ index ];}
 
 inline ushort Level::getNumTorches(){return mNumTorches;}
 inline Level::TorchInfo& Level::getTorch( ushort index ){return mTorches[ index ];}
+
+inline ushort Level::getNumFurniture(){return mNumFurniture;}
+inline Level::Furniture& Level::getFurniture( ushort index ){return mFurniture[ index ];}
 
 #endif

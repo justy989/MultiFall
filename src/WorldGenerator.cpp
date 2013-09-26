@@ -500,6 +500,12 @@ void WorldGenerator::genLevelRoomHeights( Level& level, LevelPreset& preset, Roo
         for(short i = startI ;i <= endI; i++){
             for(short j = startJ;j <= endJ; j++){
                 level.setBlock( i, j, genHeight, Level::Ramp::None );
+
+                if( mRand.gen( 1, 100 ) > 95 ){
+                    level.addFurniture( (Level::Furniture::Type)mRand.gen( 1, 4 ), 
+                        XMFLOAT3( static_cast<float>(i) * 0.3f, static_cast<float>(genHeight) * 0.3f, static_cast<float>(j) * 0.3f ), 
+                        static_cast<float>(mRand.gen(0, 4)) * 3.14159 * 0.5f );
+                }
             }
         }
     }

@@ -90,6 +90,8 @@ protected:
     Fog mFog;
 
 	StaticMesh mTorch;
+
+    StaticMesh mFurniture[ 3 ];
 };
 
 #endif  

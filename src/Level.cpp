@@ -8,7 +8,8 @@ Level::Level() :
     mDepth(0),
     mBlocks(0),
     mNumLights(0),
-	mNumTorches(0)
+	mNumTorches(0),
+    mNumFurniture(0)
 {
 
 }
@@ -70,6 +71,21 @@ bool Level::addTorch(XMFLOAT3 pos, float rotAbootYAxis)
 	mNumTorches++;
 
 	return true;
+}
+
+bool Level::addFurniture( Furniture::Type type, XMFLOAT3 position, float yRot )
+{
+    if( mNumFurniture >= LEVEL_MAX_LIGHTS ){
+        return false;
+    }
+
+    mFurniture[ mNumFurniture ].type = type;
+    mFurniture[ mNumFurniture ].position = position;
+    mFurniture[ mNumFurniture ].yRotation = yRot;
+
+    mNumFurniture++;
+
+    return true;
 }
 
 void Level::clear()
