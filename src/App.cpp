@@ -809,6 +809,9 @@ void App::draw( )
         mTorch.draw( mWindow.getDeviceContext() );
 
 		//drawDarkParticles
+<<<<<<< HEAD
+>>>>>>> 2de5cc8846c6cbf1a2a566a2d5d97dddd9cce064
+=======
 >>>>>>> 2de5cc8846c6cbf1a2a566a2d5d97dddd9cce064
 	}
 
