@@ -3,6 +3,13 @@ Texture2D colorBuffer : register( t1 );
 Texture2D normalBuffer : register( t2 );
 Texture2D depthBuffer : register ( t3 );
 
+struct ParticleInstanceData
+{
+	float3 pos;
+	float rot;
+	float4 isAlive;
+}
+
 DepthStencilState depthState
 {
 	DepthEnable = TRUE;
@@ -53,6 +60,11 @@ cbuffer cbFogPS : register( b3 )
 	float4 gFogData;	//16 bytes
 };
 
+cbuffer cbParticles : register( b4 )
+{
+	ParticleInstanceData gParticles[100];
+};
+
 struct VertexIn
 {
 	float3 pos  : POSITION;
@@ -64,6 +76,23 @@ struct VertexOut
 {
 	float4 pos  : SV_POSITION;
 	float3 normal : NORMAL;
+	float2 tex :	TEXCOORD;
+};
+
+struct LightParticleIn
+{
+	float3 pos  : POSITION;
+};
+
+struct LightParticleGSIn
+{
+	float4 pos  : POSITION;
+	float2 tex :	TEXCOORD;
+}
+
+struct LightParticleOut
+{
+	float4 pos  : SV_POSITION;
 	float2 tex :	TEXCOORD;
 };
 
@@ -170,6 +199,62 @@ float4 ps_point(PointVertexOut pin) : SV_TARGET0
     return float4(float4(normalize(gFogData.xyz), 0) * (saturate((1.0f - depth) * 2.0f * gFogData.w)) * attenuation * gLightRadIntensity.y * ambientLight, 1.0f);
 }
 
+LightParticleGSIn vs_lightparticle(LightParticleIn input, uint instanceID : SV_InstanceID)
+{
+	LightParticleGSIn output;
+	//float4x4 worldViewProj = mul(gWorld, gViewProj);    
+    output.pos = float4(gParticles[instanceID].pos, 1.0f);
+	output.tex = float2(particlePositions[instanceID].isAlive, gParticles[instanceID].rot);
+
+	return output;
+}
+
+[maxvertexcount(4)]
+void gs_lightparticle(point LightParticleGSIn input, inout TriangleStream<float3> output)
+{
+	//if the particle instance is alive
+	if(input.tex.x > 0)
+	{
+		float3 planeNormal = input.pos.xyz - camPos.xyz;
+		planeNormal = normalize(planeNormal);
+
+		float3 upVector = float3(cos(input.tex.y), sin(input.tex.y), 0.0f);
+		float3 rightVector = normalize(cross(planeNormal, upVector));
+		upVector = normalize(cross(rightVector, planeNormal));
+
+		// Create the billboards quad
+		float3 vert[4];
+
+		// We get the points by using the billboards right vector and the billboards height
+		vert[0] = input.xyz - rightVector; // Get bottom left vertex
+		vert[1] = input.xyz + rightVector; // Get bottom right vertex
+		vert[2] = input.xyz - rightVector + upVector; // Get top left vertex
+		vert[3] = input.xyz + rightVector + upVector; // Get top right vertex
+
+		// Get billboards texture coordinates
+		float2 texCoord[4];
+		texCoord[0] = float2(0, 1);
+		texCoord[1] = float2(1, 1);
+		texCoord[2] = float2(0, 0);
+		texCoord[3] = float2(1, 0);
+
+		// Now we "append" or add the vertices to the outgoing stream list
+		LightParticleOut outputVert;
+		for(int i = 0; i < 4; i++)
+		{
+			outputVert.pos = mul(float4(vert[i], 1.0f), worldViewProj);
+			outputVert.tex = texCoord[i];
+
+			output.Append(outputVert);
+		}
+	}
+}
+
+float4 ps_lightparticles(LightParticleOut input) : SV_Target0
+{
+	return texture_.Sample( colorSampler_, input.tex );
+}
+
 technique11 GeoPass
 {
     pass P0
@@ -201,5 +286,17 @@ technique11 PointLight
         SetVertexShader( CompileShader( vs_5_0, vs_point() ) );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_5_0, ps_point() ) );
+    }
+}
+
+technique11 LightParticle
+{
+    pass P0
+    {
+		SetDepthStencilState(depthState, 0);
+		SetBlendState(blendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF );
+        SetVertexShader( CompileShader( vs_5_0, vs_lightparticle() ) );
+		SetGeometryShader( CompileShader( vs_5_0, gs_lightparticle() ) );
+        SetPixelShader( CompileShader( ps_5_0, ps_lightparticle() ) );
     }
 }

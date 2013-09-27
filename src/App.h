@@ -106,6 +106,7 @@ protected:
 	ID3DX11EffectTechnique* mRenderGBufferTech;
 	ID3DX11EffectTechnique* mAmbientLightTech;
 	ID3DX11EffectTechnique* mPointLightTech;
+	ID3DX11EffectTechnique* mLightParticleTech;
 
 	ID3D11InputLayout* mInputLayout;
 	ID3D11Buffer* mFSQuadVB;
