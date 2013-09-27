@@ -1,11 +1,12 @@
 #include "ParticleDisplay.h"
+#include "Log.h"
 
 ParticleDisplay::ParticleDisplay()
 {
 
 }
 
-bool ParticleDisplay::init(ID3D11Device* device)
+bool ParticleDisplay::init(ID3D11Device* device, ID3DX11EffectTechnique* technique)
 {
 	unsigned long* indices;
 	int i;
@@ -13,12 +14,21 @@ bool ParticleDisplay::init(ID3D11Device* device)
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
 
+	// Create the vertex input layout.
+	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
+	};
 
-	// Set the maximum number of vertices in the vertex array.
-	mVertexCount = MAX_PARTICLES * 4;
+	//Create the input layout
+    D3DX11_PASS_DESC passDesc;
+    technique->GetPassByIndex(0)->GetDesc( &passDesc );
 
-	// Set the maximum number of indices in the index array.
-	mIndexCount = MAX_PARTICLES * 6;
+    if(FAILED(device->CreateInputLayout(vertexDesc, 2, passDesc.pIAInputSignature, 
+		passDesc.IAInputSignatureSize, &mInputLayout))){
+            LOG_ERRO << "Failed to create Vertex Input Layout for Particles" << LOG_ENDL;
+            return false;
+    }
 
 	// Create the vertex array for the particles that will be rendered.
 	mVertices = new ParticleVertex[mVertexCount];
@@ -27,27 +37,13 @@ bool ParticleDisplay::init(ID3D11Device* device)
 		return false;
 	}
 
-	// Create the index array.
-	indices = new unsigned long[mIndexCount];
-	if(!indices)
-	{
-		return false;
-	}
-
 	// Initialize vertex array to zeros at first.
-	memset(mVertices, 0, (sizeof(ParticleVertex) * mVertexCount));
+	memset(mVertices, 0, (sizeof(ParticleVertex)));
 
-	// Initialize the index array.
-	for(i=0; i<mIndexCount; i++)
-	{
-		indices[i] = i;
-	}
-
-	// Set up the description of the dynamic vertex buffer.
-	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	vertexBufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
 	vertexBufferDesc.ByteWidth = sizeof(ParticleVertex) * mVertexCount;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	vertexBufferDesc.CPUAccessFlags = 0;
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
@@ -87,5 +83,36 @@ bool ParticleDisplay::init(ID3D11Device* device)
 	delete [] indices;
 	indices = 0;
 
+	D3D11_BUFFER_DESC constDesc;
+    ZeroMemory( &constDesc, sizeof( constDesc ) );
+    constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    constDesc.ByteWidth = sizeof( ParticleInstanceData );
+    constDesc.Usage = D3D11_USAGE_DEFAULT;
+    
+	if( FAILED( device->CreateBuffer( &constDesc, 0, &mParticleInstanceDataCB ) ) ){
+        LOG_ERRO << "Failed to create constant buffer for ParticleDisplay" << LOG_ENDL;
+        return false;
+    }
+
 	return true;
+}
+
+void ParticleDisplay::UpdateBuffers(ParticleInstanceData* pos, ID3D11DeviceContext* device)
+{
+	int index, i;
+	HRESULT result;	
+
+	device->UpdateSubresource( mParticleInstanceDataCB, 0, 0, pos, 0, 0 );
+}
+
+void ParticleDisplay::Draw(ParticleInstanceData* pos, ID3D11DeviceContext* device)
+{
+	UpdateBuffers(pos, device);
+
+	//Set input layout and topology
+    device->IASetInputLayout( mInputLayout );
+	device->IASetPrimitiveTopology( D3D_PRIMITIVE_TOPOLOGY_POINTLIST );
+
+	device->VSSetConstantBuffers(4, 1, &mParticleInstanceDataCB);
+	device->GSSetConstantBuffers(4, 1, &mParticleInstanceDataCB);
 }

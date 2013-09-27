@@ -5,7 +5,8 @@ Particle::Particle() :
 	mVelocity(0,0,0),
 	mPosition(0,0,0),
 	mAngle(0),
-	mAngularVelocity(0)
+	mAngularVelocity(0),
+	mSize(0.1f)
 {
 
 }
@@ -42,4 +43,8 @@ void Particle::setRotation(float angle)
 void Particle::setAngularVelocity(float vel)
 {
 	mAngularVelocity = vel;
+}
+void Particle::setSize(float size)
+{
+	mSize = size;
 }

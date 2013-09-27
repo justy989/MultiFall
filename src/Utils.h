@@ -16,7 +16,8 @@
 
 #define BYTE_MAX 255
 
-#define MAX_PARTICLES 1000
+#define MAX_EMITTERS 50
+#define MAX_PARTICLES 100
 
 //Typedefs
 typedef unsigned char byte;
@@ -24,6 +25,13 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 
 //Structs
+struct ParticleInstanceData
+{
+	XMFLOAT3 Pos;
+	float Rot;
+	XMFLOAT4 isAlive;
+};
+
 struct DungeonVertex{
     XMFLOAT3 position;
 	XMFLOAT3 normal;

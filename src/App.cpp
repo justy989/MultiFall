@@ -450,6 +450,7 @@ bool App::initShaders()
 	mRenderGBufferTech = mFX->GetTechniqueByName("GeoPass");
 	mAmbientLightTech = mFX->GetTechniqueByName("AmbientLight");
 	mPointLightTech = mFX->GetTechniqueByName("PointLight");
+	mLightParticleTech = mFX->GetTechniqueByName("LightParticle");
 
     LOG_INFO << "Loaded color.fx shader Successfully" << LOG_ENDL;
 
@@ -803,6 +804,12 @@ void App::draw( )
 	{
 		mRenderGBufferTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
         mWorldDisplay.draw( mWindow.getDeviceContext(), mFX, mWorld );
+<<<<<<< HEAD
+=======
+        mTorch.draw( mWindow.getDeviceContext() );
+
+		//drawDarkParticles
+>>>>>>> 2de5cc8846c6cbf1a2a566a2d5d97dddd9cce064
 	}
 
 	//switch back to original render target
@@ -843,8 +850,11 @@ void App::draw( )
 	{
 		mPointLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
 		mWorldDisplay.getLevelDisplay().applyFog(mWindow.getDeviceContext()); 
-		mWorldDisplay.drawPointLights(mWindow.getDeviceContext(), mFX, mCamera.getPosition(), mWorld);		
+		mWorldDisplay.drawPointLights(mWindow.getDeviceContext(), mFX, mCamera.getPosition(), mWorld);
 	}
+
+	//pass for LightParticles
+
 
 	mWindow.getDeviceContext()->OMSetDepthStencilState(prevDSS, 0);
 

@@ -10,7 +10,9 @@ class EmitterManager
 public:
 	EmitterManager();
 
-	bool init();
+	bool init(ID3D11Device* device, ID3DX11EffectTechnique* tech);
+
+	void spawnEmitter(XMFLOAT3 gravity, XMFLOAT3 position, XMFLOAT3 velocity, float maxTime);
 
 	void Update(float dt);
 
@@ -18,4 +20,9 @@ public:
 protected:
 	ushort mNumEmitters;
 	Emitter* mEmitters;
+
+	ID3D11ShaderResourceView* mParticle1;
+	ID3D11ShaderResourceView* mParticle2;
+
+	ID3DX11EffectTechnique* mTech;
 };
