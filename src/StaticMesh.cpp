@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <vector>
+#include <assert.h>
 
 StaticMesh::StaticMesh() :
     mVB(NULL),
@@ -97,6 +98,8 @@ bool StaticMesh::loadFromObj( ID3D11Device* device, char* objPath, LPCWSTR textu
         vertData[i] = vb[i];
     }
 
+    calcBoundingBox( vertData, mVertexCount );
+
     D3D11_BUFFER_DESC vbd;
     vbd.Usage = D3D11_USAGE_IMMUTABLE;
     vbd.ByteWidth = sizeof(DungeonVertex) * mVertexCount;
@@ -116,6 +119,50 @@ bool StaticMesh::loadFromObj( ID3D11Device* device, char* objPath, LPCWSTR textu
 
     delete[] vertData;
     return true;
+}
+
+void StaticMesh::calcBoundingBox( DungeonVertex* verts, uint vertCount )
+{
+    assert( vertCount > 0 );
+
+    //Init data to start, assumes vertexCount > 0!
+    mBoundingBoxMin.x = verts[0].position.x;
+    mBoundingBoxMax.x = verts[0].position.x;
+    mBoundingBoxMin.y = verts[0].position.y;
+    mBoundingBoxMax.y = verts[0].position.y;
+    mBoundingBoxMin.z = verts[0].position.z;
+    mBoundingBoxMax.z = verts[0].position.z;
+
+    //Loop through each vertex
+    for(int i = 0; i < mVertexCount; i++){
+
+        //Calc X min and max
+        if( verts[i].position.x < mBoundingBoxMin.x ){
+            mBoundingBoxMin.x = verts[i].position.x;
+        }
+
+        if( verts[i].position.x > mBoundingBoxMax.x ){
+            mBoundingBoxMax.x = verts[i].position.x;
+        }
+
+        //Calc Y min and max
+        if( verts[i].position.y < mBoundingBoxMin.y ){
+            mBoundingBoxMin.y = verts[i].position.y;
+        }
+
+        if( verts[i].position.y > mBoundingBoxMax.y ){
+            mBoundingBoxMax.y = verts[i].position.y;
+        }
+
+        //Calc Z min and max
+        if( verts[i].position.z < mBoundingBoxMin.z ){
+            mBoundingBoxMin.z = verts[i].position.z;
+        }
+
+        if( verts[i].position.z > mBoundingBoxMax.z ){
+            mBoundingBoxMax.z = verts[i].position.z;
+        }
+    }
 }
 
 void StaticMesh::draw( ID3D11DeviceContext* device )

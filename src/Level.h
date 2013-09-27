@@ -6,7 +6,8 @@
 #include "StaticMesh.h"
 
 #define LEVEL_MAX_LIGHTS 128
-#define LEVEL_MAX_FURNITURE 128
+#define LEVEL_MAX_FURNITURE 1024
+#define LEVEL_FURNITURE_TYPE_COUNT 7
 
 //Holds a level of a Dungeon
 class Level{
@@ -44,7 +45,10 @@ public:
             None,
             Chair,
             Desk,
-            Table
+            Table,
+            Bench,
+            Bed_Frame,
+            Book_Case
         };
 
         Type type;
@@ -82,6 +86,9 @@ public:
     //Get the height of a block
     byte getBlockHeight( short i, short j );
 
+    //Is a rectangle of blocks the same height?
+    bool isRectOfBlocksSameHeight( short l, short r, short t, short b, byte height );
+
     inline short getWidth();
     inline short getDepth();
     inline byte getHeight();
@@ -94,6 +101,9 @@ public:
     
     inline ushort getNumFurniture();
 	inline Furniture& getFurniture( ushort index );
+
+    inline XMFLOAT3& getFurnitureDimensions( Furniture::Type type );
+    inline void setFurnitureDimensions( Furniture::Type type, XMFLOAT3 dimensions );
 
 protected:
 
@@ -114,6 +124,9 @@ protected:
 
     ushort mNumFurniture;
     Furniture mFurniture[ LEVEL_MAX_FURNITURE ];
+
+    //Dimensions of furniture by type
+    XMFLOAT3 mFurnitureDimensions[ LEVEL_FURNITURE_TYPE_COUNT ];
 };
 
 short Level::getWidth(){return mWidth;}
@@ -128,5 +141,8 @@ inline Level::TorchInfo& Level::getTorch( ushort index ){return mTorches[ index 
 
 inline ushort Level::getNumFurniture(){return mNumFurniture;}
 inline Level::Furniture& Level::getFurniture( ushort index ){return mFurniture[ index ];}
+
+inline XMFLOAT3& Level::getFurnitureDimensions( Level::Furniture::Type type ){return mFurnitureDimensions[type];}
+inline void Level::setFurnitureDimensions( Level::Furniture::Type type, XMFLOAT3 dimensions ){mFurnitureDimensions[type] = dimensions;}
 
 #endif

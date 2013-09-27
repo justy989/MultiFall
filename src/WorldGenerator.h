@@ -4,6 +4,8 @@
 #include "Random.h"
 #include "Level.h"
 
+#define ROOM_MAX_DIMENSION 16
+
 class WorldGenerator{
 public:
 
@@ -20,12 +22,11 @@ public:
     struct LevelPreset{
         IRange roomCount;
 
-        IRange roomWidth;
-        IRange roomDepth;
-
         IRange roomCeilingHeight;
 
         FRange doorScrubChance;
+
+        float roomChances[ 8 ];
     };
 
     struct RoomPreset{
@@ -33,6 +34,37 @@ public:
         FRange rampDensity;
         FRange wallDensity;
         IRange wallLength;
+
+        struct Type{
+            IRange width;
+            IRange height;
+
+            IRange furnitureCount[ LEVEL_FURNITURE_TYPE_COUNT ];
+            FRange furnitureChance[ LEVEL_FURNITURE_TYPE_COUNT ];
+        };
+
+        Type mRoomTypes[ 8 ];
+    };
+
+    struct Room{
+
+        enum Type{
+            Empty,
+            Labyrinth,
+            BedRoom,
+            Study,
+            Library,
+            Storage,
+            DiningRoom,
+            Ballroom
+        };
+
+        Type type;
+
+        int left;
+        int right;
+        int top;
+        int bottom;
     };
 
     WorldGenerator();
@@ -44,13 +76,6 @@ public:
     inline void setTileIDMax( uint tileIDMax );
 
 protected:
-
-    struct Room{
-        int left;
-        int right;
-        int top;
-        int bottom;
-    };
 
     struct Door{
         int x;
@@ -68,12 +93,18 @@ protected:
     void genLevelLayout( Level& level, LevelPreset& preset ); 
     void genLevelRoomHeights( Level& level, LevelPreset& preset, Room& room );
     void genLevelRoomWalls( Level& level, LevelPreset& preset, Room& room );
+    void genLevelRoomFurniture( Level& level, Room& room );
 
     void genDoors( Level& level, Room& room, Room& prevRoom, WallSide attached );
     void scrubLevelDoorways( Level& level, LevelPreset& preset );
     int applyLevelDoorways( Level& level );
 
-    void genRoom( WallSide side, int attachX, int attachY, Room& room, LevelPreset& preset ); 
+    void genRoom( WallSide side, int attachX, int attachY, Room& room, LevelPreset& preset );
+
+    //Generate furniture in a room, set px and py to where they were generated
+    void genFurnitureInRoom( Level::Furniture::Type type, Level& level, Room& room, bool againstWall, int& px, int& py );
+    
+    void genChairByFurniture( Level::Furniture::Type type, Level& level, Room& room, int px, int py );
 
 protected:
 

@@ -102,6 +102,7 @@ void Level::clear()
 
     mNumLights = 0;
 	mNumTorches = 0;
+    mNumFurniture = 0;
 }
 
 void Level::setBlock( short i, short j, byte height, Ramp ramp )
@@ -143,4 +144,22 @@ byte Level::getBlockHeight( short i, short j )
     assert( j < mDepth );
 
     return mBlocks[i][j].height;
+}
+
+bool Level::isRectOfBlocksSameHeight( short l, short r, short t, short b, byte height )
+{
+    assert( l < mWidth );
+    assert( t < mDepth );    
+    assert( r < mWidth );
+    assert( b < mDepth );
+
+    for(short j = t; j <= b; j++){
+        for(short i = l; i <= r; i++){
+            if( mBlocks[i][j].height != height ){
+                return false;
+            }
+        }
+    }
+
+    return true;
 }

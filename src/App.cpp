@@ -207,11 +207,11 @@ bool App::init( )
     mLevelPreset.roomCount.min = 8;
     mLevelPreset.roomCount.max = 16;
 
-    mLevelPreset.roomWidth.min = 2;
-    mLevelPreset.roomWidth.max = 16;
+    //mLevelPreset.roomWidth.min = 2;
+    //mLevelPreset.roomWidth.max = 16;
 
-    mLevelPreset.roomDepth.min = 2;
-    mLevelPreset.roomDepth.max = 16;
+    //mLevelPreset.roomDepth.min = 2;
+    //mLevelPreset.roomDepth.max = 16;
 
     mLevelPreset.roomCeilingHeight.min = 3;
     mLevelPreset.roomCeilingHeight.max = 6;
@@ -219,16 +219,40 @@ bool App::init( )
     mLevelPreset.doorScrubChance.min = 0.0f;
     mLevelPreset.doorScrubChance.max = 1.0f;
 
+    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Empty ] = 0.1f;
+    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Labyrinth ] = 0.25f;
+    mLevelPreset.roomChances[ WorldGenerator::Room::Type::BedRoom ] = 0.4f;
+    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Study ] = 0.5f;
+    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Library ] = 0.6f;
+    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Storage ] = 0.8f;
+    mLevelPreset.roomChances[ WorldGenerator::Room::Type::DiningRoom ] = 0.9f;
+    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Ballroom ] = 1.0f;
+
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
     mEntity.getSolidity().radius = 0.15f;
     mEntity.getSolidity().height = 0.25f;
 
-    if( !mTorch.loadFromObj(mWindow.getDevice(), "content/meshes/torch.obj", L"content/textures/torch_texture.png") ){
+    if( !mUIDisplay.init( mWindow.getDevice(), L"content/textures/multifall_ui.png", L"content/shaders/ui.fx" ) ){
         return false;
     }
 
-    if( !mUIDisplay.init( mWindow.getDevice(), L"content/textures/multifall_ui.png", L"content/shaders/ui.fx" ) ){
-        return false;
+    //Set furniture dimensions based on bounding boxes 
+    for(int i = 1; i < LEVEL_FURNITURE_TYPE_COUNT; i++){
+        XMFLOAT3 dimensions;
+
+        dimensions.x = mWorldDisplay.getLevelDisplay().getFurnitureMesh( (Level::Furniture::Type)(i) ).getBoundingBoxMax().x - 
+                       mWorldDisplay.getLevelDisplay().getFurnitureMesh( (Level::Furniture::Type)(i) ).getBoundingBoxMin().x;
+        dimensions.y = mWorldDisplay.getLevelDisplay().getFurnitureMesh( (Level::Furniture::Type)(i) ).getBoundingBoxMax().y - 
+                       mWorldDisplay.getLevelDisplay().getFurnitureMesh( (Level::Furniture::Type)(i) ).getBoundingBoxMin().y;
+        dimensions.z = mWorldDisplay.getLevelDisplay().getFurnitureMesh( (Level::Furniture::Type)(i) ).getBoundingBoxMax().z - 
+                       mWorldDisplay.getLevelDisplay().getFurnitureMesh( (Level::Furniture::Type)(i) ).getBoundingBoxMin().z;
+
+        //Scale the dimensions
+        dimensions.x *= mWorldDisplay.getLevelDisplay().getFurnitureScale( (Level::Furniture::Type)(i) );
+        dimensions.y *= mWorldDisplay.getLevelDisplay().getFurnitureScale( (Level::Furniture::Type)(i) );
+        dimensions.z *= mWorldDisplay.getLevelDisplay().getFurnitureScale( (Level::Furniture::Type)(i) );
+
+        mWorld.getLevel().setFurnitureDimensions( (Level::Furniture::Type)(i), dimensions );
     }
 
     UIWindow::Text text;
@@ -379,7 +403,7 @@ bool App::init( )
 
     LevelThemeLoader ltl;
 
-	ltl.loadTheme("content/themes/stone.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
+	ltl.loadTheme("content/themes/brick_wood.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
 
     mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
     mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f );	
@@ -495,7 +519,6 @@ bool App::initRTVs()
 	HRESULT result;
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
-
 
 	// Initialize the render target texture description.
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
@@ -780,7 +803,6 @@ void App::draw( )
 	{
 		mRenderGBufferTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
         mWorldDisplay.draw( mWindow.getDeviceContext(), mFX, mWorld );
-        mTorch.draw( mWindow.getDeviceContext() );
 	}
 
 	//switch back to original render target
@@ -816,7 +838,6 @@ void App::draw( )
 		drawFSQuad();
 	}
 
-    
 	mPointLightTech->GetDesc( &techDesc );
     for(ushort p = 0; p < techDesc.Passes; ++p)
 	{
@@ -886,8 +907,6 @@ void App::clear( )
     mUIWindow.clear();
 
     mUIDisplay.clear();
-
-    mTorch.clear();
 
     mWindow.clear();
 }

@@ -114,8 +114,6 @@ protected:
 
 	XMFLOAT2 mHalfPixel;
 
-    StaticMesh mTorch;
-
 	//G-buffer render targets for deferred shading
 	//[0] = color
 	//[1] = normal

@@ -81,6 +81,25 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
         return false;
     }
 
+    if( !mFurniture[3].loadFromObj(device, "content/meshes/bench_1.obj", L"content/textures/furniture_wood.png") ){
+        return false;
+    }
+
+	if( !mFurniture[4].loadFromObj(device, "content/meshes/bed_frame_1.obj", L"content/textures/furniture_wood.png") ){
+        return false;
+    }
+
+	if( !mFurniture[5].loadFromObj(device, "content/meshes/bookcase_1.obj", L"content/textures/furniture_wood.png") ){
+        return false;
+    }
+
+    mFurnitureScale[ Level::Furniture::Chair ] = 0.065f;
+    mFurnitureScale[ Level::Furniture::Desk ] = 0.1f;
+    mFurnitureScale[ Level::Furniture::Table ] = 0.1f;
+    mFurnitureScale[ Level::Furniture::Bench ] = 0.1f;
+    mFurnitureScale[ Level::Furniture::Bed_Frame ] = 0.1f;
+    mFurnitureScale[ Level::Furniture::Book_Case ] = 0.1f;
+
     LOG_INFO << "Created Input Description and Texture Sampler for Level" << LOG_ENDL;
     return true;
 }
@@ -223,7 +242,12 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
 	{
         Level::Furniture& f = level.getFurniture(i);
 
-        worldm = XMMatrixScaling(0.1f, 0.1f, 0.1f) * XMMatrixRotationY( f.yRotation ) * XMMatrixTranslation( f.position.x, f.position.y, f.position.z );
+        worldm = XMMatrixScaling( mFurnitureScale[ f.type ], 
+                                  mFurnitureScale[ f.type ], 
+                                  mFurnitureScale[ f.type ]) * 
+                 XMMatrixRotationY( f.yRotation ) * 
+                 XMMatrixTranslation( f.position.x, f.position.y, f.position.z );
+
 		worldm = XMMatrixTranspose( worldm );
 
 		device->UpdateSubresource( mWorldCB, 0, 0, &worldm, 0, 0 ); 

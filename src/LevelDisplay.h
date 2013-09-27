@@ -44,6 +44,10 @@ public:
 
 	void applyFog( ID3D11DeviceContext* device);
 
+    //Get the furniture meshes
+    inline StaticMesh& getFurnitureMesh( Level::Furniture::Type type );
+    inline float getFurnitureScale( Level::Furniture::Type type );
+
 protected:
 
     bool createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  );
@@ -91,7 +95,19 @@ protected:
 
 	StaticMesh mTorch;
 
-    StaticMesh mFurniture[ 3 ];
+    StaticMesh mFurniture[ LEVEL_FURNITURE_TYPE_COUNT - 1 ];
+
+    float mFurnitureScale[ LEVEL_FURNITURE_TYPE_COUNT ];
 };
+
+inline StaticMesh& LevelDisplay::getFurnitureMesh( Level::Furniture::Type type )
+{
+    return mFurniture[ type - 1 ];
+}
+
+inline float LevelDisplay::getFurnitureScale( Level::Furniture::Type type )
+{
+    return mFurnitureScale[ type ];
+}
 
 #endif  
