@@ -42,6 +42,7 @@ bool EmitterManager::init(ID3D11Device* device, ID3DX11EffectTechnique* tech)
 	for(int i = 0; i < MAX_EMITTERS; i++)
 	{
 		mEmitters[i].init(device, tech);
+		mEmitters[i].setTexture(mParticle1);
 	}
 
 	return true;
@@ -57,7 +58,9 @@ void EmitterManager::spawnEmitter(XMFLOAT3 gravity, XMFLOAT3 position, XMFLOAT3 
 			mEmitters[i].setPosition(position);
 			mEmitters[i].setVelocity(velocity);
 			mEmitters[i].setMaxTimeAlive(maxTime);
+			mEmitters[i].setParticleChancePerFrame(50);
 			mEmitters[i].setAlive();
+			break;
 		}
 	}
 }

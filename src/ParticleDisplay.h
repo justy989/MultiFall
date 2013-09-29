@@ -14,7 +14,7 @@ public:
 
 	bool init(ID3D11Device* device, ID3DX11EffectTechnique* technique);
 
-	void Draw(ParticleInstanceData* stuff, ID3D11DeviceContext* device);
+	void Draw(ParticleInstanceData* stuff, ID3D11DeviceContext* device, ID3D11ShaderResourceView* texture);
 
 	struct ParticleVertex
 	{
@@ -27,6 +27,6 @@ protected:
 
 	int mVertexCount, mIndexCount;
 	ParticleVertex* mVertices;
-	ID3D11Buffer *mVertexBuffer, *mIndexBuffer;
+	ID3D11Buffer *mVertexBuffer; //because it's a point list, no index buffer
 	ID3D11Buffer* mParticleInstanceDataCB;
 };

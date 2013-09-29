@@ -8,7 +8,7 @@ struct ParticleInstanceData
 	float3 pos;
 	float rot;
 	float4 isAlive;
-}
+};
 
 DepthStencilState depthState
 {
@@ -41,7 +41,7 @@ cbuffer cbPerFrame : register( b0 )
 {
 	float4x4 gViewProj;
 	float4x4 gInvViewProj;
-	//float4 gCameraPos;
+	float4 gCameraPos;
 };
 
 cbuffer cbPerObject : register( b1 )
@@ -88,12 +88,13 @@ struct LightParticleGSIn
 {
 	float4 pos  : POSITION;
 	float2 tex :	TEXCOORD;
-}
+};
 
 struct LightParticleOut
 {
 	float4 pos  : SV_POSITION;
-	float2 tex :	TEXCOORD;
+	float4 screenPos : TEXCOORD0;
+	float2 tex :	TEXCOORD1;
 };
 
 struct PointVertexOut
@@ -204,32 +205,32 @@ LightParticleGSIn vs_lightparticle(LightParticleIn input, uint instanceID : SV_I
 	LightParticleGSIn output;
 	//float4x4 worldViewProj = mul(gWorld, gViewProj);    
     output.pos = float4(gParticles[instanceID].pos, 1.0f);
-	output.tex = float2(particlePositions[instanceID].isAlive, gParticles[instanceID].rot);
+	output.tex = float2(gParticles[instanceID].isAlive.x, gParticles[instanceID].rot);
 
 	return output;
 }
 
 [maxvertexcount(4)]
-void gs_lightparticle(point LightParticleGSIn input, inout TriangleStream<float3> output)
+void gs_lightparticle(point LightParticleGSIn input[1], inout TriangleStream<LightParticleOut> output)
 {
 	//if the particle instance is alive
-	if(input.tex.x > 0)
+	if(input[0].tex.x > 0)
 	{
-		float3 planeNormal = input.pos.xyz - camPos.xyz;
+		float3 planeNormal = input[0].pos.xyz - gCameraPos.xyz;
 		planeNormal = normalize(planeNormal);
 
-		float3 upVector = float3(cos(input.tex.y), sin(input.tex.y), 0.0f);
-		float3 rightVector = normalize(cross(planeNormal, upVector));
-		upVector = normalize(cross(rightVector, planeNormal));
+		float3 upVector = float3(0,1,0);//float3(cos(input[0].tex.y), sin(input[0].tex.y), 0.0f);
+		float3 rightVector = 0.02f * normalize(cross(planeNormal, upVector));
+		upVector = 0.02f * normalize(cross(rightVector, planeNormal));
 
 		// Create the billboards quad
 		float3 vert[4];
 
 		// We get the points by using the billboards right vector and the billboards height
-		vert[0] = input.xyz - rightVector; // Get bottom left vertex
-		vert[1] = input.xyz + rightVector; // Get bottom right vertex
-		vert[2] = input.xyz - rightVector + upVector; // Get top left vertex
-		vert[3] = input.xyz + rightVector + upVector; // Get top right vertex
+		vert[0] = input[0].pos.xyz - rightVector; // Get bottom left vertex
+		vert[1] = input[0].pos.xyz + rightVector; // Get bottom right vertex
+		vert[2] = input[0].pos.xyz - rightVector + upVector; // Get top left vertex
+		vert[3] = input[0].pos.xyz + rightVector + upVector; // Get top right vertex
 
 		// Get billboards texture coordinates
 		float2 texCoord[4];
@@ -242,7 +243,8 @@ void gs_lightparticle(point LightParticleGSIn input, inout TriangleStream<float3
 		LightParticleOut outputVert;
 		for(int i = 0; i < 4; i++)
 		{
-			outputVert.pos = mul(float4(vert[i], 1.0f), worldViewProj);
+			outputVert.pos = mul(float4(vert[i], 1.0f), gViewProj);
+			outputVert.screenPos = outputVert.pos;
 			outputVert.tex = texCoord[i];
 
 			output.Append(outputVert);
@@ -250,9 +252,20 @@ void gs_lightparticle(point LightParticleGSIn input, inout TriangleStream<float3
 	}
 }
 
-float4 ps_lightparticles(LightParticleOut input) : SV_Target0
+float4 ps_lightparticle(LightParticleOut input) : SV_Target0
 {
-	return texture_.Sample( colorSampler_, input.tex );
+	input.screenPos.xy /= input.screenPos.w;
+	float2 texCoord = 0.5f * (float2(input.screenPos.x, -input.screenPos.y) + 1);
+
+	float geoDepth = depthBuffer.Sample( colorSampler_, texCoord ).r;
+	float particleDepth = input.screenPos.z / input.screenPos.w;
+	if(particleDepth > geoDepth)
+	{
+		clip(-1);		
+	}
+
+	return texture_.Sample( colorSampler_, input.tex );	
+	
 }
 
 technique11 GeoPass
@@ -296,7 +309,7 @@ technique11 LightParticle
 		SetDepthStencilState(depthState, 0);
 		SetBlendState(blendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF );
         SetVertexShader( CompileShader( vs_5_0, vs_lightparticle() ) );
-		SetGeometryShader( CompileShader( vs_5_0, gs_lightparticle() ) );
+		SetGeometryShader( CompileShader( gs_5_0, gs_lightparticle() ) );
         SetPixelShader( CompileShader( ps_5_0, ps_lightparticle() ) );
     }
 }

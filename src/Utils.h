@@ -24,12 +24,17 @@ typedef unsigned char byte;
 typedef unsigned short ushort;
 typedef unsigned int uint;
 
-//Structs
-struct ParticleInstanceData
+struct PID
 {
 	XMFLOAT3 Pos;
 	float Rot;
 	XMFLOAT4 isAlive;
+};
+
+//Structs
+struct ParticleInstanceData
+{
+	PID data[MAX_PARTICLES];
 };
 
 struct DungeonVertex{

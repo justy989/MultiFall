@@ -21,6 +21,8 @@
 #include "UIDisplay.h"
 #include "UIElement.h"
 
+#include "EmitterManager.h"
+
 #include <d3dx11effect.h>
 
 class App : public WMInputHandler{
@@ -94,6 +96,8 @@ protected:
     UIDropMenu* mDropBox;
     UIInputBox* mInputBox;
     UITextBox* mTextBox;
+
+	EmitterManager mEmitterManager;
 
     bool mLeftClick;
 

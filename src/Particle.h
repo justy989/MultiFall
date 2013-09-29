@@ -12,6 +12,9 @@ public:
 	void setAngularVelocity(float vel);
 	void setSize(float size);
 
+	void setMaxTimeAlive(float maxTime);
+	void setAlive();
+
 	void Update(float dt);
 
 	inline XMFLOAT3 getGravity();
@@ -25,7 +28,11 @@ public:
 protected:
 	XMFLOAT3 mGravity, mVelocity, mPosition;
 	float mAngle, mAngularVelocity, mSize;
+	
 	bool mIsAlive;
+
+	float mTimeAlive;
+	float mMaxTimeAlive;
 };
 
 inline XMFLOAT3 Particle::getGravity(){return mGravity;}

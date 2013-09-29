@@ -41,6 +41,12 @@ void App::handleInput( RAWINPUT* input )
         }
 
         if( input->data.mouse.ulButtons & RI_MOUSE_LEFT_BUTTON_DOWN ){
+			XMMATRIX rot = XMMatrixRotationRollPitchYaw(mCamera.getPitch(), mCamera.getYaw(), 0);
+			XMVECTOR camDir = XMVectorSet( mCamera.getView()._13, mCamera.getView()._23, mCamera.getView()._33, 0);
+			camDir = XMVectorScale(camDir, 1.75f);
+			XMFLOAT3 f;
+			XMStoreFloat3(&f, camDir);
+			mEmitterManager.spawnEmitter(XMFLOAT3(0,0,0), XMFLOAT3(mCamera.getPosition().x, mCamera.getPosition().y, mCamera.getPosition().z), f, 10.0f);
             mLeftClick = true;
         }else if( input->data.mouse.ulButtons & RI_MOUSE_LEFT_BUTTON_UP ){
             mLeftClick = false;
@@ -408,6 +414,8 @@ bool App::init( )
     mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
     mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f );	
 
+	mEmitterManager.init(mWindow.getDevice(), mLightParticleTech);
+
     return true;
 }
 
@@ -755,6 +763,8 @@ void App::update( float dt )
             }
         }
     }
+
+	mEmitterManager.Update(dt);
 }
 
 void App::draw( )
@@ -795,6 +805,9 @@ void App::draw( )
     
     ID3DX11EffectMatrixVariable* mfxInvViewProj = mFX->GetVariableByName("gInvViewProj")->AsMatrix();
     mfxInvViewProj->SetMatrix(reinterpret_cast<float*>(&invViewProj));
+
+	ID3DX11EffectVectorVariable* mfxCameraPos = mFX->GetVariableByName("gCameraPos")->AsVector();
+	mfxCameraPos->SetFloatVector(reinterpret_cast<float*>(&mCamera.getPosition()));
 
 	//Start geometry fill pass
 	D3DX11_TECHNIQUE_DESC techDesc;
@@ -850,7 +863,17 @@ void App::draw( )
 
 	//pass for LightParticles
 
+	//mWindow.getDeviceContext()->OMSetRenderTargets(1, &prevRTV, mDepthStencilView);
 
+	mLightParticleTech->GetDesc( &techDesc );
+    for(ushort p = 0; p < techDesc.Passes; ++p)
+	{
+		mLightParticleTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
+		mEmitterManager.Draw(mWindow.getDeviceContext());
+	}
+
+	//mWindow.getDeviceContext()->OMSetRenderTargets(1, &prevRTV, prevDSV);
+	
 	mWindow.getDeviceContext()->OMSetDepthStencilState(prevDSS, 0);
 
 	mWindow.getDeviceContext()->OMSetBlendState(prevBS, prevfloat, prevMask);
