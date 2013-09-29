@@ -46,7 +46,7 @@ void App::handleInput( RAWINPUT* input )
 			camDir = XMVectorScale(camDir, 1.75f);
 			XMFLOAT3 f;
 			XMStoreFloat3(&f, camDir);
-			mEmitterManager.spawnEmitter(XMFLOAT3(0,0,0), XMFLOAT3(mCamera.getPosition().x, mCamera.getPosition().y, mCamera.getPosition().z), f, 10.0f);
+			mEmitterManager.spawnEmitter(XMFLOAT3(0,0.5f,0), XMFLOAT3(mCamera.getPosition().x, mCamera.getPosition().y, mCamera.getPosition().z), f, 10.0f);
             mLeftClick = true;
         }else if( input->data.mouse.ulButtons & RI_MOUSE_LEFT_BUTTON_UP ){
             mLeftClick = false;

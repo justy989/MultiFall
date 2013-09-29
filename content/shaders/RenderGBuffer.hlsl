@@ -220,8 +220,8 @@ void gs_lightparticle(point LightParticleGSIn input[1], inout TriangleStream<Lig
 		planeNormal = normalize(planeNormal);
 
 		float3 upVector = float3(0,1,0);//float3(cos(input[0].tex.y), sin(input[0].tex.y), 0.0f);
-		float3 rightVector = 0.02f * normalize(cross(planeNormal, upVector));
-		upVector = 0.02f * normalize(cross(rightVector, planeNormal));
+		float3 rightVector = 0.01f * normalize(cross(planeNormal, upVector));
+		upVector = 0.01f * normalize(cross(rightVector, planeNormal));
 
 		// Create the billboards quad
 		float3 vert[4];
