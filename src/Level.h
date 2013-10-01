@@ -25,22 +25,16 @@ public:
         Right
     };
 
-    //Holds a block in a room
-    struct Block{
-        byte ramp; //is this a ramp? If so, what kind?
-        byte height; //Height of the Level at this block
-        byte tileId; //ID for tiling
-        byte wallID; //ID wall texture selection
+    class SolidObject{
+    public:
+        XMFLOAT4 position;
+        float yRotation;
     };
 
-	struct TorchInfo
-	{
-		XMMATRIX world;
-		ushort mesh;
-		//potentially other stuff like texture maybe
-	};
+    //Furniture placed in the dungeon
+    class Furniture : public SolidObject{
+    public:
 
-    struct Furniture{
         enum Type{
             None,
             Chair,
@@ -52,9 +46,72 @@ public:
         };
 
         Type type;
-        XMFLOAT4 position;
-        float yRotation;
     };
+
+    //Transition between rooms
+    class Door : public SolidObject{
+    public:
+
+        enum State{
+            Closed,
+            Opening,
+            Opened
+        };
+
+        State state;
+    };
+
+    //
+    class Container : public SolidObject{
+    public:
+
+        enum State{
+            Closed,
+            Opening,
+            Opened
+        };
+
+        enum Type{
+            None,
+            Crate,
+            Barrel,
+            Chest,
+        };
+
+        State state;
+        Type type;
+    };
+
+    //Holds a block of floor in the level
+    struct Block{
+        //Stores what type of collidable object might be on top of the floor
+        enum Collidable{
+            None,
+            Wall,
+            Furniture,
+            Container,
+            Door
+        };
+
+        byte ramp; //is this a ramp? If so, what kind?
+        byte height; //Height of the Level at this block
+        byte tileId; //ID for tiling
+        
+        byte Collidable; //Occupant id
+
+        union{
+            Level::Furniture* furniture;
+            Level::Door* door;
+            Level::Container* container;
+        };
+    };
+
+	struct TorchInfo
+	{
+		XMMATRIX world;
+		ushort mesh;
+		//potentially other stuff like texture maybe
+	};
 
     //initialize a room to certain dimensions
     bool init( short width, short depth, byte height );

@@ -5,55 +5,80 @@
 #include "Level.h"
 
 #define ROOM_MAX_DIMENSION 16
+#define ROOM_TYPE_COUNT 8
+#define ROOM_MAX_DOORS 4
 
 class WorldGenerator{
 public:
 
+    //Integer range
     struct IRange{
         int min;
         int max;
 
-        int genValue( Random random ){
+        void set( int min, int max ){
+            this->min = min;
+            this->max = max;
+        }
+
+        int gen( Random random ){
             return random.gen( min, max + 1 );
         }
     };
 
+    //Float range
     struct FRange{
         float min;
         float max;
 
-        float genValue( Random random ){
+        void set( float min, float max ){
+            this->min = min;
+            this->max = max;
+        }
+
+        float gen( Random random ){
             return ( random.genNorm() * ( max - min ) ) + min;
         }
     };
 
-    struct LevelPreset{
-        IRange roomCount;
+    //Holding room options
+    struct RoomGenerationRanges{
+        IRange dimensions; //Dimensions of the room
 
-        IRange roomCeilingHeight;
+        IRange floorSectionArea; //Sections of floors that get generated at different heights
+        IRange floorHeight; //Height the floor sections will be generated at
+        
+        IRange ceilingHeight; //Height of the ceiling
 
-        FRange doorScrubChance;
+        FRange rampDensity; //Percent chance of ramps spawning where a ramp can exist
 
-        float roomChances[ 8 ];
+        FRange wallDensity; //Percent of the room taken up by walls
+        IRange wallLength; //Range of wall lengths
+
+        FRange furnitureDensity; //Percent of the room taken up by furniture
+        float furnitureChances[ LEVEL_FURNITURE_TYPE_COUNT ]; //Chances for the different furniture to be generated
     };
 
-    struct RoomPreset{
-        IRange floorSectionArea; //Sections of floors that get generated at different heights,
-        FRange rampDensity;
-        FRange wallDensity;
-        IRange wallLength;
+    //Level Options
+    struct LevelGenerationRanges{
+        IRange roomCount; //Number of rooms to generate
 
-        struct Type{
-            IRange dimensions;
-            FRange furnitureDensity;
-            float furnitureChances[ LEVEL_FURNITURE_TYPE_COUNT ];
-        };
+        FRange doorScrubChance; //Chance to scrub unnecessary doors
 
-        Type roomTypes[ 8 ];
+        RoomGenerationRanges rooms[ ROOM_TYPE_COUNT ]; //Room Generation ranges for each room type
+        float roomChances[ ROOM_TYPE_COUNT ]; //Chances for each room to be spawned
     };
 
+    //Structure for holding a door as part of a room
+    struct Door{
+        int x;
+        int y;
+        bool essential;
+    };
+
+    //Structure holding a room 
     struct Room{
-
+        //Types of rooms we can generate
         enum Type{
             Empty,
             Labyrinth,
@@ -67,28 +92,26 @@ public:
 
         Type type;
 
+        //Room bounds
         int left;
         int right;
         int top;
         int bottom;
+
+        Door doors[ ROOM_MAX_DOORS ]; //One for each side
     };
 
     WorldGenerator();
     ~WorldGenerator();
 
     //Generate a room's exits and floor layout
-    void genLevel( Level& level, LevelPreset& preset );
+    void genLevel( Level& level, LevelGenerationRanges& ranges );
 
     inline void setTileIDMax( uint tileIDMax );
 
 protected:
 
-    struct Door{
-        int x;
-        int y;
-        bool essential;
-    };
-
+    //Wall Side structure
     enum WallSide{
         Front,
         Left,
@@ -96,33 +119,52 @@ protected:
         Right
     };
 
-    void genLevelLayout( Level& level, LevelPreset& preset ); 
-    void genLevelRoomHeights( Level& level, LevelPreset& preset, Room& room );
-    void genLevelRoomWalls( Level& level, LevelPreset& preset, Room& room );
+    //Generated Furniture structure 
+    struct GeneratedFurniture{
+        //Inclusive index box where furniture will be generated
+        ushort leftRoomIndex;
+        ushort topRoomIndex;
+        ushort rightRoomIndex;
+        ushort bottomRoomIndex;
+
+        Level::Furniture furniture;
+    };
+
+    /* Generate a Level */
+
+    //Generate room layout
+    void genLevelBlueprint( Level& level ); 
+
+    //Generate the heights of the floors in each room
+    void genLevelRoomHeights( Level& level, Room& room );
+
+    //Do a pass generating the walls of each room
+    void genLevelRoomWalls( Level& level, Room& room );
+
+    //Do a pass generating the furniture of each room
     void genLevelRoomFurniture( Level& level, Room& room );
 
+    //Do a pass generating the doors of each room
     void genDoors( Level& level, Room& room, Room& prevRoom, WallSide attached );
-    void scrubLevelDoorways( Level& level, LevelPreset& preset );
-    int applyLevelDoorways( Level& level );
 
-    void genRoom( WallSide side, int attachX, int attachY, Room& room, LevelPreset& preset );
+    //Do a pass scrubing doors based on a chance
+    void scrubLevelDoorways( Level& level );
 
-    //Generate furniture in a room, set px and py to where they were generated
-    void genFurnitureInRoom( Level::Furniture::Type type, Level& level, Room& room, bool againstWall, int& px, int& py );
+    //Generate a room's dimensions alongsize an attached wall
+    void genRoom( WallSide side, int attachX, int attachY, Room& room );
+
+    //Generate a piece of furniture in a room
+    void genFurnitureInRoom( Level& level, Room& room, Level::Furniture::Type type, bool againstWall, GeneratedFurniture& gennedFurniture );
     
-    void genChairByFurniture( Level::Furniture::Type type, Level& level, Room& room, int px, int py );
+    //void genChairByFurniture( Level& level, Room& room, Level::Furniture::Type type, GeneratedFurniture& gennedFurniture, GeneratedFurniture& gennedChair );
+
+    /* Generate a Level */
 
 protected:
 
     Random mRand;
 
-    RoomPreset mRoomPreset;
-
-    Room* mRooms;
-    int mRoomCount;
-
-    Door* mDoors;
-    int mDoorCount;
+    LevelGenerationRanges* mLevelRanges;
 
     uint mTileIDMax;
 };

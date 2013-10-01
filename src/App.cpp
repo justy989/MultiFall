@@ -209,30 +209,97 @@ bool App::init( )
 
 	mTextManager.init(mWindow.getDevice());
 
-    //TMP Stuff
-    mLevelPreset.roomCount.min = 8;
-    mLevelPreset.roomCount.max = 16;
+    //Level Generation Data
+    mLevelGenRanges.roomCount.set( 8, 16 );
+    mLevelGenRanges.doorScrubChance.set( 0.0f, 0.0f );
 
-    //mLevelPreset.roomWidth.min = 2;
-    //mLevelPreset.roomWidth.max = 16;
+    //Chances for each room type
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Empty ] = 0.1f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Labyrinth ] = 0.25f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::BedRoom ] = 0.4f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Study ] = 0.5f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Library ] = 0.6f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Storage ] = 0.8f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::DiningRoom ] = 0.9f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Ballroom ] = 1.0f;
 
-    //mLevelPreset.roomDepth.min = 2;
-    //mLevelPreset.roomDepth.max = 16;
+    //Empty Room
+    WorldGenerator::RoomGenerationRanges& emptyRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Empty ];
 
-    mLevelPreset.roomCeilingHeight.min = 3;
-    mLevelPreset.roomCeilingHeight.max = 6;
+    emptyRanges.dimensions.set( 2, 12 );
+    emptyRanges.ceilingHeight.set( 6, 8 );
+    emptyRanges.floorHeight.set( 0, 3 );
+    emptyRanges.floorSectionArea.set( 200, 300 );
+    emptyRanges.rampDensity.set( 0.0f, 0.0f );
+    emptyRanges.wallDensity.set( 0.0f, 0.0f );
+    emptyRanges.wallLength.set( 0, 0 );
+    emptyRanges.furnitureDensity.set( 0.0f, 0.0f );
+    emptyRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    emptyRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    emptyRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    emptyRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    emptyRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    emptyRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    emptyRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 
-    mLevelPreset.doorScrubChance.min = 0.0f;
-    mLevelPreset.doorScrubChance.max = 1.0f;
+    //Labyrinth Room
+    WorldGenerator::RoomGenerationRanges& labyrinthRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Labyrinth ];
 
-    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Empty ] = 0.1f;
-    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Labyrinth ] = 0.25f;
-    mLevelPreset.roomChances[ WorldGenerator::Room::Type::BedRoom ] = 0.4f;
-    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Study ] = 0.5f;
-    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Library ] = 0.6f;
-    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Storage ] = 0.8f;
-    mLevelPreset.roomChances[ WorldGenerator::Room::Type::DiningRoom ] = 0.9f;
-    mLevelPreset.roomChances[ WorldGenerator::Room::Type::Ballroom ] = 1.0f;
+    labyrinthRanges.dimensions.set( 2, 12 );
+    labyrinthRanges.ceilingHeight.set( 6, 8 );
+    labyrinthRanges.floorHeight.set( 0, 3 );
+    labyrinthRanges.floorSectionArea.set( 200, 300 );
+    labyrinthRanges.rampDensity.set( 0.0f, 0.0f );
+    labyrinthRanges.wallDensity.set( 0.0f, 0.0f );
+    labyrinthRanges.wallLength.set( 0, 0 );
+    labyrinthRanges.furnitureDensity.set( 0.0f, 0.0f );
+    labyrinthRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    labyrinthRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    labyrinthRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    labyrinthRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    labyrinthRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    labyrinthRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    labyrinthRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
+
+    //Bed Room
+    WorldGenerator::RoomGenerationRanges& bedroomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::bedroom ];
+
+    bedroomRanges.dimensions.set( 2, 12 );
+    bedroomRanges.ceilingHeight.set( 6, 8 );
+    bedroomRanges.floorHeight.set( 0, 3 );
+    bedroomRanges.floorSectionArea.set( 200, 300 );
+    bedroomRanges.rampDensity.set( 0.0f, 0.0f );
+    bedroomRanges.wallDensity.set( 0.0f, 0.0f );
+    bedroomRanges.wallLength.set( 0, 0 );
+    bedroomRanges.furnitureDensity.set( 0.0f, 0.0f );
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
+
+    //Study Room
+    WorldGenerator::RoomGenerationRanges& studyRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::study ];
+
+    studyRanges.dimensions.set( 2, 12 );
+    studyRanges.ceilingHeight.set( 6, 8 );
+    studyRanges.floorHeight.set( 0, 3 );
+    studyRanges.floorSectionArea.set( 200, 300 );
+    studyRanges.rampDensity.set( 0.0f, 0.0f );
+    studyRanges.wallDensity.set( 0.0f, 0.0f );
+    studyRanges.wallLength.set( 0, 0 );
+    studyRanges.furnitureDensity.set( 0.0f, 0.0f );
+    studyRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    studyRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    studyRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    studyRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    studyRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    studyRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    studyRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
+
+
 
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
     mEntity.getSolidity().radius = 0.15f;
