@@ -73,7 +73,7 @@ bool Level::addTorch(XMFLOAT3 pos, float rotAbootYAxis)
 	return true;
 }
 
-bool Level::addFurniture( Furniture::Type type, XMFLOAT3 position, float yRot )
+bool Level::addFurniture( Furniture::Type type, XMFLOAT4 position, float yRot )
 {
     if( mNumFurniture >= LEVEL_MAX_LIGHTS ){
         return false;
@@ -162,4 +162,96 @@ bool Level::isRectOfBlocksSameHeight( short l, short r, short t, short b, byte h
     }
 
     return true;
+}
+
+void Level::getFurnitureAABoundingSquare( Furniture& furniture , float& left, float& front, float& right, float& back )
+{
+    XMVECTOR pos = XMLoadFloat4( &furniture.position );
+
+    //Set the dimensions vectors
+    XMVECTOR xDim = XMVectorSet( mFurnitureDimensions[ furniture.type ].x / 2.0f, 0.0f, 0.0f, 0.0f );
+    XMVECTOR zDim = XMVectorSet( 0.0f, 0.0f, mFurnitureDimensions[ furniture.type ].z / 2.0f, 0.0f );
+
+    //Calculate each corner from the origin
+    XMVECTOR frontLeft = (-xDim - zDim);
+    XMVECTOR frontRight = (xDim - zDim);
+    XMVECTOR backLeft = (-xDim + zDim);
+    XMVECTOR backRight = (xDim + zDim);
+
+    //Rotate and translate
+    XMMATRIX transform = XMMatrixRotationY( furniture.yRotation ) * XMMatrixTranslation( furniture.position.x, furniture.position.y, furniture.position.z );;
+
+    //perform each transformation
+    XMVECTOR transFrontLeft = XMVector4Transform( frontLeft, transform );
+    XMVECTOR transFrontRight = XMVector4Transform( frontRight, transform );
+    XMVECTOR transBackLeft = XMVector4Transform( backLeft, transform );
+    XMVECTOR transBackRight = XMVector4Transform( backRight, transform );
+
+    transFrontLeft += pos;
+    transFrontRight += pos;
+    transBackLeft += pos;
+    transBackRight += pos;
+
+    //Find the min and max boundries
+    XMFLOAT4 frontLeftF4; XMStoreFloat4( &frontLeftF4, transFrontLeft );
+    XMFLOAT4 frontRightF4; XMStoreFloat4( &frontRightF4, transFrontRight );
+    XMFLOAT4 backLeftF4; XMStoreFloat4( &backLeftF4, transBackLeft );
+    XMFLOAT4 backRightF4; XMStoreFloat4( &backRightF4, transBackRight );
+
+    //Init, then check each float for the lowest x and lowest z as well as highest x and highest z
+    left = frontLeftF4.x;
+    right = frontLeftF4.x;
+    front = frontLeftF4.z;
+    back = frontLeftF4.z;
+
+    //Check front right
+    if( frontRightF4.x < left ){
+        left = frontRightF4.x;
+    }
+
+    if( frontRightF4.x > right ){
+        right = frontRightF4.x;
+    }
+
+    if( frontRightF4.z < front ){
+        front = frontRightF4.z;
+    }
+
+    if( frontRightF4.z > back ){
+        back = frontRightF4.z;
+    }
+
+    //check back left
+    if( backLeftF4.x < left ){
+        left = backLeftF4.x;
+    }
+
+    if( backLeftF4.x > right ){
+        right = backLeftF4.x;
+    }
+
+    if( backLeftF4.z < front ){
+        front = backLeftF4.z;
+    }
+
+    if( backLeftF4.z > back ){
+        back = backLeftF4.z;
+    }
+
+    //check back right
+    if( backRightF4.x < left ){
+        left = backRightF4.x;
+    }
+
+    if( backRightF4.x > right ){
+        right = backRightF4.x;
+    }
+
+    if( backRightF4.z < front ){
+        front = backRightF4.z;
+    }
+
+    if( backRightF4.z > back ){
+        back = backRightF4.z;
+    }
 }

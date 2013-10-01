@@ -12,11 +12,19 @@ public:
     struct IRange{
         int min;
         int max;
+
+        int genValue( Random random ){
+            return random.gen( min, max + 1 );
+        }
     };
 
     struct FRange{
         float min;
         float max;
+
+        float genValue( Random random ){
+            return ( random.genNorm() * ( max - min ) ) + min;
+        }
     };
 
     struct LevelPreset{
@@ -36,14 +44,12 @@ public:
         IRange wallLength;
 
         struct Type{
-            IRange width;
-            IRange height;
-
-            IRange furnitureCount[ LEVEL_FURNITURE_TYPE_COUNT ];
-            FRange furnitureChance[ LEVEL_FURNITURE_TYPE_COUNT ];
+            IRange dimensions;
+            FRange furnitureDensity;
+            float furnitureChances[ LEVEL_FURNITURE_TYPE_COUNT ];
         };
 
-        Type mRoomTypes[ 8 ];
+        Type roomTypes[ 8 ];
     };
 
     struct Room{

@@ -52,7 +52,7 @@ public:
         };
 
         Type type;
-        XMFLOAT3 position;
+        XMFLOAT4 position;
         float yRotation;
     };
 
@@ -66,7 +66,7 @@ public:
 	bool addTorch( XMFLOAT3 pos, float rotAbootYAxis );
 
     //Add a piece of furniture
-    bool addFurniture( Furniture::Type type, XMFLOAT3 position, float yRot );
+    bool addFurniture( Furniture::Type type, XMFLOAT4 position, float yRot );
 
     //clear the room's allocated memory
     void clear();
@@ -88,6 +88,9 @@ public:
 
     //Is a rectangle of blocks the same height?
     bool isRectOfBlocksSameHeight( short l, short r, short t, short b, byte height );
+
+    //From furniture passed in, get a bounding box
+    void getFurnitureAABoundingSquare( Furniture& furniture , float& left, float& front, float& right, float& back );
 
     inline short getWidth();
     inline short getDepth();

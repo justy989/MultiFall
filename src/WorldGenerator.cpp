@@ -23,405 +23,141 @@ WorldGenerator::WorldGenerator() :
     mRoomPreset.wallLength.min = 1;
     mRoomPreset.wallLength.max = 16;
 
-    //Empty Room presets
-    RoomPreset::Type& empty = mRoomPreset.mRoomTypes[ Room::Type::Empty ];
+    //Empty presets
+    RoomPreset::Type& empty = mRoomPreset.roomTypes[ Room::Type::Empty ];
 
-    empty.width.min = 2;
-    empty.width.max = 12;
+    empty.dimensions.min = 2;
+    empty.dimensions.max = 12;
 
-    empty.height = empty.width;
+    empty.furnitureDensity.min = 0.0f;
+    empty.furnitureDensity.max = 0.0f;
 
-    empty.furnitureCount[ Level::Furniture::Type::None ].min = 0;
-    empty.furnitureCount[ Level::Furniture::Type::None ].max = 0;
-
-    empty.furnitureChance[ Level::Furniture::Type::None ].min = 0.0f;
-    empty.furnitureChance[ Level::Furniture::Type::None ].max = 0.0f;
-
-    empty.furnitureCount[ Level::Furniture::Type::Chair ].min = 0;
-    empty.furnitureCount[ Level::Furniture::Type::Chair ].max = 0;
-
-    empty.furnitureChance[ Level::Furniture::Type::Chair ].min = 0.0f;
-    empty.furnitureChance[ Level::Furniture::Type::Chair ].max = 0.0f;
-
-    empty.furnitureCount[ Level::Furniture::Type::Desk ].min = 0;
-    empty.furnitureCount[ Level::Furniture::Type::Desk ].max = 0;
-
-    empty.furnitureChance[ Level::Furniture::Type::Desk ].min = 0.0f;
-    empty.furnitureChance[ Level::Furniture::Type::Desk ].max = 0.0f;
-
-    empty.furnitureCount[ Level::Furniture::Type::Table ].min = 0;
-    empty.furnitureCount[ Level::Furniture::Type::Table ].max = 0;
-
-    empty.furnitureChance[ Level::Furniture::Type::Table ].min = 0.0f;
-    empty.furnitureChance[ Level::Furniture::Type::Table ].max = 0.0f;
-
-    empty.furnitureCount[ Level::Furniture::Type::Bench ].min = 0;
-    empty.furnitureCount[ Level::Furniture::Type::Bench ].max = 0;
-
-    empty.furnitureChance[ Level::Furniture::Type::Bench ].min = 0.0f;
-    empty.furnitureChance[ Level::Furniture::Type::Bench ].max = 0.0f;
-
-    empty.furnitureCount[ Level::Furniture::Type::Bed_Frame ].min = 0;
-    empty.furnitureCount[ Level::Furniture::Type::Bed_Frame ].max = 0;
-
-    empty.furnitureChance[ Level::Furniture::Type::Bed_Frame ].min = 0.0f;
-    empty.furnitureChance[ Level::Furniture::Type::Bed_Frame ].max = 0.0f;
-
-    empty.furnitureCount[ Level::Furniture::Type::Book_Case ].min = 0;
-    empty.furnitureCount[ Level::Furniture::Type::Book_Case ].max = 0;
-
-    empty.furnitureChance[ Level::Furniture::Type::Book_Case ].min = 0.0f;
-    empty.furnitureChance[ Level::Furniture::Type::Book_Case ].max = 0.0f;
+    empty.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    empty.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    empty.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    empty.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    empty.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    empty.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    empty.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 
     //Labyrinth presets
-    RoomPreset::Type& labyrinth = mRoomPreset.mRoomTypes[ Room::Type::Labyrinth ];
+    RoomPreset::Type& labyrinth = mRoomPreset.roomTypes[ Room::Type::Labyrinth ];
 
-    labyrinth.width.min = 2;
-    labyrinth.width.max = 12;
+    labyrinth.dimensions.min = 2;
+    labyrinth.dimensions.max = 12;
 
-    labyrinth.height = labyrinth.width;
+    labyrinth.furnitureDensity.min = 0.0f;
+    labyrinth.furnitureDensity.max = 0.0f;
 
-    labyrinth.furnitureCount[ Level::Furniture::Type::None ].min = 0;
-    labyrinth.furnitureCount[ Level::Furniture::Type::None ].max = 0;
-
-    labyrinth.furnitureChance[ Level::Furniture::Type::None ].min = 0.0f;
-    labyrinth.furnitureChance[ Level::Furniture::Type::None ].max = 0.0f;
-
-    labyrinth.furnitureCount[ Level::Furniture::Type::Chair ].min = 0;
-    labyrinth.furnitureCount[ Level::Furniture::Type::Chair ].max = 0;
-
-    labyrinth.furnitureChance[ Level::Furniture::Type::Chair ].min = 0.0f;
-    labyrinth.furnitureChance[ Level::Furniture::Type::Chair ].max = 0.0f;
-
-    labyrinth.furnitureCount[ Level::Furniture::Type::Desk ].min = 0;
-    labyrinth.furnitureCount[ Level::Furniture::Type::Desk ].max = 0;
-
-    labyrinth.furnitureChance[ Level::Furniture::Type::Desk ].min = 0.0f;
-    labyrinth.furnitureChance[ Level::Furniture::Type::Desk ].max = 0.0f;
-
-    labyrinth.furnitureCount[ Level::Furniture::Type::Table ].min = 0;
-    labyrinth.furnitureCount[ Level::Furniture::Type::Table ].max = 0;
-
-    labyrinth.furnitureChance[ Level::Furniture::Type::Table ].min = 0.0f;
-    labyrinth.furnitureChance[ Level::Furniture::Type::Table ].max = 0.0f;
-
-    labyrinth.furnitureCount[ Level::Furniture::Type::Bench ].min = 0;
-    labyrinth.furnitureCount[ Level::Furniture::Type::Bench ].max = 0;
-
-    labyrinth.furnitureChance[ Level::Furniture::Type::Bench ].min = 0.0f;
-    labyrinth.furnitureChance[ Level::Furniture::Type::Bench ].max = 0.0f;
-
-    labyrinth.furnitureCount[ Level::Furniture::Type::Bed_Frame ].min = 0;
-    labyrinth.furnitureCount[ Level::Furniture::Type::Bed_Frame ].max = 0;
-
-    labyrinth.furnitureChance[ Level::Furniture::Type::Bed_Frame ].min = 0.0f;
-    labyrinth.furnitureChance[ Level::Furniture::Type::Bed_Frame ].max = 0.0f;
-
-    labyrinth.furnitureCount[ Level::Furniture::Type::Book_Case ].min = 0;
-    labyrinth.furnitureCount[ Level::Furniture::Type::Book_Case ].max = 0;
-
-    labyrinth.furnitureChance[ Level::Furniture::Type::Book_Case ].min = 0.0f;
-    labyrinth.furnitureChance[ Level::Furniture::Type::Book_Case ].max = 0.0f;
+    labyrinth.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    labyrinth.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    labyrinth.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    labyrinth.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    labyrinth.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    labyrinth.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    labyrinth.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 
     //Bedroom presets
-    RoomPreset::Type& bedRoom = mRoomPreset.mRoomTypes[ Room::Type::BedRoom ];
+    RoomPreset::Type& bedRoom = mRoomPreset.roomTypes[ Room::Type::BedRoom ];
 
-    bedRoom.width.min = 2;
-    bedRoom.width.max = 4;
+    bedRoom.dimensions.min = 2;
+    bedRoom.dimensions.max = 4;
 
-    bedRoom.height = bedRoom.width;
+    bedRoom.furnitureDensity.min = 0.1f;
+    bedRoom.furnitureDensity.max = 0.25f;
 
-    bedRoom.furnitureCount[ Level::Furniture::Type::None ].min = 0;
-    bedRoom.furnitureCount[ Level::Furniture::Type::None ].max = 0;
-
-    bedRoom.furnitureChance[ Level::Furniture::Type::None ].min = 0.0f;
-    bedRoom.furnitureChance[ Level::Furniture::Type::None ].max = 0.0f;
-
-    bedRoom.furnitureCount[ Level::Furniture::Type::Chair ].min = 1;
-    bedRoom.furnitureCount[ Level::Furniture::Type::Chair ].max = 1;
-
-    bedRoom.furnitureChance[ Level::Furniture::Type::Chair ].min = 0.5f;
-    bedRoom.furnitureChance[ Level::Furniture::Type::Chair ].max = 0.8f;
-
-    bedRoom.furnitureCount[ Level::Furniture::Type::Desk ].min = 1;
-    bedRoom.furnitureCount[ Level::Furniture::Type::Desk ].max = 2;
-
-    bedRoom.furnitureChance[ Level::Furniture::Type::Desk ].min = 0.25f;
-    bedRoom.furnitureChance[ Level::Furniture::Type::Desk ].max = 0.5f;
-
-    bedRoom.furnitureCount[ Level::Furniture::Type::Table ].min = 0;
-    bedRoom.furnitureCount[ Level::Furniture::Type::Table ].max = 0;
-
-    bedRoom.furnitureChance[ Level::Furniture::Type::Table ].min = 0.0f;
-    bedRoom.furnitureChance[ Level::Furniture::Type::Table ].max = 0.0f;
-
-    bedRoom.furnitureCount[ Level::Furniture::Type::Bench ].min = 0;
-    bedRoom.furnitureCount[ Level::Furniture::Type::Bench ].max = 0;
-
-    bedRoom.furnitureChance[ Level::Furniture::Type::Bench ].min = 0.0f;
-    bedRoom.furnitureChance[ Level::Furniture::Type::Bench ].max = 0.0f;
-
-    bedRoom.furnitureCount[ Level::Furniture::Type::Bed_Frame ].min = 1;
-    bedRoom.furnitureCount[ Level::Furniture::Type::Bed_Frame ].max = 1;
-
-    bedRoom.furnitureChance[ Level::Furniture::Type::Bed_Frame ].min = 1.0f;
-    bedRoom.furnitureChance[ Level::Furniture::Type::Bed_Frame ].max = 1.0f;
-
-    bedRoom.furnitureCount[ Level::Furniture::Type::Book_Case ].min = 1;
-    bedRoom.furnitureCount[ Level::Furniture::Type::Book_Case ].max = 1;
-
-    bedRoom.furnitureChance[ Level::Furniture::Type::Book_Case ].min = 0.25f;
-    bedRoom.furnitureChance[ Level::Furniture::Type::Book_Case ].max = 0.5f;
+    bedRoom.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    bedRoom.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    bedRoom.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
+    bedRoom.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    bedRoom.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    bedRoom.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.8f;
+    bedRoom.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.1f;
 
     //Study presets
-    RoomPreset::Type& study = mRoomPreset.mRoomTypes[ Room::Type::Study ];
+    RoomPreset::Type& study = mRoomPreset.roomTypes[ Room::Type::Study ];
 
-    study.width.min = 3;
-    study.width.max = 5;
+    study.dimensions.min = 3;
+    study.dimensions.max = 5;
 
-    study.height = study.width;
+    study.furnitureDensity.min = 0.2f;
+    study.furnitureDensity.max = 0.3f;
 
-    study.furnitureCount[ Level::Furniture::Type::None ].min = 0;
-    study.furnitureCount[ Level::Furniture::Type::None ].max = 0;
-
-    study.furnitureChance[ Level::Furniture::Type::None ].min = 0.0f;
-    study.furnitureChance[ Level::Furniture::Type::None ].max = 0.0f;
-
-    study.furnitureCount[ Level::Furniture::Type::Chair ].min = 1;
-    study.furnitureCount[ Level::Furniture::Type::Chair ].max = 1;
-
-    study.furnitureChance[ Level::Furniture::Type::Chair ].min = 1.0f;
-    study.furnitureChance[ Level::Furniture::Type::Chair ].max = 1.0f;
-
-    study.furnitureCount[ Level::Furniture::Type::Desk ].min = 1;
-    study.furnitureCount[ Level::Furniture::Type::Desk ].max = 3;
-
-    study.furnitureChance[ Level::Furniture::Type::Desk ].min = 1.0f;
-    study.furnitureChance[ Level::Furniture::Type::Desk ].max = 1.0f;
-
-    study.furnitureCount[ Level::Furniture::Type::Table ].min = 1;
-    study.furnitureCount[ Level::Furniture::Type::Table ].max = 1;
-
-    study.furnitureChance[ Level::Furniture::Type::Table ].min = 0.5f;
-    study.furnitureChance[ Level::Furniture::Type::Table ].max = 0.5f;
-
-    study.furnitureCount[ Level::Furniture::Type::Bench ].min = 0;
-    study.furnitureCount[ Level::Furniture::Type::Bench ].max = 0;
-
-    study.furnitureChance[ Level::Furniture::Type::Bench ].min = 0.0f;
-    study.furnitureChance[ Level::Furniture::Type::Bench ].max = 0.0f;
-
-    study.furnitureCount[ Level::Furniture::Type::Bed_Frame ].min = 0;
-    study.furnitureCount[ Level::Furniture::Type::Bed_Frame ].max = 0;
-
-    study.furnitureChance[ Level::Furniture::Type::Bed_Frame ].min = 0.0f;
-    study.furnitureChance[ Level::Furniture::Type::Bed_Frame ].max = 0.0f;
-
-    study.furnitureCount[ Level::Furniture::Type::Book_Case ].min = 1;
-    study.furnitureCount[ Level::Furniture::Type::Book_Case ].max = 3;
-
-    study.furnitureChance[ Level::Furniture::Type::Book_Case ].min = 0.85f;
-    study.furnitureChance[ Level::Furniture::Type::Book_Case ].max = 1.0f;
+    study.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    study.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    study.furnitureChances[ Level::Furniture::Type::Desk ] = 0.4f;
+    study.furnitureChances[ Level::Furniture::Type::Table ] = 0.1f;
+    study.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    study.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    study.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.5f;
 
     //Library Presets
-    RoomPreset::Type& library = mRoomPreset.mRoomTypes[ Room::Type::Library ];
+    RoomPreset::Type& library = mRoomPreset.roomTypes[ Room::Type::Library ];
 
-    library.width.min = 5;
-    library.width.max = 8;
+    library.dimensions.min = 5;
+    library.dimensions.max = 8;
 
-    library.height = library.width;
+    library.furnitureDensity.min = 0.3f;
+    library.furnitureDensity.max = 0.45f;
 
-    library.furnitureCount[ Level::Furniture::Type::None ].min = 0;
-    library.furnitureCount[ Level::Furniture::Type::None ].max = 0;
-
-    library.furnitureChance[ Level::Furniture::Type::None ].min = 0.0f;
-    library.furnitureChance[ Level::Furniture::Type::None ].max = 0.0f;
-
-    library.furnitureCount[ Level::Furniture::Type::Chair ].min = 1;
-    library.furnitureCount[ Level::Furniture::Type::Chair ].max = 1;
-
-    library.furnitureChance[ Level::Furniture::Type::Chair ].min = 1.0f;
-    library.furnitureChance[ Level::Furniture::Type::Chair ].max = 1.0f;
-
-    library.furnitureCount[ Level::Furniture::Type::Desk ].min = 1;
-    library.furnitureCount[ Level::Furniture::Type::Desk ].max = 3;
-
-    library.furnitureChance[ Level::Furniture::Type::Desk ].min = 1.0f;
-    library.furnitureChance[ Level::Furniture::Type::Desk ].max = 1.0f;
-
-    library.furnitureCount[ Level::Furniture::Type::Table ].min = 1;
-    library.furnitureCount[ Level::Furniture::Type::Table ].max = 3;
-
-    library.furnitureChance[ Level::Furniture::Type::Table ].min = 1.0f;
-    library.furnitureChance[ Level::Furniture::Type::Table ].max = 1.0f;
-
-    library.furnitureCount[ Level::Furniture::Type::Bench ].min = 0;
-    library.furnitureCount[ Level::Furniture::Type::Bench ].max = 0;
-
-    library.furnitureChance[ Level::Furniture::Type::Bench ].min = 0.0f;
-    library.furnitureChance[ Level::Furniture::Type::Bench ].max = 0.0f;
-
-    library.furnitureCount[ Level::Furniture::Type::Bed_Frame ].min = 0;
-    library.furnitureCount[ Level::Furniture::Type::Bed_Frame ].max = 0;
-
-    library.furnitureChance[ Level::Furniture::Type::Bed_Frame ].min = 0.0f;
-    library.furnitureChance[ Level::Furniture::Type::Bed_Frame ].max = 0.0f;
-
-    library.furnitureCount[ Level::Furniture::Type::Book_Case ].min = 10;
-    library.furnitureCount[ Level::Furniture::Type::Book_Case ].max = 15;
-
-    library.furnitureChance[ Level::Furniture::Type::Book_Case ].min = 1.0f;
-    library.furnitureChance[ Level::Furniture::Type::Book_Case ].max = 1.0f;
+    library.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    library.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    library.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
+    library.furnitureChances[ Level::Furniture::Type::Table ] = 0.15f;
+    library.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    library.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    library.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.75f;
 
     //Empty Room presets
-    RoomPreset::Type& storage = mRoomPreset.mRoomTypes[ Room::Type::Storage ];
+    RoomPreset::Type& storage = mRoomPreset.roomTypes[ Room::Type::Storage ];
 
-    storage.width.min = 2;
-    storage.width.max = 4;
+    storage.dimensions.min = 2;
+    storage.dimensions.max = 4;
 
-    storage.height = storage.width;
+    storage.furnitureDensity.min = 0.0f;
+    storage.furnitureDensity.max = 0.0f;
 
-    storage.furnitureCount[ Level::Furniture::Type::None ].min = 0;
-    storage.furnitureCount[ Level::Furniture::Type::None ].max = 0;
-
-    storage.furnitureChance[ Level::Furniture::Type::None ].min = 0.0f;
-    storage.furnitureChance[ Level::Furniture::Type::None ].max = 0.0f;
-
-    storage.furnitureCount[ Level::Furniture::Type::Chair ].min = 0;
-    storage.furnitureCount[ Level::Furniture::Type::Chair ].max = 0;
-
-    storage.furnitureChance[ Level::Furniture::Type::Chair ].min = 0.0f;
-    storage.furnitureChance[ Level::Furniture::Type::Chair ].max = 0.0f;
-
-    storage.furnitureCount[ Level::Furniture::Type::Desk ].min = 0;
-    storage.furnitureCount[ Level::Furniture::Type::Desk ].max = 0;
-
-    storage.furnitureChance[ Level::Furniture::Type::Desk ].min = 0.0f;
-    storage.furnitureChance[ Level::Furniture::Type::Desk ].max = 0.0f;
-
-    storage.furnitureCount[ Level::Furniture::Type::Table ].min = 0;
-    storage.furnitureCount[ Level::Furniture::Type::Table ].max = 0;
-
-    storage.furnitureChance[ Level::Furniture::Type::Table ].min = 0.0f;
-    storage.furnitureChance[ Level::Furniture::Type::Table ].max = 0.0f;
-
-    storage.furnitureCount[ Level::Furniture::Type::Bench ].min = 0;
-    storage.furnitureCount[ Level::Furniture::Type::Bench ].max = 0;
-
-    storage.furnitureChance[ Level::Furniture::Type::Bench ].min = 0.0f;
-    storage.furnitureChance[ Level::Furniture::Type::Bench ].max = 0.0f;
-
-    storage.furnitureCount[ Level::Furniture::Type::Bed_Frame ].min = 0;
-    storage.furnitureCount[ Level::Furniture::Type::Bed_Frame ].max = 0;
-
-    storage.furnitureChance[ Level::Furniture::Type::Bed_Frame ].min = 0.0f;
-    storage.furnitureChance[ Level::Furniture::Type::Bed_Frame ].max = 0.0f;
-
-    storage.furnitureCount[ Level::Furniture::Type::Book_Case ].min = 0;
-    storage.furnitureCount[ Level::Furniture::Type::Book_Case ].max = 0;
-
-    storage.furnitureChance[ Level::Furniture::Type::Book_Case ].min = 0.0f;
-    storage.furnitureChance[ Level::Furniture::Type::Book_Case ].max = 0.0f;
+    storage.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    storage.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    storage.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    storage.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    storage.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    storage.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    storage.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 
     //Dinning Room
-    RoomPreset::Type& diningRoom = mRoomPreset.mRoomTypes[ Room::Type::DiningRoom ];
+    RoomPreset::Type& diningRoom = mRoomPreset.roomTypes[ Room::Type::DiningRoom ];
 
-    diningRoom.width.min = 4;
-    diningRoom.width.max = 6;
+    diningRoom.dimensions.min = 4;
+    diningRoom.dimensions.max = 6;
 
-    diningRoom.height = diningRoom.width;
+    diningRoom.furnitureDensity.min = 0.0f;
+    diningRoom.furnitureDensity.max = 0.0f;
 
-    diningRoom.furnitureCount[ Level::Furniture::Type::None ].min = 0;
-    diningRoom.furnitureCount[ Level::Furniture::Type::None ].max = 0;
-
-    diningRoom.furnitureChance[ Level::Furniture::Type::None ].min = 0.0f;
-    diningRoom.furnitureChance[ Level::Furniture::Type::None ].max = 0.0f;
-
-    diningRoom.furnitureCount[ Level::Furniture::Type::Chair ].min = 4;
-    diningRoom.furnitureCount[ Level::Furniture::Type::Chair ].max = 8;
-
-    diningRoom.furnitureChance[ Level::Furniture::Type::Chair ].min = 1.0f;
-    diningRoom.furnitureChance[ Level::Furniture::Type::Chair ].max = 1.0f;
-
-    diningRoom.furnitureCount[ Level::Furniture::Type::Desk ].min = 0;
-    diningRoom.furnitureCount[ Level::Furniture::Type::Desk ].max = 0;
-
-    diningRoom.furnitureChance[ Level::Furniture::Type::Desk ].min = 0.0f;
-    diningRoom.furnitureChance[ Level::Furniture::Type::Desk ].max = 0.0f;
-
-    diningRoom.furnitureCount[ Level::Furniture::Type::Table ].min = 4;
-    diningRoom.furnitureCount[ Level::Furniture::Type::Table ].max = 8;
-
-    diningRoom.furnitureChance[ Level::Furniture::Type::Table ].min = 1.0f;
-    diningRoom.furnitureChance[ Level::Furniture::Type::Table ].max = 1.0f;
-
-    diningRoom.furnitureCount[ Level::Furniture::Type::Bench ].min = 0;
-    diningRoom.furnitureCount[ Level::Furniture::Type::Bench ].max = 0;
-
-    diningRoom.furnitureChance[ Level::Furniture::Type::Bench ].min = 0.0f;
-    diningRoom.furnitureChance[ Level::Furniture::Type::Bench ].max = 0.0f;
-
-    diningRoom.furnitureCount[ Level::Furniture::Type::Bed_Frame ].min = 0;
-    diningRoom.furnitureCount[ Level::Furniture::Type::Bed_Frame ].max = 0;
-
-    diningRoom.furnitureChance[ Level::Furniture::Type::Bed_Frame ].min = 0.0f;
-    diningRoom.furnitureChance[ Level::Furniture::Type::Bed_Frame ].max = 0.0f;
-
-    diningRoom.furnitureCount[ Level::Furniture::Type::Book_Case ].min = 0;
-    diningRoom.furnitureCount[ Level::Furniture::Type::Book_Case ].max = 0;
-
-    diningRoom.furnitureChance[ Level::Furniture::Type::Book_Case ].min = 0.0f;
-    diningRoom.furnitureChance[ Level::Furniture::Type::Book_Case ].max = 0.0f;
+    diningRoom.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    diningRoom.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    diningRoom.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    diningRoom.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    diningRoom.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    diningRoom.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    diningRoom.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 
     //Dinning Room
-    RoomPreset::Type& ballRoom = mRoomPreset.mRoomTypes[ Room::Type::Ballroom ];
+    RoomPreset::Type& ballRoom = mRoomPreset.roomTypes[ Room::Type::Ballroom ];
 
-    ballRoom.width.min = 10;
-    ballRoom.width.max = 14;
+    ballRoom.dimensions.min = 8;
+    ballRoom.dimensions.max = 12;
 
-    ballRoom.height = ballRoom.width;
+    ballRoom.furnitureDensity.min = 0.0f;
+    ballRoom.furnitureDensity.max = 0.0f;
 
-    ballRoom.furnitureCount[ Level::Furniture::Type::None ].min = 0;
-    ballRoom.furnitureCount[ Level::Furniture::Type::None ].max = 0;
-
-    ballRoom.furnitureChance[ Level::Furniture::Type::None ].min = 0.0f;
-    ballRoom.furnitureChance[ Level::Furniture::Type::None ].max = 0.0f;
-
-    ballRoom.furnitureCount[ Level::Furniture::Type::Chair ].min = 10;
-    ballRoom.furnitureCount[ Level::Furniture::Type::Chair ].max = 14;
-
-    ballRoom.furnitureChance[ Level::Furniture::Type::Chair ].min = 1.0f;
-    ballRoom.furnitureChance[ Level::Furniture::Type::Chair ].max = 1.0f;
-
-    ballRoom.furnitureCount[ Level::Furniture::Type::Desk ].min = 0;
-    ballRoom.furnitureCount[ Level::Furniture::Type::Desk ].max = 0;
-
-    ballRoom.furnitureChance[ Level::Furniture::Type::Desk ].min = 0.0f;
-    ballRoom.furnitureChance[ Level::Furniture::Type::Desk ].max = 0.0f;
-
-    ballRoom.furnitureCount[ Level::Furniture::Type::Table ].min = 12;
-    ballRoom.furnitureCount[ Level::Furniture::Type::Table ].max = 18;
-
-    ballRoom.furnitureChance[ Level::Furniture::Type::Table ].min = 1.0f;
-    ballRoom.furnitureChance[ Level::Furniture::Type::Table ].max = 1.0f;
-
-    ballRoom.furnitureCount[ Level::Furniture::Type::Bench ].min = 0;
-    ballRoom.furnitureCount[ Level::Furniture::Type::Bench ].max = 0;
-
-    ballRoom.furnitureChance[ Level::Furniture::Type::Bench ].min = 0.0f;
-    ballRoom.furnitureChance[ Level::Furniture::Type::Bench ].max = 0.0f;
-
-    ballRoom.furnitureCount[ Level::Furniture::Type::Bed_Frame ].min = 0;
-    ballRoom.furnitureCount[ Level::Furniture::Type::Bed_Frame ].max = 0;
-
-    ballRoom.furnitureChance[ Level::Furniture::Type::Bed_Frame ].min = 0.0f;
-    ballRoom.furnitureChance[ Level::Furniture::Type::Bed_Frame ].max = 0.0f;
-
-    ballRoom.furnitureCount[ Level::Furniture::Type::Book_Case ].min = 0;
-    ballRoom.furnitureCount[ Level::Furniture::Type::Book_Case ].max = 0;
-
-    ballRoom.furnitureChance[ Level::Furniture::Type::Book_Case ].min = 0.0f;
-    ballRoom.furnitureChance[ Level::Furniture::Type::Book_Case ].max = 0.0f;
+    ballRoom.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    ballRoom.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    ballRoom.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    ballRoom.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    ballRoom.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    ballRoom.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    ballRoom.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 }
 
 WorldGenerator::~WorldGenerator()
@@ -494,8 +230,8 @@ void WorldGenerator::genRoom( WallSide attachSide, int attachX, int attachY, Roo
         room.type = Room::Type::Ballroom;
     }
 
-    int genWidth = mRand.gen( mRoomPreset.mRoomTypes[ room.type ].width.min, mRoomPreset.mRoomTypes[ room.type ].width.max );
-    int genHeight = mRand.gen( mRoomPreset.mRoomTypes[ room.type ].height.min, mRoomPreset.mRoomTypes[ room.type ].height.max );
+    int genWidth = mRoomPreset.roomTypes[ room.type ].dimensions.genValue( mRand );
+    int genHeight = mRoomPreset.roomTypes[ room.type ].dimensions.genValue( mRand );
 
     switch( attachSide ){
     case Back:
@@ -549,7 +285,7 @@ void WorldGenerator::genLevelLayout( Level& level, LevelPreset& preset  )
     //having to worry about hitting an edge
     space.init( mRoomCount * ( ROOM_MAX_DIMENSION + 3 ) * 2,
                 mRoomCount * ( ROOM_MAX_DIMENSION + 3 ) * 2,
-                mRand.gen( preset.roomCeilingHeight.min, preset.roomCeilingHeight.max + 1 ) );
+                preset.roomCeilingHeight.genValue( mRand ) );
 
     //Initialize walls EVERYWHERE
     for(int i = 0; i < space.getWidth(); i++){
@@ -785,18 +521,19 @@ void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room )
 
 void WorldGenerator::genFurnitureInRoom( Level::Furniture::Type type, Level& level, Room& room, bool againstWall, int& px, int& py )
 {
+    /*
     //Generate Values
-    int furnCount = mRand.gen( mRoomPreset.mRoomTypes[ room.type ].furnitureCount[ type ].min, 
-                               mRoomPreset.mRoomTypes[ room.type ].furnitureCount[ type ].max );
-    float furnChance = ( mRand.genNorm() * ( mRoomPreset.mRoomTypes[ room.type ].furnitureChance[ type ].max -
-                                       mRoomPreset.mRoomTypes[ room.type ].furnitureChance[ type ].min ) ) + 
-                                       mRoomPreset.mRoomTypes[ room.type ].furnitureChance[ type ].min;
+    int furnCount = mRand.gen( mRoomPreset.roomTypes[ room.type ].furnitureCount[ type ].min, 
+                               mRoomPreset.roomTypes[ room.type ].furnitureCount[ type ].max );
+    float furnChance = ( mRand.genNorm() * ( mRoomPreset.roomTypes[ room.type ].furnitureChance[ type ].max -
+                                       mRoomPreset.roomTypes[ room.type ].furnitureChance[ type ].min ) ) + 
+                                       mRoomPreset.roomTypes[ room.type ].furnitureChance[ type ].min;
     float roll = mRand.genNorm();
 
     //Find furniture dimensions
     int fWidth = static_cast<int>( level.getFurnitureDimensions( type ).x / 0.3f ) + 2;
     int fHeight = static_cast<int>( level.getFurnitureDimensions( type ).z / 0.3f ) + 2;
-
+     
     int halfFWidth = fWidth / 2;
     int halfFHeight = fHeight / 2;
 
@@ -882,7 +619,7 @@ void WorldGenerator::genFurnitureInRoom( Level::Furniture::Type type, Level& lev
                 fr = fx + ( level.getFurnitureDimensions( type ).z / 2.0f );
                 ft = fz - ( level.getFurnitureDimensions( type ).x / 2.0f );
                 fb = fz + ( level.getFurnitureDimensions( type ).x / 2.0f );
-            }else{*/
+            }else{
                 fl = fx - ( level.getFurnitureDimensions( type ).x / 2.0f );
                 fr = fx + ( level.getFurnitureDimensions( type ).x / 2.0f );
                 ft = fz - ( level.getFurnitureDimensions( type ).z / 2.0f );
@@ -905,7 +642,7 @@ void WorldGenerator::genFurnitureInRoom( Level::Furniture::Type type, Level& lev
                     ofr = f.position.x + ( level.getFurnitureDimensions(f.type).z / 2.0f );
                     oft = f.position.z - ( level.getFurnitureDimensions(f.type).x / 2.0f );
                     ofb = f.position.z + ( level.getFurnitureDimensions(f.type).x / 2.0f );
-                }else{*/
+                }else{
                     ofl = f.position.x - ( level.getFurnitureDimensions(f.type).x / 2.0f );
                     ofr = f.position.x + ( level.getFurnitureDimensions(f.type).x / 2.0f );
                     oft = f.position.z - ( level.getFurnitureDimensions(f.type).z / 2.0f );
@@ -971,12 +708,12 @@ void WorldGenerator::genFurnitureInRoom( Level::Furniture::Type type, Level& lev
             //Reset the number of attempts
             genAttempts = 0;
         }
-    }
+    }*/
 }
 
 void WorldGenerator::genChairByFurniture( Level::Furniture::Type type, Level& level, Room& room, int px, int py )
 {
-
+    /*
     int fWidth = static_cast<int>( level.getFurnitureDimensions( type ).x / 0.3f ) + 2;
     int fHeight = static_cast<int>( level.getFurnitureDimensions( type ).z / 0.3f ) + 2;
 
@@ -997,11 +734,11 @@ void WorldGenerator::genChairByFurniture( Level::Furniture::Type type, Level& le
     int genAttempts = 0;
 
     //Generate Values
-    float furnCount = mRand.gen( mRoomPreset.mRoomTypes[ room.type ].furnitureCount[ type ].min, 
-                           mRoomPreset.mRoomTypes[ room.type ].furnitureCount[ type ].max );
-    float furnChance = ( mRand.genNorm() * ( mRoomPreset.mRoomTypes[ room.type ].furnitureChance[ type ].max -
-                                       mRoomPreset.mRoomTypes[ room.type ].furnitureChance[ type ].min ) ) + 
-                                       mRoomPreset.mRoomTypes[ room.type ].furnitureChance[ type ].min;
+    float furnCount = mRand.gen( mRoomPreset.roomTypes[ room.type ].furnitureCount[ type ].min, 
+                           mRoomPreset.roomTypes[ room.type ].furnitureCount[ type ].max );
+    float furnChance = ( mRand.genNorm() * ( mRoomPreset.roomTypes[ room.type ].furnitureChance[ type ].max -
+                                       mRoomPreset.roomTypes[ room.type ].furnitureChance[ type ].min ) ) + 
+                                       mRoomPreset.roomTypes[ room.type ].furnitureChance[ type ].min;
     float roll = mRand.genNorm();
 
     if( roll < furnChance ){
@@ -1083,7 +820,7 @@ void WorldGenerator::genChairByFurniture( Level::Furniture::Type type, Level& le
 
             genAttempts = 0;
         }
-    }
+    }*/
 }
 
 void WorldGenerator::scrubLevelDoorways( Level& level, LevelPreset& preset )
