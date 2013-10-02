@@ -8,7 +8,7 @@
 #define ROOM_TYPE_COUNT 8
 #define ROOM_MAX_DOORS 4
 #define ROOM_DEFAULT_HEIGHT 8
-#define WORLD_GEN_ATTEMPTS 16
+#define WORLD_GEN_ATTEMPTS 256
 
 class WorldGenerator{
 public:

@@ -212,8 +212,8 @@ bool App::init( )
 	mTextManager.init(mWindow.getDevice());
 
     //Level Generation Data
-    //mLevelGenRanges.roomCount.set( 8, 16 );
-    mLevelGenRanges.roomCount.set( 2, 2 );
+    mLevelGenRanges.roomCount.set( 8, 16 );
+    //mLevelGenRanges.roomCount.set( 2, 2 );
     mLevelGenRanges.doorScrubChance.set( 0.0f, 0.0f );
 
     //Chances for each room type
@@ -274,7 +274,7 @@ bool App::init( )
     bedroomRanges.rampDensity.set( 0.0f, 0.0f );
     bedroomRanges.wallDensity.set( 0.0f, 0.4f );
     bedroomRanges.wallLength.set( 1, 4 );
-    bedroomRanges.furnitureDensity.set( 0.4f, 0.5f );
+    bedroomRanges.furnitureDensity.set( 0.2f, 0.5f );
     bedroomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
@@ -560,7 +560,7 @@ bool App::init( )
 
     mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * 0.3f;
     mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * 0.3f;
-    mCamera.getPosition().y = static_cast<float>(mWorld.getLevel().getHeight() * 5) * 0.3f;
+    mCamera.getPosition().y = static_cast<float>(mWorld.getLevel().getHeight() * 3) * 0.3f;
 
 	mEmitterManager.init(mWindow.getDevice(), mLightParticleTech);
 

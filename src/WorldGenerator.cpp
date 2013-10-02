@@ -172,7 +172,30 @@ void WorldGenerator::genLevelBlueprint( Level& level, Room* rooms, short roomCou
         }
     }
 
-    scrubLevelDoorways( space, rooms, roomCount );
+    //Cutout paths for doors
+    for(int i = 0; i < roomCount; i++){
+        if( rooms[i].doors[Front].x >= 1 && 
+            rooms[i].doors[Front].y >= 1 ){
+            space.getBlock( rooms[i].doors[Front].x, rooms[i].doors[Front].y - 1 ).setHeight( 0 );
+        }
+
+        if( rooms[i].doors[Left].x >= 1 && 
+            rooms[i].doors[Left].y >= 1 ){
+            space.getBlock( rooms[i].doors[Left].x - 1, rooms[i].doors[Left].y ).setHeight( 0 );
+        }
+
+        if( rooms[i].doors[Back].x >= 1 && 
+            rooms[i].doors[Back].y >= 1 ){
+            space.getBlock( rooms[i].doors[Back].x, rooms[i].doors[Back].y + 1 ).setHeight( 0 );
+        }
+
+        if( rooms[i].doors[Right].x >= 1 && 
+            rooms[i].doors[Right].y >= 1 ){
+            space.getBlock( rooms[i].doors[Right].x + 1, rooms[i].doors[Right].y ).setHeight( 0 );
+        }
+    }
+
+    //scrubLevelDoorways( space, rooms, roomCount );
     //mDoorCount = applyLevelDoorways( space );
 
     int minX = space.getWidth();
@@ -215,7 +238,6 @@ void WorldGenerator::genLevelBlueprint( Level& level, Room* rooms, short roomCou
         rooms[i].bottom -= minY; rooms[i].bottom *= 2; rooms[i].bottom++;
 
         for(int d = 0; d < ROOM_MAX_DOORS; d++){
-
             if( rooms[i].doors[d].x >= 0 && rooms[i].doors[d].y >= 0 ){
                 rooms[i].doors[d].x -= minX; rooms[i].doors[d].x *= 2;
                 rooms[i].doors[d].y -= minY; rooms[i].doors[d].y *= 2;
@@ -257,8 +279,6 @@ void WorldGenerator::genDoors( Level& level, Room& room, Room& prevRoom, WallSid
     case Left:
 
         //Left Side
-
-        //Calulcate ranges to gen from
         min = room.top > prevRoom.top ? room.top : prevRoom.top;
         max = room.bottom < prevRoom.bottom ? room.bottom : prevRoom.bottom;
 
@@ -311,6 +331,25 @@ void WorldGenerator::genDoors( Level& level, Room& room, Room& prevRoom, WallSid
     room.doors[ attached ].essential = true;
 
     //For each wall check along it to see if doors can be created
+    if( !room.doors[ Left ].essential ){
+        room.doors[ Left ].x = room.left;
+        room.doors[ Left ].y = mRand.gen( room.top, room.bottom + 1 );
+    }
+
+    if( !room.doors[ Front ].essential ){
+        room.doors[ Front ].x = mRand.gen( room.left, room.right + 1 );
+        room.doors[ Front ].y = room.top;
+    }
+
+    if( !room.doors[ Right ].essential ){
+        room.doors[ Right ].x = room.right;
+        room.doors[ Right ].y = mRand.gen( room.top, room.bottom + 1 );
+    }
+
+    if( !room.doors[ Back ].essential ){
+        room.doors[ Back ].x = mRand.gen( room.left, room.right + 1 );
+        room.doors[ Back ].y = room.bottom;
+    }
 
     /*
     //Ungenerate the door if there is no room on the other side
@@ -324,19 +363,13 @@ void WorldGenerator::genDoors( Level& level, Room& room, Room& prevRoom, WallSid
 
 void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room )
 {
-    //Generate the type of furniture
-
-    //Generate the furniture in the room
-
-    //Is there a path to each exit?
-    
     float genFurnitureDensity = mLevelRanges->rooms[ room.type ].furnitureDensity.gen( mRand );
-    int FurnitureCount = static_cast<int>(static_cast<float>((room.right - room.left) * (room.bottom - room.top)) * genFurnitureDensity);
+    int furnitureCount = static_cast<int>(static_cast<float>((room.right - room.left) * (room.bottom - room.top)) * genFurnitureDensity);
     int gennedFurnitureBlocks = 0;
 
     int attempts = 0;
     
-    while( gennedFurnitureBlocks < FurnitureCount ){
+    while( gennedFurnitureBlocks < furnitureCount ){
         Level::Furniture furniture;
 
         float furnitureRoll = mRand.genNorm();
@@ -417,7 +450,7 @@ void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room )
         }
 
         //Increment by furniture width * height
-        gennedFurnitureBlocks += ( iRight - iLeft ) * ( iBack - iFront );
+        gennedFurnitureBlocks += ( ( iRight - iLeft ) + 1 ) * ( ( iBack - iFront ) + 1);
     }
 }
 
@@ -734,6 +767,10 @@ void WorldGenerator::genLevelRoomWalls( Level& level, Room& room )
             CLAMP(end, room.top, room.bottom);
 
             for(; startY <= end; startY++){
+                if( level.getBlock(startX, startY).getCollidableType() != Level::Block::Collidable::None ){
+                    break;
+                }
+
                 byte saveHeight = level.getBlock(startX, startY).getHeight();
                 level.getBlock(startX, startY).setWall( level.getHeight() );
                 gennedWalls++;
@@ -751,6 +788,10 @@ void WorldGenerator::genLevelRoomWalls( Level& level, Room& room )
             CLAMP(end, room.left, room.right);
 
             for(; startX <= end; startX++){
+                if( level.getBlock(startX, startY).getCollidableType() != Level::Block::Collidable::None ){
+                    break;
+                }
+
                 byte saveHeight = level.getBlock(startX, startY).getHeight();
                 level.getBlock(startX, startY).setWall( level.getHeight() );
                 gennedWalls++;
@@ -768,6 +809,10 @@ void WorldGenerator::genLevelRoomWalls( Level& level, Room& room )
             CLAMP(end, room.top, room.bottom);
 
             for(; startY >= end; startY--){
+                if( level.getBlock(startX, startY).getCollidableType() != Level::Block::Collidable::None ){
+                    break;
+                }
+
                 byte saveHeight = level.getBlock(startX, startY).getHeight();
                 level.getBlock(startX, startY).setWall( level.getHeight() );
                 gennedWalls++;
@@ -785,6 +830,10 @@ void WorldGenerator::genLevelRoomWalls( Level& level, Room& room )
             CLAMP(end, room.left, room.right);
 
             for(; startX >= end; startX--){
+                if( level.getBlock(startX, startY).getCollidableType() != Level::Block::Collidable::None ){
+                    break;
+                }
+                
                 byte saveHeight = level.getBlock(startX, startY).getHeight();
                 level.getBlock(startX, startY).setWall( level.getHeight() );
                 gennedWalls++;
