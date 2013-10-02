@@ -7,6 +7,8 @@
 #define ROOM_MAX_DIMENSION 16
 #define ROOM_TYPE_COUNT 8
 #define ROOM_MAX_DOORS 4
+#define ROOM_DEFAULT_HEIGHT 8
+#define WORLD_GEN_ATTEMPTS 16
 
 class WorldGenerator{
 public:
@@ -71,6 +73,9 @@ public:
 
     //Structure for holding a door as part of a room
     struct Door{
+
+        Door() : x(-1), y(-1), essential(false){}
+
         int x;
         int y;
         bool essential;
@@ -87,8 +92,12 @@ public:
             Library,
             Storage,
             DiningRoom,
-            Ballroom
+            BallRoom
         };
+
+        Room() : type(Empty), 
+            left(0), right(0),
+            top(0), bottom(0) {}
 
         Type type;
 
@@ -133,7 +142,7 @@ protected:
     /* Generate a Level */
 
     //Generate room layout
-    void genLevelBlueprint( Level& level ); 
+    void genLevelBlueprint( Level& level, Room* rooms, short roomCount ); 
 
     //Generate the heights of the floors in each room
     void genLevelRoomHeights( Level& level, Room& room );
@@ -148,13 +157,16 @@ protected:
     void genDoors( Level& level, Room& room, Room& prevRoom, WallSide attached );
 
     //Do a pass scrubing doors based on a chance
-    void scrubLevelDoorways( Level& level );
+    void scrubLevelDoorways( Level& level, Room* rooms, short roomCount );
 
     //Generate a room's dimensions alongsize an attached wall
     void genRoom( WallSide side, int attachX, int attachY, Room& room );
 
     //Generate a piece of furniture in a room
     void genFurnitureInRoom( Level& level, Room& room, Level::Furniture::Type type, bool againstWall, GeneratedFurniture& gennedFurniture );
+
+    //Determine whether there is a path to all doors or not
+    bool pathExistsToDoors( Level& level, Room& room );
     
     //void genChairByFurniture( Level& level, Room& room, Level::Furniture::Type type, GeneratedFurniture& gennedFurniture, GeneratedFurniture& gennedChair );
 

@@ -2,6 +2,16 @@
 
 #include <assert.h>
 
+Level::Block::Block() : 
+    mCollidable(Collidable::None),
+    mHeight(0),
+    mTileID(0),
+    mWallID(0),
+    mRamp(Ramp::None)
+{
+
+}
+
 Level::Level() :
     mWidth(0),
     mHeight(0),
@@ -32,11 +42,6 @@ bool Level::init( short width, short depth, byte height )
 
     for(short i = 0; i < mWidth; i++){
         mBlocks[i] = new Block[ mDepth ];
-
-        for( short j = 0; j < mDepth; j++){
-            mBlocks[i][j].height = BYTE_MAX;
-            mBlocks[i][j].ramp = 0;
-        }
     }
 
     return true;
@@ -73,9 +78,9 @@ bool Level::addTorch(XMFLOAT3 pos, float rotAbootYAxis)
 	return true;
 }
 
-bool Level::addFurniture( Furniture::Type type, XMFLOAT4 position, float yRot )
+ushort Level::addFurniture( Furniture::Type type, XMFLOAT4 position, float yRot )
 {
-    if( mNumFurniture >= LEVEL_MAX_LIGHTS ){
+    if( mNumFurniture >= LEVEL_MAX_FURNITURE ){
         return false;
     }
 
@@ -84,6 +89,34 @@ bool Level::addFurniture( Furniture::Type type, XMFLOAT4 position, float yRot )
     mFurniture[ mNumFurniture ].yRotation = yRot;
 
     mNumFurniture++;
+
+    return mNumFurniture - 1;
+}
+
+ushort Level::addFurniture( Furniture& furniture )
+{
+    if( mNumFurniture >= LEVEL_MAX_FURNITURE ){
+        return false;
+    }
+
+    mFurniture[ mNumFurniture ] = furniture;
+
+    mNumFurniture++;
+
+    return mNumFurniture - 1;
+}
+
+bool Level::removeFurniture( ushort index )
+{
+    if( index >= mNumFurniture ){
+        return false;
+    }
+
+    mNumFurniture--;
+
+    for(ushort i = index; i < mNumFurniture; i++){
+        mFurniture[i] = mFurniture[i+1];
+    }
 
     return true;
 }
@@ -105,57 +138,33 @@ void Level::clear()
     mNumFurniture = 0;
 }
 
-void Level::setBlock( short i, short j, byte height, Ramp ramp )
-{
-    assert( i < mWidth );
-    assert( j < mDepth );
-
-    mBlocks[i][j].ramp = ramp;
-    mBlocks[i][j].height = height;
-}
-
-void Level::setBlockTileID( short i, short j, byte id )
+Level::Block& Level::getBlock( ushort i, ushort j )
 {
 	assert( i < mWidth );
     assert( j < mDepth );
 
-    mBlocks[i][j].tileId = id;
+    return mBlocks[i][j];
 }
 
-byte Level::getBlockTileID( short i, short j )
-{
-    assert( i < mWidth );
-    assert( j < mDepth );
-
-	return mBlocks[i][j].tileId;
-}
-
-Level::Ramp Level::getBlockRamp( short i, short j )
-{
-    assert( i < mWidth );
-    assert( j < mDepth );
-
-    return (Level::Ramp)(mBlocks[i][j].ramp);
-}
-
-byte Level::getBlockHeight( short i, short j )
-{
-    assert( i < mWidth );
-    assert( j < mDepth );
-
-    return mBlocks[i][j].height;
-}
-
-bool Level::isRectOfBlocksSameHeight( short l, short r, short t, short b, byte height )
+bool Level::isRectOfBlocksLevelAndOpen( short l, short r, short t, short b )
 {
     assert( l < mWidth );
     assert( t < mDepth );    
     assert( r < mWidth );
     assert( b < mDepth );
 
+    byte height = mBlocks[l][t].getHeight();
+
     for(short j = t; j <= b; j++){
         for(short i = l; i <= r; i++){
-            if( mBlocks[i][j].height != height ){
+
+            //If there is a height change fail
+            if( mBlocks[i][j].getHeight() != height ){
+                return false;
+            }
+
+            //If there is a collidable object fail
+            if( mBlocks[i][j].getCollidableType() != Level::Block::Collidable::None ){
                 return false;
             }
         }
@@ -179,7 +188,7 @@ void Level::getFurnitureAABoundingSquare( Furniture& furniture , float& left, fl
     XMVECTOR backRight = (xDim + zDim);
 
     //Rotate and translate
-    XMMATRIX transform = XMMatrixRotationY( furniture.yRotation ) * XMMatrixTranslation( furniture.position.x, furniture.position.y, furniture.position.z );;
+    XMMATRIX transform = XMMatrixRotationY( furniture.yRotation ) * XMMatrixTranslation( furniture.position.x, furniture.position.y, furniture.position.z );
 
     //perform each transformation
     XMVECTOR transFrontLeft = XMVector4Transform( frontLeft, transform );

@@ -10,252 +10,80 @@ WorldGenerator::WorldGenerator() :
 {
     //mRand.seed( time( 0 ) );
     mRand.seed( 41491 );
-
-    mRoomPreset.floorSectionArea.min = 200;
-    mRoomPreset.floorSectionArea.max = 300;
-
-    mRoomPreset.rampDensity.min = 0.0f;
-    mRoomPreset.rampDensity.max = 1.0f;
-
-    mRoomPreset.wallDensity.min = 0.0f;
-    mRoomPreset.wallDensity.max = 0.1f;
-
-    mRoomPreset.wallLength.min = 1;
-    mRoomPreset.wallLength.max = 16;
-
-    //Empty presets
-    RoomPreset::Type& empty = mRoomPreset.roomTypes[ Room::Type::Empty ];
-
-    empty.dimensions.min = 2;
-    empty.dimensions.max = 12;
-
-    empty.furnitureDensity.min = 0.0f;
-    empty.furnitureDensity.max = 0.0f;
-
-    empty.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    empty.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
-    empty.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
-    empty.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
-    empty.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
-    empty.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    empty.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-
-    //Labyrinth presets
-    RoomPreset::Type& labyrinth = mRoomPreset.roomTypes[ Room::Type::Labyrinth ];
-
-    labyrinth.dimensions.min = 2;
-    labyrinth.dimensions.max = 12;
-
-    labyrinth.furnitureDensity.min = 0.0f;
-    labyrinth.furnitureDensity.max = 0.0f;
-
-    labyrinth.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    labyrinth.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
-    labyrinth.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
-    labyrinth.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
-    labyrinth.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
-    labyrinth.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    labyrinth.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-
-    //Bedroom presets
-    RoomPreset::Type& bedRoom = mRoomPreset.roomTypes[ Room::Type::BedRoom ];
-
-    bedRoom.dimensions.min = 2;
-    bedRoom.dimensions.max = 4;
-
-    bedRoom.furnitureDensity.min = 0.1f;
-    bedRoom.furnitureDensity.max = 0.25f;
-
-    bedRoom.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    bedRoom.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
-    bedRoom.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
-    bedRoom.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
-    bedRoom.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
-    bedRoom.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.8f;
-    bedRoom.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.1f;
-
-    //Study presets
-    RoomPreset::Type& study = mRoomPreset.roomTypes[ Room::Type::Study ];
-
-    study.dimensions.min = 3;
-    study.dimensions.max = 5;
-
-    study.furnitureDensity.min = 0.2f;
-    study.furnitureDensity.max = 0.3f;
-
-    study.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    study.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
-    study.furnitureChances[ Level::Furniture::Type::Desk ] = 0.4f;
-    study.furnitureChances[ Level::Furniture::Type::Table ] = 0.1f;
-    study.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
-    study.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    study.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.5f;
-
-    //Library Presets
-    RoomPreset::Type& library = mRoomPreset.roomTypes[ Room::Type::Library ];
-
-    library.dimensions.min = 5;
-    library.dimensions.max = 8;
-
-    library.furnitureDensity.min = 0.3f;
-    library.furnitureDensity.max = 0.45f;
-
-    library.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    library.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
-    library.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
-    library.furnitureChances[ Level::Furniture::Type::Table ] = 0.15f;
-    library.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
-    library.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    library.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.75f;
-
-    //Empty Room presets
-    RoomPreset::Type& storage = mRoomPreset.roomTypes[ Room::Type::Storage ];
-
-    storage.dimensions.min = 2;
-    storage.dimensions.max = 4;
-
-    storage.furnitureDensity.min = 0.0f;
-    storage.furnitureDensity.max = 0.0f;
-
-    storage.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    storage.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
-    storage.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
-    storage.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
-    storage.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
-    storage.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    storage.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-
-    //Dinning Room
-    RoomPreset::Type& diningRoom = mRoomPreset.roomTypes[ Room::Type::DiningRoom ];
-
-    diningRoom.dimensions.min = 4;
-    diningRoom.dimensions.max = 6;
-
-    diningRoom.furnitureDensity.min = 0.0f;
-    diningRoom.furnitureDensity.max = 0.0f;
-
-    diningRoom.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    diningRoom.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
-    diningRoom.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
-    diningRoom.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
-    diningRoom.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
-    diningRoom.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    diningRoom.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-
-    //Dinning Room
-    RoomPreset::Type& ballRoom = mRoomPreset.roomTypes[ Room::Type::Ballroom ];
-
-    ballRoom.dimensions.min = 8;
-    ballRoom.dimensions.max = 12;
-
-    ballRoom.furnitureDensity.min = 0.0f;
-    ballRoom.furnitureDensity.max = 0.0f;
-
-    ballRoom.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    ballRoom.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
-    ballRoom.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
-    ballRoom.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
-    ballRoom.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
-    ballRoom.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    ballRoom.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 }
 
 WorldGenerator::~WorldGenerator()
 {
-    if( mRooms ){
-        delete[] mRooms;
-    }
+    mLevelRanges = NULL;
 }
 
-void WorldGenerator::genLevel( Level& level, LevelPreset& preset )
+void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges )
 {
-    int roomCount = mRand.gen( preset.roomCount.min, preset.roomCount.max + 1 );
-    mRoomCount = roomCount;
-    mRooms = new Room[ roomCount ];
+    //Generate number of rooms that will exist in the level and allocate space for it
+    int roomCount = ranges.roomCount.gen( mRand );
+    Room* rooms = new Room[ roomCount ];
 
-    int doorCount = roomCount * 4; //The max doors we can have, generating one per side
-    mDoors = new Door[ doorCount ];
-    mDoorCount = 0; //No doors have been generated yet
+    mLevelRanges = &ranges;
 
-    //Init all doors to non-essential
-    for(int i = 0; i < doorCount; i++){
-        mDoors[i].essential = false;
-        mDoors[i].x = -1;
-        mDoors[i].y = -1;
-    }
-
-    genLevelLayout( level, preset );
+    //Gen the rooms that make up the level
+    genLevelBlueprint( level, rooms, (short)(roomCount) );
     
-    //The door count is no longer accurate. It only represents the number of doors placed in the dungeon
-
-    for(int i = 0; i < mRoomCount; i++){
-        genLevelRoomHeights( level, preset, mRooms[i] );
-        genLevelRoomWalls( level, preset, mRooms[i] );
-    }
-
-    //Separate furniture pass to make sure it all gets generated on the floor
-    for(int i = 0; i < mRoomCount; i++){
-        genLevelRoomFurniture( level, mRooms[i] );
+    //For each room, do a pass generating the heights, furniture, containers, and walls
+    for(int i = 0; i < roomCount; i++){
+        genLevelRoomHeights( level, rooms[i] );
+        genLevelRoomFurniture( level, rooms[i] );
+        //genLevelRoomContainers( level, rooms[i] );
+        genLevelRoomWalls( level, rooms[i] );
     }
 
     LOG_INFO << "Generated Level: " << level.getWidth() << ", " << level.getDepth() << LOG_ENDL;
-    LOG_INFO << "Level has " << mRoomCount << " rooms and " << mDoorCount << " doors" << LOG_ENDL;
+    LOG_INFO << "Level has " << roomCount << " rooms " << LOG_ENDL;
 
-    delete[] mRooms;
-    mRooms = NULL;
-
-    delete[] mDoors;
-    mDoors = NULL;
+    delete[] rooms;
+    rooms = NULL;
 }
 
-void WorldGenerator::genRoom( WallSide attachSide, int attachX, int attachY, Room& room, LevelPreset& preset ) 
+void WorldGenerator::genRoom( WallSide attachSide, int attachX, int attachY, Room& room ) 
 {
     //Generate room type
     float roomTypeRoll = mRand.genNorm();
 
-    if( roomTypeRoll < preset.roomChances[ Room::Type::Empty ] ){
-        room.type = Room::Type::Empty;
-    }else if( roomTypeRoll < preset.roomChances[ Room::Type::Labyrinth ] ){
-        room.type = Room::Type::Labyrinth;
-    }else if( roomTypeRoll < preset.roomChances[ Room::Type::BedRoom ] ){
-        room.type = Room::Type::BedRoom;
-    }else if( roomTypeRoll < preset.roomChances[ Room::Type::Study ] ){
-        room.type = Room::Type::Study;
-    }else if( roomTypeRoll < preset.roomChances[ Room::Type::Library ] ){
-        room.type = Room::Type::Library;
-    }else if( roomTypeRoll < preset.roomChances[ Room::Type::Storage ] ){
-        room.type = Room::Type::Storage;
-    }else if( roomTypeRoll < preset.roomChances[ Room::Type::DiningRoom ] ){
-        room.type = Room::Type::DiningRoom;
-    }else if( roomTypeRoll <= preset.roomChances[ Room::Type::Ballroom ] ){
-        room.type = Room::Type::Ballroom;
+    //Generate the type of room based on the roll
+    for(int i = 0; i <= Room::Type::BallRoom; i++){
+        if( roomTypeRoll < mLevelRanges->roomChances[ i ] ){
+            room.type = (Room::Type)(i);
+            break;
+        }
     }
 
+    //Hard coded to bedrooms to start
+    room.type = Room::Type::BedRoom;
+
     //Based on type, generate width and height
-    int genWidth = mRoomPreset.roomTypes[ room.type ].dimensions.genValue( mRand );
-    int genHeight = mRoomPreset.roomTypes[ room.type ].dimensions.genValue( mRand );
+    int genWidth = mLevelRanges->rooms[ room.type ].dimensions.gen( mRand );
+    int genHeight = mLevelRanges->rooms[ room.type ].dimensions.gen( mRand );
 
     //Generate the direction the room is extended based on which side it is attached from
     switch( attachSide ){
     case Back:
-        if( mRand.gen(1, 100) > 50 ){
+        if( mRand.gen(1, 1000) > 500 ){
             genWidth = -genWidth;
         }
         break;
     case Right:
-        if( mRand.gen(1, 100) > 50 ){
+        if( mRand.gen(1, 1000) > 500 ){
             genHeight = -genHeight;
         }
         break;
     case Front:
         genHeight = -genHeight;
-        if( mRand.gen(1, 100) > 50 ){
+        if( mRand.gen(1, 1000) > 500 ){
             genWidth = -genWidth;
         }
         break;
     case Left:
         genWidth = -genWidth;
-        if( mRand.gen(1, 100) > 50 ){
+        if( mRand.gen(1, 1000) > 500 ){
             genHeight = -genHeight;
         }
         break;
@@ -281,20 +109,20 @@ void WorldGenerator::genRoom( WallSide attachSide, int attachX, int attachY, Roo
     }
 }
 
-void WorldGenerator::genLevelLayout( Level& level, LevelPreset& preset  )
+void WorldGenerator::genLevelBlueprint( Level& level, Room* rooms, short roomCount )
 {
     Level space;
 
     //Allocate a level big enough to generate a large length of rooms without
     //having to worry about hitting an edge
-    space.init( mRoomCount * ( ROOM_MAX_DIMENSION + 3 ) * 2,
-                mRoomCount * ( ROOM_MAX_DIMENSION + 3 ) * 2,
-                preset.roomCeilingHeight.genValue( mRand ) );
+    space.init( roomCount * ( ROOM_MAX_DIMENSION + 3 ) * 2,
+                roomCount * ( ROOM_MAX_DIMENSION + 3 ) * 2,
+                ROOM_DEFAULT_HEIGHT );
 
     //Initialize walls EVERYWHERE
     for(int i = 0; i < space.getWidth(); i++){
         for(int j = 0; j < space.getDepth(); j++){
-            space.setBlock(i, j, space.getHeight(), Level::Ramp::None );
+            space.getBlock( i, j ).setHeight( space.getHeight() );
         }
     }
 
@@ -304,12 +132,12 @@ void WorldGenerator::genLevelLayout( Level& level, LevelPreset& preset  )
     int attachedY = space.getDepth() / 2;
 
     //Generate the rooms
-    for(int i = 0; i < mRoomCount; i++){
-        genRoom( wallSide, attachedX, attachedY, mRooms[ i ], preset );
+    for(int i = 0; i < roomCount; i++){
+        genRoom( wallSide, attachedX, attachedY, rooms[ i ] );
 
-        for(int x = mRooms[ i ].left; x <= mRooms[ i ].right; x++){
-            for(int y = mRooms[ i ].top; y <= mRooms[ i ].bottom; y++){
-                space.setBlock(x, y, 0, Level::Ramp::None);
+        for(int x = rooms[ i ].left; x <= rooms[ i ].right; x++){
+            for(int y = rooms[ i ].top; y <= rooms[ i ].bottom; y++){
+                space.getBlock( x, y ).setHeight(0);
             }
         }
 
@@ -317,34 +145,34 @@ void WorldGenerator::genLevelLayout( Level& level, LevelPreset& preset  )
         //The door along wallSide is always unScrubable
         //We only generate doors after the first room has been genned
         if( i > 0 ){
-            genDoors( space, mRooms[ i - 1 ], mRooms[ i ], wallSide );
+            genDoors( space, rooms[ i - 1 ], rooms[ i ], wallSide );
         }
 
         wallSide = (WallSide)mRand.gen(0, WallSide::Right + 1 );
 
         switch( wallSide ){
         case Front:
-            attachedY = mRooms[ i ].top - 2;
-            attachedX = mRand.gen( mRooms[ i ].left, mRooms[ i ].right + 1 );
+            attachedY = rooms[ i ].top - 2;
+            attachedX = mRand.gen( rooms[ i ].left, rooms[ i ].right + 1 );
             break;
         case Left:
-            attachedX = mRooms[ i ].left - 2;
-            attachedY = mRand.gen( mRooms[ i ].top, mRooms[ i ].bottom + 1 );
+            attachedX = rooms[ i ].left - 2;
+            attachedY = mRand.gen( rooms[ i ].top, rooms[ i ].bottom + 1 );
             break;
         case Back:
-            attachedY = mRooms[ i ].bottom + 2;
-            attachedX = mRand.gen( mRooms[ i ].left, mRooms[ i ].right + 1 );
+            attachedY = rooms[ i ].bottom + 2;
+            attachedX = mRand.gen( rooms[ i ].left, rooms[ i ].right + 1 );
             break;
         case Right:
-            attachedX = mRooms[ i ].right + 2;
-            attachedY = mRand.gen( mRooms[ i ].top, mRooms[ i ].bottom + 1 );
+            attachedX = rooms[ i ].right + 2;
+            attachedY = mRand.gen( rooms[ i ].top, rooms[ i ].bottom + 1 );
             break;
         default:
             break;
         }
     }
 
-    scrubLevelDoorways( space, preset );
+    scrubLevelDoorways( space, rooms, roomCount );
     //mDoorCount = applyLevelDoorways( space );
 
     int minX = space.getWidth();
@@ -355,7 +183,7 @@ void WorldGenerator::genLevelLayout( Level& level, LevelPreset& preset  )
     //Cut out the bounds of the rooms to save space
     for( int i = 0; i < space.getWidth(); i++){
         for(int j = 0; j < space.getDepth(); j++){
-            if( space.getBlockHeight(i, j) == 0 ){
+            if( space.getBlock(i, j).getHeight() == 0 ){
                 if( i > maxX ){maxX = i;}
                 if( i < minX ){minX = i;}
                 if( j > maxY ){maxY = j;}
@@ -375,16 +203,29 @@ void WorldGenerator::genLevelLayout( Level& level, LevelPreset& preset  )
 
     for( int i = 0; i < level.getWidth(); i++){
         for(int j = 0; j < level.getDepth(); j++){
-            level.setBlock(i, j, space.getBlockHeight((i/2) + minX, (j/2) + minY), Level::Ramp::None );
+            level.getBlock(i, j).setHeight( space.getBlock( (i/2) + minX, (j/2) + minY ).getHeight() );
         }
     }
 
     //Convert the rooms from the space level to this level
-    for(int i = 0; i < mRoomCount; i++){
-        mRooms[i].left -= minX;mRooms[i].left *= 2;
-        mRooms[i].right -= minX; mRooms[i].right *= 2; mRooms[i].right++;
-        mRooms[i].top -= minY; mRooms[i].top *= 2;
-        mRooms[i].bottom -= minY; mRooms[i].bottom *= 2; mRooms[i].bottom++;
+    for(int i = 0; i < roomCount; i++){
+        rooms[i].left -= minX; rooms[i].left *= 2;
+        rooms[i].right -= minX; rooms[i].right *= 2; rooms[i].right++;
+        rooms[i].top -= minY; rooms[i].top *= 2;
+        rooms[i].bottom -= minY; rooms[i].bottom *= 2; rooms[i].bottom++;
+
+        for(int d = 0; d < ROOM_MAX_DOORS; d++){
+
+            if( rooms[i].doors[d].x >= 0 && rooms[i].doors[d].y >= 0 ){
+                rooms[i].doors[d].x -= minX; rooms[i].doors[d].x *= 2;
+                rooms[i].doors[d].y -= minY; rooms[i].doors[d].y *= 2;
+
+                //TODO: Add a door then pass it to the setDoor call
+
+                //level.getBlock( rooms[i].doors[d].x, rooms[i].doors[d].y ).setDoor( NULL );
+                //level.getBlock( rooms[i].doors[d].x, rooms[i].doors[d].y ).setHeight( 0 );
+            }
+        }
     }
 
     space.clear();
@@ -395,99 +236,89 @@ void WorldGenerator::genDoors( Level& level, Room& room, Room& prevRoom, WallSid
     int min = 0;
     int max = 0;
 
-    //Left Side
+    //Generate the attached side
+    switch( attached ){
+    case Front:
 
-    //Calulcate ranges to gen from
-    min = room.top > prevRoom.top ? room.top : prevRoom.top;
-    max = room.bottom < prevRoom.bottom ? room.bottom : prevRoom.bottom;
+        //Front Side
+        min = room.left > prevRoom.left ? room.left : prevRoom.left;
+        max = room.right < prevRoom.right ? room.right : prevRoom.right;
 
-    room.doors[ 0 ].x = room.left - 1;
+        room.doors[ attached ].y = room.top;
 
-    if( min >= max ){
-        room.doors[ 0 ].y = min;
-    }else{
-        room.doors[ 0 ].y = mRand.gen( min, max + 1 );
+        if( min >= max ){
+            room.doors[ attached ].x = min;
+        }else{
+            room.doors[ attached ].x = mRand.gen( min, max + 1);
+        }
+
+        break;
+
+    case Left:
+
+        //Left Side
+
+        //Calulcate ranges to gen from
+        min = room.top > prevRoom.top ? room.top : prevRoom.top;
+        max = room.bottom < prevRoom.bottom ? room.bottom : prevRoom.bottom;
+
+        room.doors[ attached ].x = room.left;
+
+        if( min >= max ){
+            room.doors[ attached ].y = min;
+        }else{
+            room.doors[ attached ].y = mRand.gen( min, max + 1 );
+        }
+
+        break;
+
+    case Back:
+        
+        //Back Side
+        min = room.left > prevRoom.left ? room.left : prevRoom.left;
+        max = room.right < prevRoom.right ? room.right : prevRoom.right;
+
+        room.doors[ attached ].y = room.bottom;
+
+        if( min >= max ){
+            room.doors[ attached ].x = min;
+        }else{
+            room.doors[ attached ].x = mRand.gen( min, max + 1);
+        }
+
+        break;
+
+    case Right:
+
+        //Right Side
+        min = room.top > prevRoom.top ? room.top : prevRoom.top;
+        max = room.bottom < prevRoom.bottom ? room.bottom : prevRoom.bottom;
+
+        room.doors[ attached ].x = room.right;
+
+        if( min >= max ){
+            room.doors[ attached ].y = min;
+        }else{
+            room.doors[ attached ].y = mRand.gen( min, max + 1 );
+        }
+
+        break;
+
+    default:
+        break;
     }
 
+    room.doors[ attached ].essential = true;
+
+    //For each wall check along it to see if doors can be created
+
+    /*
     //Ungenerate the door if there is no room on the other side
-    if( level.getBlockHeight( room.doors[ 0 ].x - 1, room.doors[ 0 ].y ) == level.getHeight() ||
-        level.getBlockHeight( room.doors[ 0 ].x, room.doors[ 0 ].y ) != level.getHeight() ){
-        room.doors[ 0 ].x = -1;
-        room.doors[ 0 ].y = -1;
-    }
-
-    if( attached == Left ){
-        room.doors[ 0 ].essential = true;
-    }
-
-    //Right Side
-    min = room.top > prevRoom.top ? room.top : prevRoom.top;
-    max = room.bottom < prevRoom.bottom ? room.bottom : prevRoom.bottom;
-
-    room.doors[ 1 ].x = room.right + 1;
-
-    if( min >= max ){
-        room.doors[ 1 ].y = min;
-    }else{
-        room.doors[ 1 ].y = mRand.gen( min, max + 1 );
-    }
-
-    //Ungenerate the door if there is no room on the other side
-    if( level.getBlockHeight( room.doors[ 1 ].x + 1, room.doors[ 1 ].y ) == level.getHeight() ||
-        level.getBlockHeight( room.doors[ 1 ].x, room.doors[ 1 ].y ) != level.getHeight() ){
-        room.doors[ 1 ].x = -1;
-        room.doors[ 1 ].y = -1;
-    }
-
-    if( attached == Right ){
-        room.doors[ 1 ].essential = true;
-    }
-
-    //Front Side
-    min = room.left > prevRoom.left ? room.left : prevRoom.left;
-    max = room.right < prevRoom.right ? room.right : prevRoom.right;
-
-    room.doors[ 2 ].y = room.top - 1;
-
-    if( min >= max ){
-        room.doors[ 2 ].x = min;
-    }else{
-        room.doors[ 2 ].x = mRand.gen( min, max + 1);
-    }
-
-    //Ungenerate the door if there is no room on the other side
-    if( level.getBlockHeight( room.doors[ 2 ].x, room.doors[ 2 ].y - 1 ) == level.getHeight() ||
-        level.getBlockHeight( room.doors[ 2 ].x, room.doors[ 2 ].y ) != level.getHeight() ){
-        room.doors[ 2 ].x = -1;
-        room.doors[ 2 ].y = -1;
-    }
-
-    if( attached == Front ){
-        room.doors[ 2 ].essential = true;
-    }
-
-    //Back Side
-    min = room.left > prevRoom.left ? room.left : prevRoom.left;
-    max = room.right < prevRoom.right ? room.right : prevRoom.right;
-
-    room.doors[ 3 ].y = room.bottom + 1;
-
-    if( min >= max ){
-        room.doors[ 3 ].x = min;
-    }else{
-        room.doors[ 3 ].x = mRand.gen( min, max + 1);
-    }
-
-    //Ungenerate the door if there is no room on the other side
-    if( level.getBlockHeight( room.doors[ 3 ].x, room.doors[ 3 ].y + 1 ) == level.getHeight() ||
-        level.getBlockHeight( room.doors[ 3 ].x, room.doors[ 3 ].y ) != level.getHeight() ){
-        room.doors[ 3 ].x = -1;
-        room.doors[ 3 ].y = -1;
-    }
-
-    if( attached == Front ){
-        room.doors[ 3 ].essential = true;
-    }
+    if( level.getBlock( room.doors[ attached ].x + 1, room.doors[ attached ].y ).getHeight() == level.getHeight() ||
+        level.getBlock( room.doors[ attached ].x, room.doors[ attached ].y ).getHeight() != level.getHeight() ){
+        room.doors[ attached ].x = -1;
+        room.doors[ attached ].y = -1;
+    }*/
 }
 
 
@@ -498,6 +329,96 @@ void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room )
     //Generate the furniture in the room
 
     //Is there a path to each exit?
+    
+    float genFurnitureDensity = mLevelRanges->rooms[ room.type ].furnitureDensity.gen( mRand );
+    int FurnitureCount = static_cast<int>(static_cast<float>((room.right - room.left) * (room.bottom - room.top)) * genFurnitureDensity);
+    int gennedFurnitureBlocks = 0;
+
+    int attempts = 0;
+    
+    while( gennedFurnitureBlocks < FurnitureCount ){
+        Level::Furniture furniture;
+
+        float furnitureRoll = mRand.genNorm();
+        float check = 0.0f;
+
+        attempts++;
+
+        if( attempts > WORLD_GEN_ATTEMPTS ){
+            break;
+        }
+
+        //Generate the type of furniture
+        for(int i = 0; i < LEVEL_FURNITURE_TYPE_COUNT; i++){
+            check += mLevelRanges->rooms[ room.type ].furnitureChances[ i ];
+
+            if( furnitureRoll < check ){
+                furniture.type = (Level::Furniture::Type)(i);
+                break;
+            }
+        }
+
+        //Gen position
+        int gX = mRand.gen( room.left, room.right + 1 );
+        int gZ = mRand.gen( room.top, room.bottom + 1 );
+
+        //Gen rotation
+        int yRot = mRand.gen( 0, 4 );
+
+        //TODO: Regenerate values against the wall
+        //if( againstWall ){
+        //
+        //}
+
+        //Position the furniture
+        furniture.position.x = ( static_cast<float>( gX ) * 0.3f ) + 0.15f;
+        furniture.position.z = ( static_cast<float>( gZ ) * 0.3f ) + 0.15f;
+        furniture.position.y = ( level.getBlock( gX, gZ ).getHeight() * 0.3f );
+
+        //Rotate the furniture
+        furniture.yRotation = static_cast<float>( yRot ) * ( 3.14159f / 2.0f );
+
+        float left, front, right, back;
+        
+        //Calculate bounding box
+        level.getFurnitureAABoundingSquare( furniture, left, front, right, back );
+
+        //Convert to indices touched
+        short iLeft = static_cast<short>( left / 0.3f );
+        short iFront = static_cast<short>( front / 0.3f );
+        short iRight = static_cast<short>( right / 0.3f );
+        short iBack = static_cast<short>( back / 0.3f );
+
+        //Make sure the area we want to set to furniture is clear
+        if( !level.isRectOfBlocksLevelAndOpen(iLeft, iRight, iFront, iBack) ){
+            continue;
+        }
+
+        ushort addedFurnitureIndex = level.addFurniture( furniture );
+        Level::Furniture* addedFurniture = &level.getFurniture( addedFurnitureIndex );
+
+        //Set the blocks in the touched indicies to be furniture blocks
+        for(int i = iLeft; i <= iRight; i++){
+            for(int j = iFront; j <= iBack; j++){
+                level.getBlock( i, j ).setFurniture( addedFurniture );
+            }
+        }
+
+        //If there isn't a path, undo what we added
+        if( !pathExistsToDoors( level, room ) ){
+            for(int i = iLeft; i <= iRight; i++){
+                for(int j = iFront; j <= iBack; j++){
+                    level.getBlock( i, j ).setOpen();
+                }
+            }
+
+            level.removeFurniture( addedFurnitureIndex );
+            continue;
+        }
+
+        //Increment by furniture width * height
+        gennedFurnitureBlocks += ( iRight - iLeft ) * ( iBack - iFront );
+    }
 }
 
 void WorldGenerator::genFurnitureInRoom( Level& level, Room& room, Level::Furniture::Type type, bool againstWall, GeneratedFurniture& gennedFurniture )
@@ -505,9 +426,115 @@ void WorldGenerator::genFurnitureInRoom( Level& level, Room& room, Level::Furnit
 
 }
 
-void WorldGenerator::genChairByFurniture( Level::Furniture::Type type, Level& level, Room& room, int px, int py )
+void blockFloodFillWalkable( Level::Block** blocks, ushort width, ushort depth, ushort i, ushort j )
 {
-    /*
+    //Set the current block to open
+    blocks[i][j].setOpen();
+    blocks[i][j].setHeight( 255 );
+
+    ushort nextI = i - 1;
+    ushort nextJ = j - 1;
+
+    //Flood fill to the left
+    if( nextI < width ){
+        if( blocks[nextI][j].getCollidableType() <= Level::Block::Collidable::Door && 
+            blocks[nextI][j].getHeight() != 255 ){
+            blockFloodFillWalkable( blocks, width, depth, nextI, j );
+        }
+    }
+
+    nextI = i + 1;
+
+    //Flood fill to the right
+    if( nextI < width ){
+        if( blocks[nextI][j].getCollidableType() <= Level::Block::Collidable::Door && 
+            blocks[nextI][j].getHeight() != 255 ){
+            blockFloodFillWalkable( blocks, width, depth, nextI, j );
+        }
+    }
+
+    //Flood Fill to the front
+    if( nextJ < depth ){
+        if( blocks[i][nextJ].getCollidableType() <= Level::Block::Collidable::Door && 
+            blocks[i][nextJ].getHeight() != 255 ){
+            blockFloodFillWalkable( blocks, width, depth, i, nextJ );
+        }
+    }
+
+    nextJ = j + 1;
+
+    //Flood fill to the back
+    if( nextJ < depth ){
+        if( blocks[i][nextJ].getCollidableType() <= Level::Block::Collidable::Door && 
+            blocks[i][nextJ].getHeight() != 255 ){
+            blockFloodFillWalkable( blocks, width, depth, i, nextJ );
+        }
+    }
+}
+
+bool WorldGenerator::pathExistsToDoors( Level& level, Room& room )
+{
+    bool pathExists = true;
+    ushort width = room.right - room.left;
+    ushort depth = room.bottom - room.top;
+
+    //Init block array
+    Level::Block** blocks = new Level::Block*[ width ];
+
+    for(ushort i = 0; i < width; i++){
+        blocks[i] = new Level::Block[ depth ];
+    }
+
+    //Copy Blocks
+    for(ushort i = 0; i < width; i++){
+        for(ushort j = 0; j < depth; j++){
+            blocks[i][j] = level.getBlock( room.left + i, room.top + j );
+        }
+    }
+
+    //Find an essential exit
+    ushort exitI = 0, exitJ = 0;
+
+    for(int i = 0; i < 4; i++){
+        if( room.doors[i].essential ){
+            exitI = room.doors[i].x - room.left;
+            exitJ = room.doors[i].y - room.top;
+            break;
+        }
+    }
+
+    //The first room may not have an exit
+    if( exitI || exitJ ){
+        //Flood Fill doors, ramps and walkable space to check and see if exits are touchable
+        blockFloodFillWalkable( blocks, width, depth, exitI, exitJ );
+
+        //Check each exit to make sure it still is accessible
+        for(int i = 0; i < 4; i++){
+            if( room.doors[i].x >= 0 && room.doors[i].y >= 0 ){
+                if( blocks[ room.doors[i].x - room.left ][ room.doors[i].y - room.top ].getCollidableType() != 
+                    Level::Block::Collidable::None ){
+                    pathExists = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    //Delete blocks
+    for(ushort i = 0; i < width; i++){
+        delete[] blocks[i];
+    }
+
+    delete[] blocks;
+
+    //Return result
+    return pathExists;
+}
+
+/*
+void WorldGenerator::genChairByFurniture( Level::Furniture::Type type, Room& room, Level& level, GeneratedFurniture& gennedFurniture, GeneratedFurniture& gennedChair )
+{
+    
     int fWidth = static_cast<int>( level.getFurnitureDimensions( type ).x / 0.3f ) + 2;
     int fHeight = static_cast<int>( level.getFurnitureDimensions( type ).z / 0.3f ) + 2;
 
@@ -528,11 +555,11 @@ void WorldGenerator::genChairByFurniture( Level::Furniture::Type type, Level& le
     int genAttempts = 0;
 
     //Generate Values
-    float furnCount = mRand.gen( mRoomPreset.roomTypes[ room.type ].furnitureCount[ type ].min, 
-                           mRoomPreset.roomTypes[ room.type ].furnitureCount[ type ].max );
-    float furnChance = ( mRand.genNorm() * ( mRoomPreset.roomTypes[ room.type ].furnitureChance[ type ].max -
-                                       mRoomPreset.roomTypes[ room.type ].furnitureChance[ type ].min ) ) + 
-                                       mRoomPreset.roomTypes[ room.type ].furnitureChance[ type ].min;
+    float furnCount = mRand.gen( mRoommLevelRanges->roomTypes[ room.type ].furnitureCount[ type ].min, 
+                           mRoommLevelRanges->roomTypes[ room.type ].furnitureCount[ type ].max );
+    float furnChance = ( mRand.genNorm() * ( mRoommLevelRanges->roomTypes[ room.type ].furnitureChance[ type ].max -
+                                       mRoommLevelRanges->roomTypes[ room.type ].furnitureChance[ type ].min ) ) + 
+                                       mRoommLevelRanges->roomTypes[ room.type ].furnitureChance[ type ].min;
     float roll = mRand.genNorm();
 
     if( roll < furnChance ){
@@ -614,24 +641,29 @@ void WorldGenerator::genChairByFurniture( Level::Furniture::Type type, Level& le
 
             genAttempts = 0;
         }
-    }*/
-}
+    }
+}*/
 
-void WorldGenerator::scrubLevelDoorways( Level& level, LevelPreset& preset )
+void WorldGenerator::scrubLevelDoorways( Level& level, Room* rooms, short roomCount )
 {
-    float scrubChance = preset.doorScrubChance.genValue( mRand );
+    float scrubChance = mLevelRanges->doorScrubChance.gen( mRand );
 
-    for(int i = 0; i < mDoorCount; i++){
-        if( !mDoors[i].essential && mRand.genNorm() < scrubChance ){
-            mDoors[i].x = -1;
-            mDoors[i].y = -1;
+    for(int i = 0; i < roomCount; i++){
+        for(int d = 0; d < 4; d++){
+            Door& door = rooms[i].doors[d];
+
+            if( !door.essential && mRand.genNorm() < scrubChance ){
+                door.x = -1;
+                door.y = -1;
+            }
         }
     }
 }
 
+/*
 int WorldGenerator::applyLevelDoorways( Level& level )
 {
-    /*
+    
     int placed = 0;
 
     for(int i = 0; i < mDoorCount; i++){
@@ -671,48 +703,104 @@ int WorldGenerator::applyLevelDoorways( Level& level )
         }
     }
 
-    return placed;*/
+    return placed;
     return 0;
-}
+}*/
 
-void WorldGenerator::genLevelRoomWalls( Level& level, LevelPreset& preset, Room& room )
+void WorldGenerator::genLevelRoomWalls( Level& level, Room& room )
 {
-    float genWallDensity = mRoomPreset.wallDensity.genValue( mRand );
+    float genWallDensity = mLevelRanges->rooms[ room.type ].wallDensity.gen( mRand );
     int wallCount = static_cast<int>(static_cast<float>((room.right - room.left) * (room.bottom - room.top)) * genWallDensity);
     int gennedWalls = 0;
+    int attempts = 0;
     
     while( gennedWalls < wallCount ){
-        int genLength = mRand.gen( mRoomPreset.wallLength.min, mRoomPreset.wallLength.max + 1);
-        int genVertical = mRand.gen(0, 100);
+        int genLength = mLevelRanges->rooms[ room.type ].wallLength.gen( mRand );
+        int genDirection = mRand.gen(0, 1000);
 
         int startX = mRand.gen(room.left, room.right + 1);
         int startY = mRand.gen(room.top, room.bottom + 1);
         int end = 0;
+        attempts++;
 
-        //50/50 chance to be vertical or horizontal
-        if(genVertical > 50){
+        if( attempts > WORLD_GEN_ATTEMPTS ){
+            break;
+        }
+
+        //Generate an equal chance to move in any direction
+        if(genDirection > 250){
             end = startY + genLength;
 
             CLAMP(end, room.top, room.bottom);
 
             for(; startY <= end; startY++){
-                level.setBlock(startX, startY, level.getHeight(), Level::Ramp::None );
+                byte saveHeight = level.getBlock(startX, startY).getHeight();
+                level.getBlock(startX, startY).setWall( level.getHeight() );
                 gennedWalls++;
+
+                if( !pathExistsToDoors( level, room ) ){
+                    level.getBlock(startX, startY).setOpen();
+                    level.getBlock(startX, startY).setHeight( saveHeight );
+                    gennedWalls--;
+                    break;
+                }
             }
-        }else{
+        }else if(genDirection > 500){
             end = startX + genLength;
 
             CLAMP(end, room.left, room.right);
 
             for(; startX <= end; startX++){
-                level.setBlock(startX, startY, level.getHeight(), Level::Ramp::None );
+                byte saveHeight = level.getBlock(startX, startY).getHeight();
+                level.getBlock(startX, startY).setWall( level.getHeight() );
                 gennedWalls++;
+
+                if( !pathExistsToDoors( level, room ) ){
+                    level.getBlock(startX, startY).setOpen();
+                    level.getBlock(startX, startY).setHeight( saveHeight );
+                    gennedWalls--;
+                    break;
+                }
+            }
+        }else if(genDirection > 750){
+            end = startY - genLength;
+
+            CLAMP(end, room.top, room.bottom);
+
+            for(; startY >= end; startY--){
+                byte saveHeight = level.getBlock(startX, startY).getHeight();
+                level.getBlock(startX, startY).setWall( level.getHeight() );
+                gennedWalls++;
+
+                if( !pathExistsToDoors( level, room ) ){
+                    level.getBlock(startX, startY).setOpen();
+                    level.getBlock(startX, startY).setHeight( saveHeight );
+                    gennedWalls--;
+                    break;
+                }
+            }
+        }else{
+            end = startX - genLength;
+
+            CLAMP(end, room.left, room.right);
+
+            for(; startX >= end; startX--){
+                byte saveHeight = level.getBlock(startX, startY).getHeight();
+                level.getBlock(startX, startY).setWall( level.getHeight() );
+                gennedWalls++;
+
+                if( !pathExistsToDoors( level, room ) ){
+                    level.getBlock(startX, startY).setOpen();
+                    level.getBlock(startX, startY).setHeight( saveHeight );
+                    gennedWalls--;
+                    break;
+                }
             }
         }
     }
 }
 
-void WorldGenerator::genLevelRoomHeights( Level& level, LevelPreset& preset, Room& room )
+void WorldGenerator::genLevelRoomHeights( Level& level, Room& room )
 {
     int maxGennedHeight = level.getHeight() - 2;
     int genHeight;
@@ -722,12 +810,13 @@ void WorldGenerator::genLevelRoomHeights( Level& level, LevelPreset& preset, Roo
         room.type == Room::Type::Study ||
         room.type == Room::Type::Storage ||
         room.type == Room::Type::DiningRoom ||
-        room.type == Room::Type::Ballroom ){
+        room.type == Room::Type::BallRoom ){
+
         genHeight = mRand.gen(0, maxGennedHeight + 1 );
 
         for(short i = room.left; i <= room.right; i++){
             for( short j = room.top; j <= room.bottom; j++){
-                level.setBlock( i, j, genHeight, Level::Ramp::None );
+                level.getBlock( i, j ).setHeight( genHeight );
             }
         }
 
@@ -737,13 +826,13 @@ void WorldGenerator::genLevelRoomHeights( Level& level, LevelPreset& preset, Roo
     //Init floor to -1
     for(short i = room.left; i <= room.right; i++){
         for( short j = room.top; j <= room.bottom; j++){
-            level.setBlock( i, j, 255, Level::Ramp::None );
+                level.getBlock( i, j ).setHeight( 255 );
         }
     }
 
     //Generate floor rects
     while( true ){ //While we can still find empty floor to generate!
-        int genArea = mRand.gen( mRoomPreset.floorSectionArea.min, mRoomPreset.floorSectionArea.max + 1 );
+        int genArea = mLevelRanges->rooms[ room.type ].floorSectionArea.gen( mRand );
         genArea += (5 - (genArea % 5)); //Round up to the nearest 5
         int halfGenArea = genArea / 2;
 
@@ -774,7 +863,7 @@ void WorldGenerator::genLevelRoomHeights( Level& level, LevelPreset& preset, Roo
         //Find the first empty block
         for(short i = room.left; i <= room.right; i++){
             for( short j = room.top; j <= room.bottom; j++){
-                if( level.getBlockHeight(i, j) == 255 ){
+                if( level.getBlock(i, j).getHeight() == 255 ){
                     startI = i;
                     startJ = j;
                     break;
@@ -803,14 +892,14 @@ void WorldGenerator::genLevelRoomHeights( Level& level, LevelPreset& preset, Roo
         //Loop over rect and set at genned height
         for(short i = startI ;i <= endI; i++){
             for(short j = startJ;j <= endJ; j++){
-                level.setBlock( i, j, genHeight, Level::Ramp::None );
+                level.getBlock( i, j ).setHeight( genHeight );
             }
         }
     }
     /*
     //Skip generating ramps for now
     //Generate ramps
-    float genRampDensity = mRoomPreset.rampDensity.genValue( mRand );
+    float genRampDensity = mRoommLevelRanges->rampDensity.genValue( mRand );
     int rampPct = static_cast<int>((1.0f - genRampDensity) * 100.0f);
 
     //Set left and right ramps

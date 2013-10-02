@@ -86,8 +86,10 @@ void App::handleInput( RAWINPUT* input )
                     break;
                 }
 
-                mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
+                mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges );
                 mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f);
+                mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * 0.3f;
+                mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * 0.3f;
             }
             break;
         case 'O':
@@ -210,7 +212,8 @@ bool App::init( )
 	mTextManager.init(mWindow.getDevice());
 
     //Level Generation Data
-    mLevelGenRanges.roomCount.set( 8, 16 );
+    //mLevelGenRanges.roomCount.set( 8, 16 );
+    mLevelGenRanges.roomCount.set( 2, 2 );
     mLevelGenRanges.doorScrubChance.set( 0.0f, 0.0f );
 
     //Chances for each room type
@@ -221,7 +224,7 @@ bool App::init( )
     mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Library ] = 0.6f;
     mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Storage ] = 0.8f;
     mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::DiningRoom ] = 0.9f;
-    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Ballroom ] = 1.0f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::BallRoom ] = 1.0f;
 
     //Empty Room
     WorldGenerator::RoomGenerationRanges& emptyRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Empty ];
@@ -262,26 +265,26 @@ bool App::init( )
     labyrinthRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 
     //Bed Room
-    WorldGenerator::RoomGenerationRanges& bedroomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::bedroom ];
+    WorldGenerator::RoomGenerationRanges& bedroomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::BedRoom ];
 
-    bedroomRanges.dimensions.set( 2, 12 );
+    bedroomRanges.dimensions.set( 2, 4 );
     bedroomRanges.ceilingHeight.set( 6, 8 );
     bedroomRanges.floorHeight.set( 0, 3 );
     bedroomRanges.floorSectionArea.set( 200, 300 );
     bedroomRanges.rampDensity.set( 0.0f, 0.0f );
-    bedroomRanges.wallDensity.set( 0.0f, 0.0f );
-    bedroomRanges.wallLength.set( 0, 0 );
-    bedroomRanges.furnitureDensity.set( 0.0f, 0.0f );
+    bedroomRanges.wallDensity.set( 0.0f, 0.4f );
+    bedroomRanges.wallLength.set( 1, 4 );
+    bedroomRanges.furnitureDensity.set( 0.4f, 0.5f );
     bedroomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
-    bedroomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
-    bedroomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    bedroomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.8f;
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.1f;
 
     //Study Room
-    WorldGenerator::RoomGenerationRanges& studyRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::study ];
+    WorldGenerator::RoomGenerationRanges& studyRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Study ];
 
     studyRanges.dimensions.set( 2, 12 );
     studyRanges.ceilingHeight.set( 6, 8 );
@@ -299,7 +302,81 @@ bool App::init( )
     studyRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 
+    //Library
+    WorldGenerator::RoomGenerationRanges& libraryRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Library ];
 
+    libraryRanges.dimensions.set( 2, 12 );
+    libraryRanges.ceilingHeight.set( 6, 8 );
+    libraryRanges.floorHeight.set( 0, 3 );
+    libraryRanges.floorSectionArea.set( 200, 300 );
+    libraryRanges.rampDensity.set( 0.0f, 0.0f );
+    libraryRanges.wallDensity.set( 0.0f, 0.0f );
+    libraryRanges.wallLength.set( 0, 0 );
+    libraryRanges.furnitureDensity.set( 0.0f, 0.0f );
+    libraryRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    libraryRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    libraryRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    libraryRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    libraryRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    libraryRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    libraryRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
+
+    //Storage
+    WorldGenerator::RoomGenerationRanges& storageRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Storage ];
+
+    storageRanges.dimensions.set( 2, 12 );
+    storageRanges.ceilingHeight.set( 6, 8 );
+    storageRanges.floorHeight.set( 0, 3 );
+    storageRanges.floorSectionArea.set( 200, 300 );
+    storageRanges.rampDensity.set( 0.0f, 0.0f );
+    storageRanges.wallDensity.set( 0.0f, 0.0f );
+    storageRanges.wallLength.set( 0, 0 );
+    storageRanges.furnitureDensity.set( 0.0f, 0.0f );
+    storageRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    storageRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    storageRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    storageRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    storageRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    storageRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    storageRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
+
+    //Dining Room
+    WorldGenerator::RoomGenerationRanges& diningRoomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::DiningRoom ];
+
+    diningRoomRanges.dimensions.set( 2, 12 );
+    diningRoomRanges.ceilingHeight.set( 6, 8 );
+    diningRoomRanges.floorHeight.set( 0, 3 );
+    diningRoomRanges.floorSectionArea.set( 200, 300 );
+    diningRoomRanges.rampDensity.set( 0.0f, 0.0f );
+    diningRoomRanges.wallDensity.set( 0.0f, 0.0f );
+    diningRoomRanges.wallLength.set( 0, 0 );
+    diningRoomRanges.furnitureDensity.set( 0.0f, 0.0f );
+    diningRoomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    diningRoomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    diningRoomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    diningRoomRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    diningRoomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    diningRoomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    diningRoomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
+
+    //BallRoom
+    WorldGenerator::RoomGenerationRanges& ballRoomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::BallRoom ];
+
+    ballRoomRanges.dimensions.set( 2, 12 );
+    ballRoomRanges.ceilingHeight.set( 6, 8 );
+    ballRoomRanges.floorHeight.set( 0, 3 );
+    ballRoomRanges.floorSectionArea.set( 200, 300 );
+    ballRoomRanges.rampDensity.set( 0.0f, 0.0f );
+    ballRoomRanges.wallDensity.set( 0.0f, 0.0f );
+    ballRoomRanges.wallLength.set( 0, 0 );
+    ballRoomRanges.furnitureDensity.set( 0.0f, 0.0f );
+    ballRoomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
     mEntity.getSolidity().radius = 0.15f;
@@ -476,10 +553,14 @@ bool App::init( )
 
     LevelThemeLoader ltl;
 
-	ltl.loadTheme("content/themes/brick_wood.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
+	ltl.loadTheme("content/themes/stone.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
 
-    mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
+    mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges );
     mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f );	
+
+    mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * 0.3f;
+    mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * 0.3f;
+    mCamera.getPosition().y = static_cast<float>(mWorld.getLevel().getHeight() * 5) * 0.3f;
 
 	mEmitterManager.init(mWindow.getDevice(), mLightParticleTech);
 
@@ -727,35 +808,37 @@ void App::update( float dt )
         CLAMP( bx, 0, mWorld.getLevel().getWidth() - 1 );
         CLAMP( bz, 0, mWorld.getLevel().getDepth() - 1 );
 
-        if( mWorld.getLevel().getBlockRamp(bx, bz) == Level::Ramp::None ){
+        if( mWorld.getLevel().getBlock(bx, bz).getCollidableType() == Level::Block::Collidable::None ){
             //Make sure we are on the floor, otherwise bring us down through gravity
-            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getLevel().getBlockHeight(bx, bz)) * 0.3f;
+            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * 0.3f;
 
             if( distFromGround > 0.05f ){
                 moveVec -= XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
             }else if(distFromGround < -0.05f ){
                 moveVec += XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
             }
-        }else if( mWorld.getLevel().getBlockRamp(bx, bz) == Level::Ramp::Front ){
-            float blockHeight = static_cast<float>(mWorld.getLevel().getBlockHeight(bx, bz)) * 0.3f;
-            float rampUp = fmod(mEntity.getPosition().z, 0.3f);
-            rampUp *= 1.25f;
-            mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
-        }else if( mWorld.getLevel().getBlockRamp(bx, bz) == Level::Ramp::Back ){
-            float blockHeight = static_cast<float>(mWorld.getLevel().getBlockHeight(bx, bz)) * 0.3f;
-            float rampUp = fmod(mEntity.getPosition().z, 0.3f);
-            rampUp = (0.3f - rampUp) * 1.25f;
-            mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
-        }else if( mWorld.getLevel().getBlockRamp(bx, bz) == Level::Ramp::Left ){
-            float blockHeight = static_cast<float>(mWorld.getLevel().getBlockHeight(bx, bz)) * 0.3f;
-            float rampUp = fmod(mEntity.getPosition().x, 0.3f);
-            rampUp *= 1.25f;
-            mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
-        }else if( mWorld.getLevel().getBlockRamp(bx, bz) == Level::Ramp::Right ){
-            float blockHeight = static_cast<float>(mWorld.getLevel().getBlockHeight(bx, bz)) * 0.3f;
-            float rampUp = fmod(mEntity.getPosition().x, 0.3f);
-            rampUp = (0.3f - rampUp) * 1.25f;
-            mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
+        }else if( mWorld.getLevel().getBlock(bx, bz).getCollidableType() == Level::Block::Collidable::Ramp ){
+            if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Front ){
+                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * 0.3f;
+                float rampUp = fmod(mEntity.getPosition().z, 0.3f);
+                rampUp *= 1.25f;
+                mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
+            }else if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Back ){
+                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * 0.3f;
+                float rampUp = fmod(mEntity.getPosition().z, 0.3f);
+                rampUp = (0.3f - rampUp) * 1.25f;
+                mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
+            }else if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Left ){
+                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * 0.3f;
+                float rampUp = fmod(mEntity.getPosition().x, 0.3f);
+                rampUp *= 1.25f;
+                mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
+            }else if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Right ){
+                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * 0.3f;
+                float rampUp = fmod(mEntity.getPosition().x, 0.3f);
+                rampUp = (0.3f - rampUp) * 1.25f;
+                mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
+            }
         }
 
         moveVec = XMVector3Normalize( moveVec );
@@ -809,7 +892,7 @@ void App::update( float dt )
 
         if( change.action == UIWindow::UserChange::Action::ClickButton &&
             change.id == 0 ){
-            mWorldGen.genLevel( mWorld.getLevel(), mLevelPreset );
+                mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges );
             mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f);
         }else if( change.action == UIWindow::UserChange::Action::MoveSlider &&
             change.id == 0 ){

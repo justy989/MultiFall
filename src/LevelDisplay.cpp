@@ -274,17 +274,17 @@ bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float bl
         for(int j = 0; j < level.getDepth(); j++){
 
             //Don't generate a floor that is a ramp or the same height as the ceiling, no one will see it silly!
-            if( level.getBlockHeight(i, j) == level.getHeight() ){
+            if( level.getBlock(i, j).getHeight() == level.getHeight() ){
                 continue;
             }
 
-			byte id = level.getBlockTileID(i,j);
+            byte id = level.getBlock(i,j).getTileID();
             float row = id / mFloorTileRows;
 			float column = id % mFloorTileRows;
 
             //Front left
             verts[ v ].position.x = static_cast<float>(i) * blockDimension;
-            verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval;
+            verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval;
             verts[ v ].position.z = static_cast<float>(j) * blockDimension;
 			verts[ v ].tex = XMFLOAT2(column * mFloorClip, row * mFloorClip);
 
@@ -314,26 +314,28 @@ bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float bl
 
             v++;
 
-            //Raise the verticies of the correct side of the ramp
-            switch( level.getBlockRamp(i, j) ){
-            case Level::Ramp::Front:
-                verts[ v - 1 ].position.y += heightInterval;
-                verts[ v - 2 ].position.y += heightInterval;
-                break;
-            case Level::Ramp::Back:
-                verts[ v - 3 ].position.y += heightInterval;
-                verts[ v - 4 ].position.y += heightInterval;
-                break;
-            case Level::Ramp::Left:
-                verts[ v - 1 ].position.y += heightInterval;
-                verts[ v - 3 ].position.y += heightInterval;
-                break;
-            case Level::Ramp::Right:
-                verts[ v - 2 ].position.y += heightInterval;
-                verts[ v - 4 ].position.y += heightInterval;
-                break;
-            default:
-                break;
+            if( level.getBlock(i, j).getCollidableType() == Level::Block::Collidable::Ramp ){
+                //Raise the verticies of the correct side of the ramp
+                switch( level.getBlock(i, j).getRamp() ){
+                case Level::Ramp::Front:
+                    verts[ v - 1 ].position.y += heightInterval;
+                    verts[ v - 2 ].position.y += heightInterval;
+                    break;
+                case Level::Ramp::Back:
+                    verts[ v - 3 ].position.y += heightInterval;
+                    verts[ v - 4 ].position.y += heightInterval;
+                    break;
+                case Level::Ramp::Left:
+                    verts[ v - 1 ].position.y += heightInterval;
+                    verts[ v - 3 ].position.y += heightInterval;
+                    break;
+                case Level::Ramp::Right:
+                    verts[ v - 2 ].position.y += heightInterval;
+                    verts[ v - 4 ].position.y += heightInterval;
+                    break;
+                default:
+                    break;
+                }
             }
 
             //Generate the normals
@@ -426,14 +428,14 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
 			
 			
             if( nextI >= 0 ){
-                if( level.getBlockHeight( i, j ) > level.getBlockHeight( nextI, nextJ ) ){
+                if( level.getBlock( i, j ).getHeight() > level.getBlock( nextI, nextJ ).getHeight() ){
 
                     verts[ v ].position.x = static_cast<float>(i) * blockDimension;
-                    verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval ;
+                    verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval ;
                     verts[ v ].position.z = static_cast<float>(j) * blockDimension;
 					verts[ v ].tex = XMFLOAT2(1, 0);
 
-					if(i % 3 == 0 && j % 4 == 0 && (level.getBlockHeight( i, j ) - level.getBlockHeight( nextI, nextJ )) > 1)
+					if(i % 3 == 0 && j % 4 == 0 && (level.getBlock( i, j ).getHeight() - level.getBlock( nextI, nextJ ).getHeight()) > 1)
 					{
                         PointLight pl;
 						XMFLOAT3 pos = verts[v].position;
@@ -457,14 +459,14 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                     verts[ v ].position.x = verts[ v - 2 ].position.x;
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 2 ].position.z;
-					verts[ v ].tex = XMFLOAT2(1, 1*level.getBlockHeight( i, j ));
+					verts[ v ].tex = XMFLOAT2(1, 1*level.getBlock( i, j ).getHeight());
 
                     v++;
 
                     verts[ v ].position.x = verts[ v - 3 ].position.x;
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 3 ].position.z + blockDimension;
-					verts[ v ].tex = XMFLOAT2(0, 1*level.getBlockHeight( i, j ));
+					verts[ v ].tex = XMFLOAT2(0, 1*level.getBlock( i, j ).getHeight());
 
                     v++;
 
@@ -482,9 +484,9 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
             nextJ = j;
 
             if( nextI < level.getWidth() ){
-                if( level.getBlockHeight( i, j ) > level.getBlockHeight( nextI, nextJ ) ){
+                if( level.getBlock( i, j ).getHeight() > level.getBlock( nextI, nextJ ).getHeight() ){
                     verts[ v ].position.x = static_cast<float>(i) * blockDimension + blockDimension;
-                    verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval;
+                    verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval;
                     verts[ v ].position.z = static_cast<float>(j) * blockDimension + blockDimension;
 					verts[ v ].tex = XMFLOAT2(1, 0);
 
@@ -500,14 +502,14 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                     verts[ v ].position.x = verts[ v - 2 ].position.x;
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 2 ].position.z;
-					verts[ v ].tex = XMFLOAT2(1, 1*level.getBlockHeight( i, j ));
+					verts[ v ].tex = XMFLOAT2(1, 1*level.getBlock( i, j ).getHeight());
 
                     v++;
 
                     verts[ v ].position.x = verts[ v - 3 ].position.x;
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 3 ].position.z - blockDimension;
-					verts[ v ].tex = XMFLOAT2(0, 1*level.getBlockHeight( i, j ));
+					verts[ v ].tex = XMFLOAT2(0, 1*level.getBlock( i, j ).getHeight());
 
                     v++;
 
@@ -525,9 +527,9 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
             nextJ = j - 1;
 
             if( nextJ >= 0 ){
-                if( level.getBlockHeight( i, j ) > level.getBlockHeight( nextI, nextJ ) ){
+                if( level.getBlock( i, j ).getHeight() > level.getBlock( nextI, nextJ ).getHeight() ){
                     verts[ v ].position.x = static_cast<float>(i) * blockDimension + blockDimension;
-                    verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval;
+                    verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval;
                     verts[ v ].position.z = static_cast<float>(j) * blockDimension;
 					verts[ v ].tex = XMFLOAT2(1, 0);
 
@@ -543,14 +545,14 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                     verts[ v ].position.x = verts[ v - 2 ].position.x;
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 2 ].position.z;
-					verts[ v ].tex = XMFLOAT2(1, 1*level.getBlockHeight( i, j ));
+					verts[ v ].tex = XMFLOAT2(1, 1*level.getBlock( i, j ).getHeight());
 
                     v++;
 
                     verts[ v ].position.x = verts[ v - 3 ].position.x - blockDimension;
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 3 ].position.z;
-					verts[ v ].tex = XMFLOAT2(0, 1*level.getBlockHeight( i, j ));
+					verts[ v ].tex = XMFLOAT2(0, 1*level.getBlock( i, j ).getHeight());
 
                     v++;
 
@@ -568,9 +570,9 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
             nextJ = j + 1;
 
             if( nextJ < level.getDepth() ){
-                if( level.getBlockHeight( i, j ) > level.getBlockHeight( nextI, nextJ ) ){
+                if( level.getBlock(i, j).getHeight() > level.getBlock( nextI, nextJ ).getHeight() ){
                     verts[ v ].position.x = static_cast<float>(i) * blockDimension;
-                    verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval;
+                    verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval;
                     verts[ v ].position.z = static_cast<float>(j) * blockDimension + blockDimension;
 					verts[ v ].tex = XMFLOAT2(1, 0);
 
@@ -586,14 +588,14 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                     verts[ v ].position.x = verts[ v - 2 ].position.x;
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 2 ].position.z;
-					verts[ v ].tex = XMFLOAT2(1, 1*level.getBlockHeight( i, j ));
+					verts[ v ].tex = XMFLOAT2(1, 1*level.getBlock(i, j).getHeight());
 
                     v++;
 
                     verts[ v ].position.x = verts[ v - 3 ].position.x + blockDimension;
                     verts[ v ].position.y = 0.0f;
                     verts[ v ].position.z = verts[ v - 3 ].position.z;
-					verts[ v ].tex = XMFLOAT2(0, 1*level.getBlockHeight( i, j ));
+					verts[ v ].tex = XMFLOAT2(0, 1*level.getBlock(i, j).getHeight());
 
                     v++;
 
@@ -675,9 +677,10 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
     for(int i = 0; i < level.getWidth(); i++){
         for(int j = 0; j < level.getDepth(); j++){
 
-            if( level.getBlockRamp(i,j) == Level::Ramp::Front ){
+            if( level.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
+                level.getBlock(i,j).getRamp() == Level::Ramp::Front ){
                 verts[ v ].position.x = static_cast<float>(i) * blockDimension;
-                verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval;
+                verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval;
                 verts[ v ].position.z = static_cast<float>(j) * blockDimension;
                 verts[ v ].tex = XMFLOAT2(0, 0);
 
@@ -698,7 +701,7 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                 v++;
 
                 verts[ v ].position.x = static_cast<float>(i) * blockDimension + blockDimension;
-                verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval;
+                verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval;
                 verts[ v ].position.z = static_cast<float>(j) * blockDimension;
                 verts[ v ].tex = XMFLOAT2(0, 0);
 
@@ -723,9 +726,10 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
 
                 vertexCount += 6;
                 mRampCount++;
-            }else if( level.getBlockRamp(i,j) == Level::Ramp::Back ){
+            }else if( level.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
+                      level.getBlock(i,j).getRamp() == Level::Ramp::Back ){
                 verts[ v ].position.x = static_cast<float>(i) * blockDimension;
-                verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval + heightInterval;
+                verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval + heightInterval;
                 verts[ v ].position.z = static_cast<float>(j) * blockDimension;
                 verts[ v ].tex = XMFLOAT2(0, 1);
 
@@ -746,7 +750,7 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                 v++;
 
                 verts[ v ].position.x = static_cast<float>(i) * blockDimension + blockDimension;
-                verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval + heightInterval;
+                verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval + heightInterval;
                 verts[ v ].position.z = static_cast<float>(j) * blockDimension;
                 verts[ v ].tex = XMFLOAT2(0, 1);
 
@@ -771,9 +775,10 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
 
                 vertexCount += 6;
                 mRampCount++;
-            }else if( level.getBlockRamp(i,j) == Level::Ramp::Left ){
+            }else if( level.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
+                      level.getBlock(i,j).getRamp() == Level::Ramp::Left ){
                 verts[ v ].position.x = static_cast<float>(i) * blockDimension;
-                verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval;
+                verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval;
                 verts[ v ].position.z = static_cast<float>(j) * blockDimension;
                 verts[ v ].tex = XMFLOAT2(0, 0);
 
@@ -794,7 +799,7 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                 v++;
 
                 verts[ v ].position.x = static_cast<float>(i) * blockDimension;
-                verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval;
+                verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval;
                 verts[ v ].position.z = static_cast<float>(j) * blockDimension + blockDimension;
                 verts[ v ].tex = XMFLOAT2(0, 0);
 
@@ -819,9 +824,10 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
 
                 vertexCount += 6;
                 mRampCount++;
-            }else if( level.getBlockRamp(i,j) == Level::Ramp::Right ){
+            }else if( level.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
+                      level.getBlock(i,j).getRamp() == Level::Ramp::Right ){
                 verts[ v ].position.x = static_cast<float>(i) * blockDimension;
-                verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval + heightInterval;
+                verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval + heightInterval;
                 verts[ v ].position.z = static_cast<float>(j) * blockDimension + blockDimension;
                 verts[ v ].tex = XMFLOAT2(0, 1);
 
@@ -842,7 +848,7 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                 v++;
 
                 verts[ v ].position.x = static_cast<float>(i) * blockDimension;
-                verts[ v ].position.y = static_cast<float>(level.getBlockHeight(i, j)) * heightInterval + heightInterval;
+                verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval + heightInterval;
                 verts[ v ].position.z = static_cast<float>(j) * blockDimension;
                 verts[ v ].tex = XMFLOAT2(0, 1);
 

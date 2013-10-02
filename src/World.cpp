@@ -130,12 +130,13 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     if( i >= 0 && i < mLevel.getWidth() &&
         j >= 0 && j < mLevel.getDepth() ){
 
-        blockHeight = static_cast<float>( mLevel.getBlockHeight(i, j) ) * 0.3f;
+        blockHeight = static_cast<float>( mLevel.getBlock(i, j).getHeight() ) * 0.3f;
 
         if( blockHeight > pf ||
             ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            ( mLevel.getBlockRamp(i,j) == Level::Ramp::Front ||
-               mLevel.getBlockRamp(i,j) == Level::Ramp::Back ) ) ){
+            mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
+            ( mLevel.getBlock(i,j).getRamp() == Level::Ramp::Front ||
+               mLevel.getBlock(i,j).getRamp() == Level::Ramp::Back ) ) ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
@@ -159,12 +160,13 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     if( i >= 0 && i < mLevel.getWidth() &&
         j >= 0 && j < mLevel.getDepth() ){
 
-        blockHeight = static_cast<float>(mLevel.getBlockHeight(i, j)) * 0.3f;
+        blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight() ) * 0.3f;
 
         if( blockHeight > pf ||
             ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            ( mLevel.getBlockRamp(i,j) == Level::Ramp::Front ||
-               mLevel.getBlockRamp(i,j) == Level::Ramp::Back ) ) ){
+            mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
+            ( mLevel.getBlock(i,j).getRamp() == Level::Ramp::Front ||
+               mLevel.getBlock(i,j).getRamp() == Level::Ramp::Back ) ) ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
@@ -188,12 +190,13 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     if( i >= 0 && i < mLevel.getWidth() &&
         j >= 0 && j < mLevel.getDepth() ){
 
-        blockHeight = static_cast<float>(mLevel.getBlockHeight(i, j)) * 0.3f;
+        blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight()) * 0.3f;
 
         if( blockHeight > pf ||
             ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            ( mLevel.getBlockRamp(i,j) == Level::Ramp::Left ||
-               mLevel.getBlockRamp(i,j) == Level::Ramp::Right ) )  ){
+            mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
+            ( mLevel.getBlock(i,j).getRamp() == Level::Ramp::Left ||
+               mLevel.getBlock(i,j).getRamp() == Level::Ramp::Right ) )  ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
@@ -217,12 +220,13 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     if( i >= 0 && i < mLevel.getWidth() &&
         j >= 0 && j < mLevel.getDepth() ){
 
-        blockHeight = static_cast<float>(mLevel.getBlockHeight(i, j)) * 0.3f;
+        blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight()) * 0.3f;
 
         if( blockHeight > pf ||
             ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            ( mLevel.getBlockRamp(i,j) == Level::Ramp::Left ||
-               mLevel.getBlockRamp(i,j) == Level::Ramp::Right ) ) ){
+            mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
+            ( mLevel.getBlock(i,j).getRamp() == Level::Ramp::Left ||
+               mLevel.getBlock(i,j).getRamp() == Level::Ramp::Right ) ) ){
             left = static_cast<float>(i) * 0.3f;
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
