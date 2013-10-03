@@ -212,9 +212,9 @@ bool App::init( )
 	mTextManager.init(mWindow.getDevice());
 
     //Level Generation Data
-    mLevelGenRanges.roomCount.set( 8, 16 );
+    //mLevelGenRanges.roomCount.set( 8, 16 );
     mLevelGenRanges.roomCeilingHeight.set( 3, 5 );
-    //mLevelGenRanges.roomCount.set( 2, 2 );
+    mLevelGenRanges.roomCount.set( 2, 2 );
     mLevelGenRanges.doorScrubChance.set( 0.0f, 0.0f );
 
     //Chances for each room type
@@ -266,7 +266,8 @@ bool App::init( )
     //Bed Room
     WorldGenerator::RoomGenerationRanges& bedroomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::BedRoom ];
 
-    bedroomRanges.dimensions.set( 1, 2 );
+    //bedroomRanges.dimensions.set( 1, 2 );
+    bedroomRanges.dimensions.set( 10, 11 );
     bedroomRanges.floorHeight.set( 0, 0 );
     bedroomRanges.floorSectionArea.set( 200, 300 );
     bedroomRanges.rampDensity.set( 0.0f, 0.0f );
@@ -276,10 +277,14 @@ bool App::init( )
     bedroomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.7f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.05f;
-    bedroomRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.05f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.9f;
-    bedroomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.05f;
+    bedroomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.00f;
+    bedroomRanges.lightDensity.set( 0.05f, 0.1f );
+    bedroomRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
+    bedroomRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
+    bedroomRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
 
     //Study Room
     WorldGenerator::RoomGenerationRanges& studyRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Study ];

@@ -29,8 +29,16 @@ public:
     //Solid Object in a Level
     class SolidObject{
     public:
-        XMFLOAT4 position;
-        float yRotation;
+
+        inline void setYRotation( float f );
+
+        inline XMFLOAT4& getPosition();
+        inline float getYRotation();
+
+    protected:
+
+        XMFLOAT4 mPosition;
+        float mYRotation;
     };
 
     //Furniture placed in the dungeon
@@ -47,7 +55,12 @@ public:
             Book_Case
         };
 
-        Type type;
+        inline void setType( Type type );
+        inline Type getType( );
+
+    protected:
+
+        Type mType;
     };
 
     //Transition between rooms
@@ -194,10 +207,7 @@ public:
     bool init( short width, short depth, byte height );
 
     //Add a light if there is room for it!
-    bool addLight( PointLight& light );
-
-    //Add a torch
-	bool addTorch( XMFLOAT3 pos, float rotAbootYAxis );
+    bool addLight( Light& light );
 
     //Add a piece of furniture
     ushort addFurniture( Furniture::Type type, XMFLOAT4 position, float yRot );
@@ -223,10 +233,7 @@ public:
     inline byte getHeight();
 
     inline ushort getNumLights();
-    inline PointLight& getLight( ushort index );
-
-	inline ushort getNumTorches();
-	inline TorchInfo& getTorch( ushort index );
+    inline Light& getLight( ushort index );
     
     inline ushort getNumFurniture();
 	inline Furniture& getFurniture( ushort index );
@@ -245,14 +252,13 @@ protected:
 
     //Lights
     ushort mNumLights;
-    PointLight mLights[ LEVEL_MAX_LIGHTS ];
+    Light mLights[ LEVEL_MAX_LIGHTS ];
 
     //Furniture
-	ushort mNumTorches;
-	TorchInfo mTorches[ LEVEL_MAX_LIGHTS ];
-
     ushort mNumFurniture;
     Furniture mFurniture[ LEVEL_MAX_FURNITURE ];
+
+    //Containers
 
     //Dimensions of furniture by type
     XMFLOAT3 mFurnitureDimensions[ LEVEL_FURNITURE_TYPE_COUNT ];
@@ -304,21 +310,28 @@ inline ushort Level::Light::getJ(){return mJ;}
 
 inline ushort Level::Light::getHeight(){return mHeight;}
 
+//Solid Object Index Functions
+inline void Level::SolidObject::setYRotation( float f ){mYRotation = f;}
+
+inline XMFLOAT4& Level::SolidObject::getPosition(){return mPosition;}
+inline float Level::SolidObject::getYRotation(){return mYRotation;}
+
 //Level Inline Functions
 ushort Level::getWidth(){return mWidth;}
 ushort Level::getDepth(){return mDepth;}
 byte Level::getHeight(){return mHeight;}
 
 inline ushort Level::getNumLights(){return mNumLights;}
-inline PointLight& Level::getLight( ushort index ){return mLights[ index ];}
-
-inline ushort Level::getNumTorches(){return mNumTorches;}
-inline Level::TorchInfo& Level::getTorch( ushort index ){return mTorches[ index ];}
+inline Level::Light& Level::getLight( ushort index ){return mLights[ index ];}
 
 inline ushort Level::getNumFurniture(){return mNumFurniture;}
 inline Level::Furniture& Level::getFurniture( ushort index ){return mFurniture[ index ];}
 
 inline XMFLOAT3& Level::getFurnitureDimensions( Level::Furniture::Type type ){return mFurnitureDimensions[type];}
 inline void Level::setFurnitureDimensions( Level::Furniture::Type type, XMFLOAT3 dimensions ){mFurnitureDimensions[type] = dimensions;}
+
+//Furniture inline functiosn
+inline void Level::Furniture::setType( Type type ){mType = type;}
+inline Level::Furniture::Type Level::Furniture::getType( ){return mType;}
 
 #endif

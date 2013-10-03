@@ -65,7 +65,11 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
         return false;
     }
 
-	if( !mTorch.loadFromObj(device, "content/meshes/torch.obj", L"content/textures/torch_texture.png") ){
+    if( !mLights[0].loadFromObj(device, "content/meshes/candle.obj", L"content/textures/candle_texture.png") ){
+        return false;
+    }
+    
+    if( !mLights[1].loadFromObj(device, "content/meshes/torch.obj", L"content/textures/torch_texture.png") ){
         return false;
     }
 
@@ -99,6 +103,10 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
     mFurnitureScale[ Level::Furniture::Bench ] = 0.1f;
     mFurnitureScale[ Level::Furniture::Bed_Frame ] = 0.1f;
     mFurnitureScale[ Level::Furniture::Book_Case ] = 0.1f;
+
+    mLightScale[ Level::Light::Candle ] = 0.05f;
+    mLightScale[ Level::Light::Torch ] = 0.125f;
+    mLightScale[ Level::Light::Chandelier ] = 0.5f;
 
     LOG_INFO << "Created Input Description and Texture Sampler for Level" << LOG_ENDL;
     return true;
@@ -151,7 +159,13 @@ void LevelDisplay::clear()
     ReleaseCOM( mFloorTexture );
     ReleaseCOM( mWallTexture );
 
-    mTorch.clear();
+    for(uint i = 1; i < LEVEL_LIGHT_TYPE_COUNT; i++){
+        mLights[i-1].clear();
+    }
+
+    for(uint i = 1; i < LEVEL_FURNITURE_TYPE_COUNT; i++){
+        mFurniture[i-1].clear();
+    }
 
     LOG_INFO << "Released Level Display Assets and buffers" << LOG_ENDL;
 }
@@ -223,37 +237,47 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
     device->DrawIndexed(6 * mWallCount, 0, 0);
 
 	Level& level = world.getLevel();
-	for(uint i = 0; i < level.getNumTorches(); i++)
-	{
-		worldm = level.getTorch(i).world;
 
-		worldm = XMMatrixTranspose( worldm );
+    //Draw light meshes at light locations
+    for(ushort i = 0; i < level.getNumLights(); i++){
+        Level::Light& l = level.getLight( i );
 
-		device->UpdateSubresource( mWorldCB, 0, 0, &worldm, 0, 0 ); 
+        float xOffset = l.getAttachedWall() == Level::Light::AttachedWall::Left ? -0.15f :
+                        (l.getAttachedWall() == Level::Light::AttachedWall::Right ? 0.15f : 0.0f);
+        float zOffset = l.getAttachedWall() == Level::Light::AttachedWall::Front ? -0.15f : 
+                        (l.getAttachedWall() == Level::Light::AttachedWall::Back ? 0.15f : 0.0f);
+
+        worldm = XMMatrixScaling( mLightScale[ l.getType() ], mLightScale[ l.getType() ], mLightScale[ l.getType() ] ) * 
+                 XMMatrixRotationY( static_cast<float>( l.getAttachedWall() ) * 3.14159f / 2.0f ) * 
+                 XMMatrixTranslation( static_cast<float>(l.getI()) * 0.3f + 0.15f,
+                                      0.3f * static_cast<float>(l.getHeight()),
+                                      static_cast<float>(l.getJ()) * 0.3f + 0.15f);
+
+        worldm = XMMatrixTranspose( worldm );
+
+        device->UpdateSubresource( mWorldCB, 0, 0, &worldm, 0, 0 ); 
 		device->VSSetConstantBuffers( 1, 1, &mWorldCB );
 
-		if(level.getTorch(i).mesh == 0)
-		{
-			mTorch.draw(device);
-		}
-	}
+        mLights[ l.getType() - 1 ].draw( device );
+    }
 
+    //Draw furniture meshes
     for(uint i = 0; i < level.getNumFurniture(); i++)
 	{
         Level::Furniture& f = level.getFurniture(i);
 
-        worldm = XMMatrixScaling( mFurnitureScale[ f.type ], 
-                                  mFurnitureScale[ f.type ], 
-                                  mFurnitureScale[ f.type ]) * 
-                 XMMatrixRotationY( f.yRotation ) * 
-                 XMMatrixTranslation( f.position.x, f.position.y, f.position.z );
+        worldm = XMMatrixScaling( mFurnitureScale[ f.getType() ], 
+                                  mFurnitureScale[ f.getType() ], 
+                                  mFurnitureScale[ f.getType() ]) * 
+                 XMMatrixRotationY( f.getYRotation() ) * 
+                 XMMatrixTranslation( f.getPosition().x, f.getPosition().y, f.getPosition().z );
 
 		worldm = XMMatrixTranspose( worldm );
 
 		device->UpdateSubresource( mWorldCB, 0, 0, &worldm, 0, 0 ); 
 		device->VSSetConstantBuffers( 1, 1, &mWorldCB );
 
-        mFurniture[ f.type - 1 ].draw(device);
+        mFurniture[ f.getType() - 1 ].draw(device);
 	}
 }
 
@@ -434,7 +458,8 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                     verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval ;
                     verts[ v ].position.z = static_cast<float>(j) * blockDimension;
 					verts[ v ].tex = XMFLOAT2(1, 0);
-
+                    
+                    /*
 					if(i % 3 == 0 && j % 4 == 0 && (level.getBlock( i, j ).getHeight() - level.getBlock( nextI, nextJ ).getHeight()) > 1)
 					{
                         PointLight pl;
@@ -445,7 +470,7 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                         level.addLight( pl );
 
 						level.addTorch(pos, XMConvertToRadians(-90.0f));
-					}
+					}*/
 					
                     v++;
 

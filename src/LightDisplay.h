@@ -44,6 +44,9 @@ protected:
     ID3D11RasterizerState* mInsideLightRS;
 	ID3D11RasterizerState* mOutsideLightRS;
 
+    //List of point lights to use based on light type
+    PointLight mPointLights[ LEVEL_LIGHT_TYPE_COUNT - 1 ];
+
 	StaticMesh mSphere; //for point lights
 };
 

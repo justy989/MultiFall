@@ -67,6 +67,11 @@ bool LightDisplay::init(ID3D11Device* device)
         return false;
     }
 
+    //Point light settings, should be moved to dungeon theme
+    mPointLights[ Level::Light::Candle - 1 ].set( XMFLOAT3(), 0.5f, 1.0f, XMFLOAT3( 1.0f, 0.5f, 0.0f ) );
+    mPointLights[ Level::Light::Torch - 1 ].set( XMFLOAT3(), 1.5f, 1.0f, XMFLOAT3( 1.0f, 0.75f, 0.2f ) );
+    mPointLights[ Level::Light::Chandelier - 1 ].set( XMFLOAT3(), 4.0f, 1.0f, XMFLOAT3( 1.0f, 1.0f, 0.2f ) );
+
 	return true;
 }
 
@@ -93,9 +98,21 @@ void LightDisplay::drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* 
 
     for(ushort i = 0; i < level.getNumLights(); i++)
 	{
+        Level::Light& levelLight = level.getLight(i);
+        PointLight& pointLight = mPointLights[ levelLight.getType() - 1 ];
+
+        float xOffset = levelLight.getAttachedWall() == Level::Light::AttachedWall::Left ? -0.15f :
+                        (levelLight.getAttachedWall() == Level::Light::AttachedWall::Right ? 0.15f : 0.0f);
+        float zOffset = levelLight.getAttachedWall() == Level::Light::AttachedWall::Front ? -0.15f : 
+                        (levelLight.getAttachedWall() == Level::Light::AttachedWall::Back ? 0.15f : 0.0f);
+
+        float tx = static_cast<float>(levelLight.getI()) * 0.3f + 0.15f;
+        float ty = 0.3f * static_cast<float>(levelLight.getHeight());
+        float tz = static_cast<float>(levelLight.getJ()) * 0.3f + 0.15f;
+
         //Update the world Matrix Constant Buffer
-        XMMATRIX world = XMMatrixScaling( level.getLight(i).getRadius(), level.getLight(i).getRadius(), level.getLight(i).getRadius() ) *
-                         XMMatrixTranslation( level.getLight(i).getPosition().x, level.getLight(i).getPosition().y, level.getLight(i).getPosition().z );
+        XMMATRIX world = XMMatrixScaling( pointLight.getRadius(), pointLight.getRadius(), pointLight.getRadius() ) *
+                         XMMatrixTranslation( tx, ty, tz );
 
 		world = XMMatrixTranspose( world );
 
@@ -103,8 +120,8 @@ void LightDisplay::drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* 
 		device->VSSetConstantBuffers( 1, 1, &mWorldCB );
 
         //Update the Light Constant Buffer
-		XMFLOAT4 lightPosition = XMFLOAT4( level.getLight(i).getPosition().x, level.getLight(i).getPosition().y, level.getLight(i).getPosition().z, 1);
-		XMFLOAT4 lightRadIntensity = XMFLOAT4( level.getLight(i).getRadius(), level.getLight(i).getIntensity(), 0, 0);
+		XMFLOAT4 lightPosition = XMFLOAT4( tx, ty, tz, 1 );
+		XMFLOAT4 lightRadIntensity = XMFLOAT4( pointLight.getRadius(), pointLight.getIntensity(), 0, 0 );
 
         plCB.position = lightPosition;
         plCB.radIntensity = lightRadIntensity;

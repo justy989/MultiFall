@@ -130,17 +130,6 @@ protected:
         Right
     };
 
-    //Generated Furniture structure 
-    struct GeneratedFurniture{
-        //Inclusive index box where furniture will be generated
-        ushort leftRoomIndex;
-        ushort topRoomIndex;
-        ushort rightRoomIndex;
-        ushort bottomRoomIndex;
-
-        Level::Furniture furniture;
-    };
-
     /* Generate a Level */
 
     //Generate room layout

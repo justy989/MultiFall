@@ -9,6 +9,7 @@
 
 #include "Level.h"
 #include "World.h"
+#include "Light.h"
 
 //Fog parameters
 struct Fog{
@@ -93,11 +94,11 @@ protected:
     //NOTE: will need to be moved to world display eventually
     Fog mFog;
 
-	StaticMesh mTorch;
-
+    StaticMesh mLights[ LEVEL_LIGHT_TYPE_COUNT - 1];
     StaticMesh mFurniture[ LEVEL_FURNITURE_TYPE_COUNT - 1 ];
 
     float mFurnitureScale[ LEVEL_FURNITURE_TYPE_COUNT ];
+    float mLightScale[ LEVEL_LIGHT_TYPE_COUNT ];
 };
 
 inline StaticMesh& LevelDisplay::getFurnitureMesh( Level::Furniture::Type type )

@@ -18,7 +18,6 @@ Level::Level() :
     mDepth(0),
     mBlocks(0),
     mNumLights(0),
-	mNumTorches(0),
     mNumFurniture(0)
 {
 
@@ -47,7 +46,7 @@ bool Level::init( short width, short depth, byte height )
     return true;
 }
 
-bool Level::addLight( PointLight& light )
+bool Level::addLight( Light& light )
 {
     if( mNumLights >= LEVEL_MAX_LIGHTS ){
         return false;
@@ -59,34 +58,15 @@ bool Level::addLight( PointLight& light )
     return true;
 }
 
-bool Level::addTorch(XMFLOAT3 pos, float rotAbootYAxis)
-{
-	if(mNumTorches >= LEVEL_MAX_LIGHTS)
-	{
-		return false;
-	}
-
-	float scale = 0.1f;
-	XMMATRIX w = XMMatrixScaling(scale, scale, scale) * XMMatrixRotationAxis(XMVectorSet(0,1,0,1), rotAbootYAxis) * XMMatrixTranslation(pos.x, pos.y, pos.z);
-	TorchInfo t;
-	t.world = w;
-	t.mesh = 0;
-
-	mTorches[mNumTorches] = t;
-	mNumTorches++;
-
-	return true;
-}
-
 ushort Level::addFurniture( Furniture::Type type, XMFLOAT4 position, float yRot )
 {
     if( mNumFurniture >= LEVEL_MAX_FURNITURE ){
         return false;
     }
 
-    mFurniture[ mNumFurniture ].type = type;
-    mFurniture[ mNumFurniture ].position = position;
-    mFurniture[ mNumFurniture ].yRotation = yRot;
+    mFurniture[ mNumFurniture ].setType( type );
+    mFurniture[ mNumFurniture ].getPosition() = position ;
+    mFurniture[ mNumFurniture ].setYRotation( yRot );
 
     mNumFurniture++;
 
@@ -134,7 +114,6 @@ void Level::clear()
     }
 
     mNumLights = 0;
-	mNumTorches = 0;
     mNumFurniture = 0;
 }
 
@@ -175,11 +154,11 @@ bool Level::isRectOfBlocksLevelAndOpen( short l, short r, short t, short b )
 
 void Level::getFurnitureAABoundingSquare( Furniture& furniture , float& left, float& front, float& right, float& back )
 {
-    XMVECTOR pos = XMLoadFloat4( &furniture.position );
+    XMVECTOR pos = XMLoadFloat4( &furniture.getPosition() );
 
     //Set the dimensions vectors
-    XMVECTOR xDim = XMVectorSet( mFurnitureDimensions[ furniture.type ].x / 2.0f, 0.0f, 0.0f, 0.0f );
-    XMVECTOR zDim = XMVectorSet( 0.0f, 0.0f, mFurnitureDimensions[ furniture.type ].z / 2.0f, 0.0f );
+    XMVECTOR xDim = XMVectorSet( mFurnitureDimensions[ furniture.getType() ].x / 2.0f, 0.0f, 0.0f, 0.0f );
+    XMVECTOR zDim = XMVectorSet( 0.0f, 0.0f, mFurnitureDimensions[ furniture.getType() ].z / 2.0f, 0.0f );
 
     //Calculate each corner from the origin
     XMVECTOR frontLeft = (-xDim - zDim);
@@ -188,7 +167,10 @@ void Level::getFurnitureAABoundingSquare( Furniture& furniture , float& left, fl
     XMVECTOR backRight = (xDim + zDim);
 
     //Rotate and translate
-    XMMATRIX transform = XMMatrixRotationY( furniture.yRotation ) * XMMatrixTranslation( furniture.position.x, furniture.position.y, furniture.position.z );
+    XMMATRIX transform = XMMatrixRotationY( furniture.getYRotation() ) *
+                         XMMatrixTranslation( furniture.getPosition().x, 
+                                              furniture.getPosition().y, 
+                                              furniture.getPosition().z );
 
     //perform each transformation
     XMVECTOR transFrontLeft = XMVector4Transform( frontLeft, transform );
