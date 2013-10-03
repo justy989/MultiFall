@@ -8,6 +8,7 @@
 #define LEVEL_MAX_LIGHTS 128
 #define LEVEL_MAX_FURNITURE 1024
 #define LEVEL_FURNITURE_TYPE_COUNT 7
+#define LEVEL_LIGHT_TYPE_COUNT 4
 
 //Holds a level of a Dungeon
 class Level{
@@ -148,12 +149,23 @@ public:
             Chandelier
         };
 
-        inline void set( ushort i, ushort j, Type type );
+        enum AttachedWall{
+            Front,
+            Left,
+            Right,
+            Back
+        };
+
+        inline void set( ushort i, ushort j, ushort height, Type type, AttachedWall = Front );
 
         inline Type getType();
 
+        inline AttachedWall getAttachedWall();
+
         inline ushort getI();
         inline ushort getJ();
+
+        inline ushort getHeight();
 
     protected:
 
@@ -163,6 +175,12 @@ public:
         //Block position
         ushort mI;
         ushort mJ;
+
+        //height
+        ushort mHeight;
+
+        //Which wall it is attached to, if it is a torch
+        AttachedWall mAttachedWall;
     };
 
 	struct TorchInfo
@@ -265,18 +283,26 @@ inline byte Level::Block::getTileID(){return mTileID;}
 inline byte Level::Block::getWallID(){return mWallID;}
 
 //Light Inline Functions
-inline void Level::Light::set( ushort i, ushort j, Type type )
+inline void Level::Light::set( ushort i, ushort j, ushort height, Type type, Level::Light::AttachedWall attachedWall )
 {
     mI = i;
     mJ = j;
 
+    mHeight = height;
+
     mType = type;
+
+    mAttachedWall = attachedWall;
 }
 
 inline Level::Light::Type Level::Light::getType(){return mType;}
 
+inline Level::Light::AttachedWall Level::Light::getAttachedWall(){return mAttachedWall;}
+
 inline ushort Level::Light::getI(){return mI;}
 inline ushort Level::Light::getJ(){return mJ;}
+
+inline ushort Level::Light::getHeight(){return mHeight;}
 
 //Level Inline Functions
 ushort Level::getWidth(){return mWidth;}

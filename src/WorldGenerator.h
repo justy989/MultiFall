@@ -7,7 +7,7 @@
 #define ROOM_MAX_DIMENSION 16
 #define ROOM_TYPE_COUNT 8
 #define ROOM_MAX_DOORS 4
-#define ROOM_DEFAULT_HEIGHT 8
+#define ROOM_DEFAULT_HEIGHT 6
 #define WORLD_GEN_ATTEMPTS 256
 
 class WorldGenerator{
@@ -23,7 +23,7 @@ public:
             this->max = max;
         }
 
-        int gen( Random random ){
+        int gen( Random& random ){
             return random.gen( min, max + 1 );
         }
     };
@@ -38,7 +38,7 @@ public:
             this->max = max;
         }
 
-        float gen( Random random ){
+        float gen( Random& random ){
             return ( random.genNorm() * ( max - min ) ) + min;
         }
     };
@@ -49,13 +49,14 @@ public:
 
         IRange floorSectionArea; //Sections of floors that get generated at different heights
         IRange floorHeight; //Height the floor sections will be generated at
-        
-        IRange ceilingHeight; //Height of the ceiling
 
         FRange rampDensity; //Percent chance of ramps spawning where a ramp can exist
 
         FRange wallDensity; //Percent of the room taken up by walls
         IRange wallLength; //Range of wall lengths
+
+        FRange lightDensity; //Percent of the room is illuminated with light
+        float lightChances[ LEVEL_LIGHT_TYPE_COUNT ]; //Chances for each light
 
         FRange furnitureDensity; //Percent of the room taken up by furniture
         float furnitureChances[ LEVEL_FURNITURE_TYPE_COUNT ]; //Chances for the different furniture to be generated
@@ -63,7 +64,8 @@ public:
 
     //Level Options
     struct LevelGenerationRanges{
-        IRange roomCount; //Number of rooms to generate
+        IRange roomCount; //Number of rooms to generate 
+        IRange roomCeilingHeight; //Height of the ceiling
 
         FRange doorScrubChance; //Chance to scrub unnecessary doors
 
@@ -153,6 +155,9 @@ protected:
     //Do a pass generating the furniture of each room
     void genLevelRoomFurniture( Level& level, Room& room );
 
+    //Do a pass generating the lights of each room
+    void genLevelRoomLights( Level& level, Room& room );
+
     //Do a pass generating the doors of each room
     void genDoors( Level& level, Room& room, Room& prevRoom, WallSide attached );
 
@@ -161,9 +166,6 @@ protected:
 
     //Generate a room's dimensions alongsize an attached wall
     void genRoom( WallSide side, int attachX, int attachY, Room& room );
-
-    //Generate a piece of furniture in a room
-    void genFurnitureInRoom( Level& level, Room& room, Level::Furniture::Type type, bool againstWall, GeneratedFurniture& gennedFurniture );
 
     //Determine whether there is a path to all doors or not
     bool pathExistsToDoors( Level& level, Room& room );
