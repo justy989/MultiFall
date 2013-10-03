@@ -61,6 +61,8 @@ void WorldGenerator::genRoom( WallSide attachSide, int attachX, int attachY, Roo
         }
     }
 
+    room.type = Room::Type::Study;
+
     //Based on type, generate width and height
     int genWidth = mLevelRanges->rooms[ room.type ].dimensions.gen( mRand );
     int genHeight = mLevelRanges->rooms[ room.type ].dimensions.gen( mRand );
@@ -470,7 +472,7 @@ void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room )
         }
 
         //Generate the type of furniture
-        for(int i = 0; i < LEVEL_FURNITURE_TYPE_COUNT; i++){
+        for(int i = Level::Furniture::Type::Desk; i < LEVEL_FURNITURE_TYPE_COUNT; i++){
             check += mLevelRanges->rooms[ room.type ].furnitureChances[ i ];
 
             if( furnitureRoll < check ){
@@ -487,9 +489,37 @@ void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room )
         int yRot = mRand.gen( 0, 4 );
 
         //TODO: Regenerate values against the wall
-        //if( againstWall ){
-        //
-        //}
+        if( furniture.type == Level::Furniture::Type::Desk ){
+            int wall = mRand.gen( 0, 4 );
+
+            int furnWidth = static_cast<int>( ( level.getFurnitureDimensions( Level::Furniture::Type::Desk ).x / 2.0f ) / 0.3f );
+            int furnDepth = static_cast<int>( ( level.getFurnitureDimensions( Level::Furniture::Type::Desk ).z / 2.0f ) / 0.3f );
+
+            switch( wall ){
+            case 0:
+                gZ = room.top + furnDepth;
+                gX = mRand.gen( room.left, room.right + 1 );
+                yRot = 3;
+                break;
+            case 1:
+                gX = room.left + furnWidth;
+                gZ = mRand.gen( room.top, room.bottom + 1 );
+                yRot = 0;
+                break;
+            case 2:
+                gZ = room.bottom - furnDepth;
+                gX = mRand.gen( room.left, room.right + 1 );
+                yRot = 1;
+                break;
+            case 3:
+                gX = room.right - furnWidth;
+                gZ = mRand.gen( room.top, room.bottom + 1 );
+                yRot = 2;
+                break;
+            default:
+                break;
+            }
+        }
 
         //Position the furniture
         furniture.position.x = ( static_cast<float>( gX ) * 0.3f ) + 0.15f;

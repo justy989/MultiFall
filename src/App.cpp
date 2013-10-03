@@ -290,11 +290,11 @@ bool App::init( )
     studyRanges.rampDensity.set( 0.0f, 0.0f );
     studyRanges.wallDensity.set( 0.0f, 0.0f );
     studyRanges.wallLength.set( 0, 0 );
-    studyRanges.furnitureDensity.set( 0.1f, 0.15f );
+    studyRanges.furnitureDensity.set( 0.1f, 0.35f );
     studyRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    studyRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.1f;
+    studyRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.5f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.5f;
-    studyRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.1f;
+    studyRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.2f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.3f;
@@ -310,12 +310,12 @@ bool App::init( )
     libraryRanges.wallLength.set( 10, 20 );
     libraryRanges.furnitureDensity.set( 0.4f, 0.8f );
     libraryRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    libraryRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.1f;
+    libraryRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.5f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.1f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    libraryRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.7f;
+    libraryRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.8f;
 
     //Storage
     WorldGenerator::RoomGenerationRanges& storageRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Storage ];
@@ -346,10 +346,10 @@ bool App::init( )
     diningRoomRanges.wallLength.set( 0, 0 );
     diningRoomRanges.furnitureDensity.set( 0.3f, 0.5f );
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    diningRoomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.1f;
+    diningRoomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.9f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.9f;
-    diningRoomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    diningRoomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.1f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 
@@ -364,10 +364,10 @@ bool App::init( )
     ballRoomRanges.wallLength.set( 0, 0 );
     ballRoomRanges.furnitureDensity.set( 0.05f, 0.2f );
     ballRoomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.1f;
+    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.75f;
     ballRoomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
     ballRoomRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.9f;
-    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.1f;
     ballRoomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     ballRoomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
 
