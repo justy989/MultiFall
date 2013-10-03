@@ -170,7 +170,9 @@ protected:
     //Determine whether there is a path to all doors or not
     bool pathExistsToDoors( Level& level, Room& room );
     
-    //void genChairByFurniture( Level& level, Room& room, Level::Furniture::Type type, GeneratedFurniture& gennedFurniture, GeneratedFurniture& gennedChair );
+    //Generate chairs by furniture, return the number of indices taken up by it
+    int genChairsByFurniture( Level& level, Room& room, Level::Furniture& furniture,
+                              short leftIndex, short frontIndex, short rightIndex, short backIndex);
 
     /* Generate a Level */
 

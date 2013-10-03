@@ -61,8 +61,6 @@ void WorldGenerator::genRoom( WallSide attachSide, int attachX, int attachY, Roo
         }
     }
 
-    room.type = Room::Type::Study;
-
     //Based on type, generate width and height
     int genWidth = mLevelRanges->rooms[ room.type ].dimensions.gen( mRand );
     int genHeight = mLevelRanges->rooms[ room.type ].dimensions.gen( mRand );
@@ -569,6 +567,12 @@ void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room )
 
         //Increment by furniture width * height
         gennedFurnitureBlocks += ( ( iRight - iLeft ) + 1 ) * ( ( iBack - iFront ) + 1);
+
+        //Generate a chair if it is a table or desk
+        if( furniture.type == Level::Furniture::Type::Table ||
+            furniture.type == Level::Furniture::Type::Desk ){
+            gennedFurnitureBlocks += genChairsByFurniture( level, room, furniture, iLeft, iFront, iRight, iBack );
+        }
     }
 }
 
@@ -802,6 +806,122 @@ void WorldGenerator::genLevelRoomWalls( Level& level, Room& room )
             }
         }
     }
+}
+
+
+int WorldGenerator::genChairsByFurniture( Level& level, Room& room, Level::Furniture& furniture,
+                                          short leftIndex, short frontIndex, short rightIndex, short backIndex )
+{
+    int chairCount = furniture.type == Level::Furniture::Desk ? mRand.gen(1, 2) : mRand.gen(1, 8 );
+    int gennedChairs = 0;
+    int attempts = 0;
+
+    float chairRoll = mRand.genNorm();
+
+    //If we fail the chair roll, don't generate any chairs
+    if( chairRoll > mLevelRanges->rooms[ room.type ].furnitureChances[ Level::Furniture::Chair ] ){
+        return 0;
+    }
+
+    while( gennedChairs < chairCount ){
+        attempts++;
+
+        if( attempts > WORLD_GEN_ATTEMPTS ){
+            break;
+        }
+
+        int side = mRand.gen(0, 4);
+        int gX = 0;
+        int gZ = 0;
+        int yRot = mRand.gen(0, 4);
+
+        switch( side ){
+        case 0:
+            gX = leftIndex - 1;
+            gZ = mRand.gen( frontIndex + 1, backIndex - 1 );
+            yRot = 2;
+            break;
+        case 1:
+            gX = mRand.gen( leftIndex + 1, rightIndex - 1 );
+            gZ = frontIndex - 1;
+            yRot = 1;
+            break;
+        case 2:
+            gX = rightIndex + 1;
+            gZ = mRand.gen( frontIndex + 1, backIndex - 1 );
+            yRot = 0;
+            break;
+        case 3:
+            gX = mRand.gen( leftIndex + 1, rightIndex - 1 );
+            gZ = backIndex + 1;
+            yRot = 3;
+            break;
+        default:
+            break;
+        }
+
+        //If we are out of bounds of the room, try again
+        if( gX < room.left || gX > room.right ||
+            gZ < room.top || gZ > room.bottom ){
+            continue;
+        }
+
+        Level::Furniture furniture;
+
+        furniture.type = Level::Furniture::Type::Chair;
+
+        //Position the furniture
+        furniture.position.x = ( static_cast<float>( gX ) * 0.3f ) + 0.15f;
+        furniture.position.z = ( static_cast<float>( gZ ) * 0.3f ) + 0.15f;
+        furniture.position.y = ( level.getBlock( gX, gZ ).getHeight() * 0.3f );
+
+        //Rotate the furniture
+        furniture.yRotation = static_cast<float>( yRot ) * ( 3.14159f / 2.0f );
+
+        float left, front, right, back;
+        
+        //Calculate bounding box
+        level.getFurnitureAABoundingSquare( furniture, left, front, right, back );
+
+        //Convert to indices touched
+        short iLeft = static_cast<short>( left / 0.3f );
+        short iFront = static_cast<short>( front / 0.3f );
+        short iRight = static_cast<short>( right / 0.3f );
+        short iBack = static_cast<short>( back / 0.3f );
+
+        //Make sure the area we want to set to furniture is clear
+        if( !level.isRectOfBlocksLevelAndOpen(iLeft, iRight, iFront, iBack) ){
+            continue;
+        }
+
+        ushort addedFurnitureIndex = level.addFurniture( furniture );
+        Level::Furniture* addedFurniture = &level.getFurniture( addedFurnitureIndex );
+
+        //Set the blocks in the touched indicies to be furniture blocks
+        for(int i = iLeft; i <= iRight; i++){
+            for(int j = iFront; j <= iBack; j++){
+                level.getBlock( i, j ).setFurniture( addedFurniture );
+            }
+        }
+
+        if( !pathExistsToDoors( level, room ) ){
+            level.removeFurniture( addedFurnitureIndex );
+
+            for(int i = iLeft; i <= iRight; i++){
+                for(int j = iFront; j <= iBack; j++){
+                    level.getBlock( i, j ).setOpen();
+                }
+            }
+
+            continue;
+        }
+
+
+
+        gennedChairs++;
+    }
+
+    return gennedChairs;
 }
 
 void WorldGenerator::genLevelRoomHeights( Level& level, Room& room )
