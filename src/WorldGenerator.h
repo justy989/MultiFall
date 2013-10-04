@@ -148,7 +148,8 @@ protected:
     void genLevelRoomLights( Level& level, Room& room );
 
     //Do a pass generating the doors of each room
-    void genDoors( Level& level, Room& room, Room& prevRoom, WallSide attached );
+    void genDoors( Room* allRooms, int currentGeneratedRoomCount,
+                   Room& room, Room& prevRoom, WallSide attached );
 
     //Do a pass scrubing doors based on a chance
     void scrubLevelDoorways( Level& level, Room* rooms, short roomCount );

@@ -13,8 +13,11 @@
 
 //Fog parameters
 struct Fog{
+    float start;
+    float end;
+    float diff;
+    float padding;
     XMFLOAT4 color; //Fog blending color
-    float scale;
 };
 
 class LevelDisplay{
@@ -41,7 +44,7 @@ public:
     void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world );
 
     //Set the fog we are going to display
-	void setFog(XMFLOAT4& fogColor, float fogScale );
+    void setFog( Fog& fog );
 
 	void applyFog( ID3D11DeviceContext* device);
 

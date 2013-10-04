@@ -23,7 +23,7 @@ bool LevelThemeLoader::loadTheme( char* themePath, ID3D11Device* device, WorldGe
 
     WCHAR wallTexturePath[128];
     WCHAR floorTexturePath[128];
-    Fog fog = { XMFLOAT4(0,0,0,1), 30.0f };
+    Fog fog;
     float wallTextureClip = 1.0f;
     float floorTextureClip = 1.0f;
 
@@ -57,8 +57,10 @@ bool LevelThemeLoader::loadTheme( char* themePath, ID3D11Device* device, WorldGe
             mbstowcs(floorTexturePath + 17, value, 128);
         }else if( strcmp( setting, "FloorClip" ) == 0  ){
             floorTextureClip = static_cast<float>(atof( value ));
-        }else if( strcmp( setting, "FogScale" ) == 0  ){
-            fog.scale = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "FogStart" ) == 0  ){
+            fog.start = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "FogEnd" ) == 0  ){
+            fog.end = static_cast<float>(atof( value ));
         }else if( strcmp( setting, "FogColorRed" ) == 0  ){
             fog.color.x = static_cast<float>(atof( value ));
         }else if( strcmp( setting, "FogColorGreen" ) == 0  ){
@@ -79,8 +81,11 @@ bool LevelThemeLoader::loadTheme( char* themePath, ID3D11Device* device, WorldGe
     //Set the worldGen max Tile ID to generate
     worldGen->setTileIDMax( floorRows * floorRows );
 
+    fog.diff = fog.end - fog.start;
+    fog.color.w = 1.0f;
+
     //Setup the level display fog
-	levelDisplay->setFog(fog.color, fog.scale );
+	levelDisplay->setFog( fog );
 
     //Set the level display textures and clipping info
     return levelDisplay->setTextures( device, floorTexturePath, floorTextureClip, wallTexturePath, wallTextureClip );

@@ -68,8 +68,8 @@ bool LightDisplay::init(ID3D11Device* device)
     }
 
     //Point light settings, should be moved to dungeon theme
-    mPointLights[ Level::Light::Candle - 1 ].set( XMFLOAT3(), 0.25f, 0.6f, XMFLOAT3( 1.0f, 0.5f, 0.0f ) );
-    mPointLights[ Level::Light::Torch - 1 ].set( XMFLOAT3(), 1.0f, 0.8f, XMFLOAT3( 1.0f, 0.75f, 0.2f ) );
+    mPointLights[ Level::Light::Candle - 1 ].set( XMFLOAT3(), 0.6f, 0.7f, XMFLOAT3( 1.0f, 0.5f, 0.0f ) );
+    mPointLights[ Level::Light::Torch - 1 ].set( XMFLOAT3(), 1.2f, 0.85f, XMFLOAT3( 1.0f, 0.75f, 0.2f ) );
     mPointLights[ Level::Light::Chandelier - 1 ].set( XMFLOAT3(), 3.0f, 1.0f, XMFLOAT3( 1.0f, 1.0f, 0.2f ) );
 
 	return true;
@@ -102,7 +102,7 @@ void LightDisplay::drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* 
         PointLight& pointLight = mPointLights[ levelLight.getType() - 1 ];
 
         float tx = static_cast<float>(levelLight.getI()) * 0.3f + 0.15f;
-        float ty = levelLight.getHeight();
+        float ty = levelLight.getHeight() + 0.15f;
         float tz = static_cast<float>(levelLight.getJ()) * 0.3f + 0.15f;
 
         //Update the world Matrix Constant Buffer

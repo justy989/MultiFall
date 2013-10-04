@@ -213,8 +213,8 @@ bool App::init( )
 
     //Level Generation Data
     mLevelGenRanges.roomCount.set( 8, 16 );
-    mLevelGenRanges.roomCeilingHeight.set( 3, 5 );
-    //mLevelGenRanges.roomCount.set( 2, 2 );
+    mLevelGenRanges.roomCeilingHeight.set( 3, 3 );
+    //mLevelGenRanges.roomCount.set( 6, 6 );
     mLevelGenRanges.doorScrubChance.set( 0.0f, 0.0f );
 
     //Chances for each room type
@@ -244,7 +244,7 @@ bool App::init( )
     emptyRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     emptyRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     emptyRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-    emptyRanges.lightDensity.set( 0.05f, 0.1f );
+    emptyRanges.lightDensity.set( 0.05f, 0.15f );
     emptyRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     emptyRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     emptyRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
@@ -256,7 +256,7 @@ bool App::init( )
     labyrinthRanges.floorHeight.set( 0, 0 );
     labyrinthRanges.floorSectionArea.set( 200, 300 );
     labyrinthRanges.rampDensity.set( 0.0f, 0.0f );
-    labyrinthRanges.wallDensity.set( 0.2f, 0.5f );
+    labyrinthRanges.wallDensity.set( 0.4f, 0.7f );
     labyrinthRanges.wallLength.set( 3, 8 );
     labyrinthRanges.furnitureDensity.set( 0.0f, 0.0f );
     labyrinthRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
@@ -266,7 +266,7 @@ bool App::init( )
     labyrinthRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     labyrinthRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     labyrinthRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-    labyrinthRanges.lightDensity.set( 0.05f, 0.1f );
+    labyrinthRanges.lightDensity.set( 0.05f, 0.15f );
     labyrinthRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     labyrinthRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     labyrinthRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
@@ -288,7 +288,7 @@ bool App::init( )
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.9f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.00f;
-    bedroomRanges.lightDensity.set( 0.05f, 0.1f );
+    bedroomRanges.lightDensity.set( 0.05f, 0.15f );
     bedroomRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     bedroomRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     bedroomRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
@@ -310,7 +310,7 @@ bool App::init( )
     studyRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.3f;
-    studyRanges.lightDensity.set( 0.05f, 0.1f );
+    studyRanges.lightDensity.set( 0.3f, 0.5f );
     studyRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     studyRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     studyRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
@@ -324,7 +324,7 @@ bool App::init( )
     libraryRanges.rampDensity.set( 0.0f, 0.0f );
     libraryRanges.wallDensity.set( 0.0f, 0.15f );
     libraryRanges.wallLength.set( 10, 20 );
-    libraryRanges.furnitureDensity.set( 0.4f, 0.8f );
+    libraryRanges.furnitureDensity.set( 0.3f, 0.5f );
     libraryRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.75f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
@@ -332,7 +332,7 @@ bool App::init( )
     libraryRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.8f;
-    libraryRanges.lightDensity.set( 0.05f, 0.1f );
+    libraryRanges.lightDensity.set( 0.05f, 0.15f );
     libraryRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     libraryRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     libraryRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
@@ -354,7 +354,7 @@ bool App::init( )
     storageRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     storageRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     storageRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-    storageRanges.lightDensity.set( 0.05f, 0.1f );
+    storageRanges.lightDensity.set( 0.1f, 0.3f );
     storageRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     storageRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     storageRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
@@ -362,13 +362,13 @@ bool App::init( )
     //Dining Room
     WorldGenerator::RoomGenerationRanges& diningRoomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::DiningRoom ];
 
-    diningRoomRanges.dimensions.set( 4, 7 );
+    diningRoomRanges.dimensions.set( 3, 7 );
     diningRoomRanges.floorHeight.set( 0, 0 );
     diningRoomRanges.floorSectionArea.set( 0, 0 );
     diningRoomRanges.rampDensity.set( 0.0f, 0.0f );
-    diningRoomRanges.wallDensity.set( 0.0f, 0.0f );
-    diningRoomRanges.wallLength.set( 0, 0 );
-    diningRoomRanges.furnitureDensity.set( 0.3f, 0.5f );
+    diningRoomRanges.wallDensity.set( 0.1f, 0.25f );
+    diningRoomRanges.wallLength.set( 1, 8 );
+    diningRoomRanges.furnitureDensity.set( 0.35f, 0.5f );
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 1.0f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
@@ -376,7 +376,7 @@ bool App::init( )
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.1f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-    diningRoomRanges.lightDensity.set( 0.05f, 0.1f );
+    diningRoomRanges.lightDensity.set( 0.05f, 0.15f );
     diningRoomRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     diningRoomRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     diningRoomRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
@@ -388,8 +388,8 @@ bool App::init( )
     ballRoomRanges.floorHeight.set( 0, 0 );
     ballRoomRanges.floorSectionArea.set( 200, 300 );
     ballRoomRanges.rampDensity.set( 0.0f, 0.0f );
-    ballRoomRanges.wallDensity.set( 0.0f, 0.0f );
-    ballRoomRanges.wallLength.set( 0, 0 );
+    ballRoomRanges.wallDensity.set( 0.0f, 0.1f );
+    ballRoomRanges.wallLength.set( 1, 1 );
     ballRoomRanges.furnitureDensity.set( 0.05f, 0.2f );
     ballRoomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     ballRoomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 1.0f;
@@ -398,7 +398,7 @@ bool App::init( )
     ballRoomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.1f;
     ballRoomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     ballRoomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-    ballRoomRanges.lightDensity.set( 0.05f, 0.1f );
+    ballRoomRanges.lightDensity.set( 0.05f, 0.15f );
     ballRoomRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     ballRoomRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     ballRoomRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
@@ -923,15 +923,29 @@ void App::update( float dt )
             change.id == 0 ){
             mCamera.setFOV( 40.0f + ( 20.0f * mSlider->getPercent() ) );
         }else if(change.action == UIWindow::UserChange::Action::SelectDropOption && change.id == 0 ){
+            Fog fog;
+            fog.start = 15.0f;
+            fog.end = 25.0f;
+            fog.diff = 10.0f;
+            fog.color.w = 1.0f;
             switch( mDropBox->getSelectedOption() ){
             case 0:
-                mWorldDisplay.getLevelDisplay().setFog( XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), 15.0f );
+                fog.color.x = 1.0f;
+                fog.color.y = 0.0f;
+                fog.color.z = 0.0f;
+                mWorldDisplay.getLevelDisplay().setFog( fog );
                 break;
             case 1:
-                mWorldDisplay.getLevelDisplay().setFog( XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), 15.0f );
+                fog.color.x = 0.0f;
+                fog.color.y = 1.0f;
+                fog.color.z = 0.0f;
+                mWorldDisplay.getLevelDisplay().setFog( fog );
                 break;
             case 2:
-                mWorldDisplay.getLevelDisplay().setFog( XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), 15.0f );
+                fog.color.x = 0.0f;
+                fog.color.y = 0.0f;
+                fog.color.z = 1.0f;
+                mWorldDisplay.getLevelDisplay().setFog( fog );
                 break;
             default:
                 break;

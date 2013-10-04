@@ -59,7 +59,7 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
         return false;
     }
 
-	constDesc.ByteWidth = sizeof( XMFLOAT4 );
+	constDesc.ByteWidth = sizeof( Fog );
 	if( FAILED( device->CreateBuffer( &constDesc, 0, &mFogCB ) ) ){
         LOG_ERRO << "Failed to create constant buffer for Level" << LOG_ENDL;
         return false;
@@ -99,7 +99,7 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
 
     mFurnitureScale[ Level::Furniture::Chair ] = 0.065f;
     mFurnitureScale[ Level::Furniture::Desk ] = 0.1f;
-    mFurnitureScale[ Level::Furniture::Table ] = 0.1f;
+    mFurnitureScale[ Level::Furniture::Table ] = 0.08f;
     mFurnitureScale[ Level::Furniture::Bench ] = 0.1f;
     mFurnitureScale[ Level::Furniture::Bed_Frame ] = 0.1f;
     mFurnitureScale[ Level::Furniture::Book_Case ] = 0.1f;
@@ -186,9 +186,9 @@ bool LevelDisplay::createMeshFromLevel( ID3D11Device* device, Level& level, floa
     return true;
 }
 
-void LevelDisplay::setFog( XMFLOAT4& fogColor, float fogScale )
+void LevelDisplay::setFog( Fog& fog )
 {
-	mFog.color = XMFLOAT4(fogColor.x, fogColor.y, fogColor.z, fogScale);
+	mFog = fog;
 }
 
 void LevelDisplay::applyFog(ID3D11DeviceContext* device)

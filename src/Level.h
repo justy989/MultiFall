@@ -121,7 +121,7 @@ public:
         inline void setOpen( );
         inline void setRamp( Level::Ramp ramp );
         inline void setWall( byte height );
-        inline void setDoor( Level::Door* door );
+        inline void setDoor( Level::Door* door, byte height );
         inline void setFurniture( Level::Furniture* furniture );
         inline void setContainer( Level::Container* container );
 
@@ -273,7 +273,7 @@ inline void Level::Block::setWallID( byte id ){mWallID = id;}
 inline void Level::Block::setOpen( ){mCollidable = Level::Block::Collidable::None; mFurniture = NULL;}
 inline void Level::Block::setRamp( Level::Ramp ramp ){mCollidable = Level::Block::Collidable::Ramp; mRamp = ramp;}
 inline void Level::Block::setWall( byte height ){mCollidable = Level::Block::Collidable::Wall; mHeight = height;}
-inline void Level::Block::setDoor( Level::Door* door ){mCollidable = Level::Block::Collidable::Door; mDoor = door;}
+inline void Level::Block::setDoor( Level::Door* door, byte height ){mCollidable = Level::Block::Collidable::Door; mDoor = door; mHeight = height;}
 inline void Level::Block::setFurniture( Level::Furniture* furniture ){mCollidable = Level::Block::Collidable::Furniture; mFurniture = furniture;}
 inline void Level::Block::setContainer( Level::Container* container ){mCollidable = Level::Block::Collidable::Container; mContainer = container;}
 
