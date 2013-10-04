@@ -132,6 +132,7 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
         blockHeight = static_cast<float>( mLevel.getBlock(i, j).getHeight() ) * 0.3f;
 
+        //Check wall
         if( blockHeight > pf ||
             ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
             mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
@@ -141,6 +142,42 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
             back = front + 0.3f;
+
+            if( WorldEntity::circleAALineIntersect( 
+                            XMVectorSet(right, 0.0f, front, 1.0f),
+                            XMVectorSet(right, 0.0f, back, 1.0f),
+                            XMVectorSet(px, 0.0f, pz, 1.0f),
+                            entity->getSolidity().radius ) ){
+                wallX = XMVectorSet(-1.0f, 0.0f, 0.0f, 1.0f );
+                collided = true;
+            }
+        }
+
+        //Check furniture
+        if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+
+            float front = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+            float left = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+            float right = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+            float back = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+
+            //If we have rotated 90 or 270 degrees, swap width and height
+            if( ( f->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
+                  f->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
+                ( f->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
+                  f->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
+                float tmpL = left;
+                float tmpR = right;
+                left = front;
+                right = back;
+                front = tmpL;
+                back = tmpR;
+            }
+
+            front += f->getPosition().z;
+            back += f->getPosition().z;
+            left += f->getPosition().x;
+            right += f->getPosition().x;
 
             if( WorldEntity::circleAALineIntersect( 
                             XMVectorSet(right, 0.0f, front, 1.0f),
@@ -181,6 +218,42 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
                 collided = true;
             }
         }
+
+        //Check furniture
+        if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+
+            float front = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+            float left = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+            float right = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+            float back = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+
+            //If we have rotated 90 or 270 degrees, swap width and height
+            if( ( f->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
+                  f->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
+                ( f->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
+                  f->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
+                float tmpL = left;
+                float tmpR = right;
+                left = front;
+                right = back;
+                front = tmpL;
+                back = tmpR;
+            }
+
+            front += f->getPosition().z;
+            back += f->getPosition().z;
+            left += f->getPosition().x;
+            right += f->getPosition().x;
+                
+            if( WorldEntity::circleAALineIntersect( 
+                            XMVectorSet(left, 0.0f, front, 1.0f),
+                            XMVectorSet(left, 0.0f, back, 1.0f),
+                            XMVectorSet(px, 0.0f, pz, 1.0f),
+                            entity->getSolidity().radius ) ){
+                wallX = XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f );
+                collided = true;
+            }
+        }
     }
     
     //Check the front block's back side
@@ -211,6 +284,42 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
                 collided = true;
             }
         }
+
+        //Check furniture
+        if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+
+            float front = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+            float left = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+            float right = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+            float back = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+
+            //If we have rotated 90 or 270 degrees, swap width and height
+            if( ( f->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
+                  f->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
+                ( f->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
+                  f->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
+                float tmpL = left;
+                float tmpR = right;
+                left = front;
+                right = back;
+                front = tmpL;
+                back = tmpR;
+            }
+
+            front += f->getPosition().z;
+            back += f->getPosition().z;
+            left += f->getPosition().x;
+            right += f->getPosition().x;
+
+            if( WorldEntity::circleAALineIntersect( 
+                            XMVectorSet(left, 0.0f, back, 1.0f),
+                            XMVectorSet(right, 0.0f, back, 1.0f),
+                            XMVectorSet(px, 0.0f, pz, 1.0f),
+                            entity->getSolidity().radius ) ){
+                wallZ = XMVectorSet(0.0f, 0.0f, -1.0f, 1.0f );
+                collided = true;
+            }
+        }
     }
     
     //Check the back block's front side
@@ -231,6 +340,42 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
             front = static_cast<float>(j) * 0.3f;
             right = left + 0.3f;
             back = front + 0.3f;
+
+            if( WorldEntity::circleAALineIntersect( 
+                            XMVectorSet(left, 0.0f, front, 1.0f),
+                            XMVectorSet(right, 0.0f, front, 1.0f),
+                            XMVectorSet(px, 0.0f, pz, 1.0f),
+                            entity->getSolidity().radius ) ){
+                wallZ = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f );
+                collided = true;
+            }
+        }
+
+        //Check furniture
+        if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+
+            float front = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+            float left = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+            float right = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+            float back = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+
+            //If we have rotated 90 or 270 degrees, swap width and height
+            if( ( f->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
+                  f->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
+                ( f->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
+                  f->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
+                float tmpL = left;
+                float tmpR = right;
+                left = front;
+                right = back;
+                front = tmpL;
+                back = tmpR;
+            }
+
+            front += f->getPosition().z;
+            back += f->getPosition().z;
+            left += f->getPosition().x;
+            right += f->getPosition().x;
 
             if( WorldEntity::circleAALineIntersect( 
                             XMVectorSet(left, 0.0f, front, 1.0f),

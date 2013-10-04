@@ -270,7 +270,7 @@ inline void Level::Block::setHeight( byte height ){mHeight = height;}
 inline void Level::Block::setTileID( byte id ){mTileID = id;}
 inline void Level::Block::setWallID( byte id ){mWallID = id;}
 
-inline void Level::Block::setOpen( ){mCollidable = Level::Block::Collidable::None;}
+inline void Level::Block::setOpen( ){mCollidable = Level::Block::Collidable::None; mFurniture = NULL;}
 inline void Level::Block::setRamp( Level::Ramp ramp ){mCollidable = Level::Block::Collidable::Ramp; mRamp = ramp;}
 inline void Level::Block::setWall( byte height ){mCollidable = Level::Block::Collidable::Wall; mHeight = height;}
 inline void Level::Block::setDoor( Level::Door* door ){mCollidable = Level::Block::Collidable::Door; mDoor = door;}
