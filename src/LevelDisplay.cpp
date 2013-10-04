@@ -8,9 +8,12 @@ LevelDisplay::LevelDisplay() :
     mFloorIB(NULL),
     mWallsVB(NULL),
     mWallsIB(NULL),
+    mCeilingVB(NULL),
+    mCeilingIB(NULL),
     mRampWallsVB(NULL),
     mFloorTexture(NULL),
     mWallTexture(NULL),
+    mCeilingTexture(NULL),
     mBlockCount(0),
     mWallCount(0),
     mRampCount(0),
@@ -112,7 +115,9 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
     return true;
 }
 
-bool LevelDisplay::setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, float floorClip, LPCWSTR wallTexturePath, float wallClip )
+bool LevelDisplay::setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, float floorClip, 
+                                                      LPCWSTR wallTexturePath, float wallClip,
+                                                      LPCWSTR ceilingTexturePath, float ceilingClip)
 {
     HRESULT hr;
 
@@ -137,8 +142,17 @@ bool LevelDisplay::setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, 
         return false;
     }
 
+    hr = D3DX11CreateShaderResourceViewFromFile( device,
+        ceilingTexturePath, 0, 0, &mCeilingTexture, 0 );
+
+    if( FAILED(hr) ){
+        LOG_ERRO << "Unable to load wall texture: " << LOG_WC_TO_C(wallTexturePath) << LOG_ENDL;
+        return false;
+    }
+
     mFloorClip = floorClip;
     mWallClip = wallClip;
+    mCeilingClip = 1.0f;
 
     mFloorTileRows = static_cast<int>( 1.0f / floorClip );
 
@@ -155,9 +169,12 @@ void LevelDisplay::clear()
     ReleaseCOM( mFloorIB );
     ReleaseCOM( mWallsVB );
     ReleaseCOM( mWallsIB );
+    ReleaseCOM( mCeilingVB );
+    ReleaseCOM( mCeilingIB );
     ReleaseCOM( mRampWallsVB );
     ReleaseCOM( mFloorTexture );
     ReleaseCOM( mWallTexture );
+    ReleaseCOM( mCeilingTexture );
 
     for(uint i = 1; i < LEVEL_LIGHT_TYPE_COUNT; i++){
         mLights[i-1].clear();
@@ -182,6 +199,10 @@ bool LevelDisplay::createMeshFromLevel( ID3D11Device* device, Level& level, floa
         return false;
     }
 
+    if( !createCeilingMesh( device, level, blockDimension, heightInterval ) ){
+        return false;
+    }
+
     LOG_INFO << "Level Mesh has been generated" << LOG_ENDL;
     return true;
 }
@@ -194,7 +215,7 @@ void LevelDisplay::setFog( Fog& fog )
 void LevelDisplay::applyFog(ID3D11DeviceContext* device)
 {
 	//Update constant buffer
-	device->UpdateSubresource( mFogCB, 0, 0, &mFog.color, 0, 0 ); 
+	device->UpdateSubresource( mFogCB, 0, 0, &mFog, 0, 0 ); 
 	device->PSSetConstantBuffers( 3, 1, &mFogCB );
 }
 
@@ -205,8 +226,9 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
 
     //Update the world matrix
     XMMATRIX worldm = XMMatrixIdentity();
-    //ID3DX11EffectMatrixVariable* mFXWorld = fx->GetVariableByName("gWorld")->AsMatrix();
-	//mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
+    XMMATRIX ceilingWorldm = XMMatrixTranslation( 0.0f, world.getLevel().getHeight() * 0.3f, 0.0f );
+
+    ceilingWorldm = XMMatrixTranspose( ceilingWorldm );
 
     //Set input layout and topology
     device->IASetInputLayout( mInputLayout );
@@ -235,6 +257,13 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
     device->IASetIndexBuffer( mWallsIB, DXGI_FORMAT_R16_UINT, 0 );
     device->IASetVertexBuffers(0, 1, &mWallsVB, &stride, &offset);
     device->DrawIndexed(6 * mWallCount, 0, 0);
+
+    //Draw the ceiling
+    device->PSSetShaderResources(0, 1, &mCeilingTexture );
+
+    device->IASetIndexBuffer( mCeilingIB, DXGI_FORMAT_R16_UINT, 0 );
+    device->IASetVertexBuffers(0, 1, &mCeilingVB, &stride, &offset);
+    device->DrawIndexed(6 * mBlockCount, 0, 0);
 
 	Level& level = world.getLevel();
 
@@ -431,6 +460,131 @@ bool LevelDisplay::createFloorMesh( ID3D11Device* device, Level& level, float bl
     return true;
 }
 
+
+bool LevelDisplay::createCeilingMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval )
+{
+    ReleaseCOM( mCeilingVB );
+    ReleaseCOM( mCeilingIB );
+
+    mBlockCount = level.getWidth() * level.getDepth();
+
+    DungeonVertex* verts = new DungeonVertex[ 4 * mBlockCount ];
+    ushort* inds = new ushort[ 6 * mBlockCount ];
+
+    float height = static_cast<float>(level.getHeight()) * heightInterval;
+
+    int v = 0;
+
+    //Generate floor blocks based on height
+    for(int i = 0; i < level.getWidth(); i++){
+        for(int j = 0; j < level.getDepth(); j++){
+
+            //Don't generate a ceiling over a wall
+            if( level.getBlock(i, j).getHeight() == level.getHeight() ){
+                continue;
+            }
+
+            byte id = level.getBlock(i,j).getTileID();
+            float row = id / mFloorTileRows;
+			float column = id % mFloorTileRows;
+
+            //Front left
+            verts[ v ].position.x = static_cast<float>(i) * blockDimension;
+            verts[ v ].position.y = height;
+            verts[ v ].position.z = static_cast<float>(j) * blockDimension;
+			verts[ v ].tex = XMFLOAT2(column * mFloorClip, row * mFloorClip);
+
+            v++;
+
+            //Front right
+            verts[ v ].position.x = verts[ v - 1 ].position.x + blockDimension;
+            verts[ v ].position.y = verts[ v - 1 ].position.y;
+            verts[ v ].position.z = verts[ v - 1 ].position.z;
+			verts[ v ].tex = XMFLOAT2(column * mFloorClip, row * mFloorClip + mFloorClip);
+
+            v++;
+
+            //Back left
+            verts[ v ].position.x = verts[ v - 2 ].position.x;
+            verts[ v ].position.y = verts[ v - 2 ].position.y;
+            verts[ v ].position.z = verts[ v - 2 ].position.z + blockDimension;
+			verts[ v ].tex = XMFLOAT2(column * mFloorClip + mFloorClip, row * mFloorClip);
+
+            v++;
+
+            //Back right
+            verts[ v ].position.x = verts[ v - 3 ].position.x + blockDimension;
+            verts[ v ].position.y = verts[ v - 3 ].position.y;
+            verts[ v ].position.z = verts[ v - 3 ].position.z + blockDimension;
+			verts[ v ].tex = XMFLOAT2(column * mFloorClip + mFloorClip, row * mFloorClip + mFloorClip);
+
+            v++;
+
+            //Generate the normals
+			DungeonVertex::createSurfaceNormals(verts[v-4], verts[v-3], verts[v-2]);
+			DungeonVertex::createSurfaceNormals(verts[v-3], verts[v-1], verts[v-2]);
+        }
+    }
+
+    
+    D3D11_BUFFER_DESC vbd;
+    vbd.Usage = D3D11_USAGE_IMMUTABLE;
+    vbd.ByteWidth = sizeof(DungeonVertex) * (mBlockCount * 4);
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vbd.CPUAccessFlags = 0;
+    vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+    D3D11_SUBRESOURCE_DATA vinitData;
+    vinitData.pSysMem = verts;
+
+    if(FAILED(device->CreateBuffer(&vbd, &vinitData, &mCeilingVB))){
+        LOG_ERRO << "Unable to allocate Vertex buffer for level floors" << LOG_INFO;
+        return false;
+    }
+
+    //Reusing tmp variable for indexing index buffer!
+    v = 0;
+
+    int index = 0;
+
+    //Generate indices corresponding to generated verts
+    for(int i = 0; i < level.getWidth(); i++){
+        for(int j = 0; j < level.getDepth(); j++){
+            inds[v] = index;
+            inds[v+1] = index + 1;
+            inds[v+2] = index + 2;
+
+            inds[v+3] = index + 1;
+            inds[v+4] = index + 3;
+            inds[v+5] = index + 2;
+
+            v += 6;
+            index += 4;
+        }
+    }
+
+    D3D11_BUFFER_DESC ibd;
+    ibd.Usage = D3D11_USAGE_IMMUTABLE;
+    ibd.ByteWidth = sizeof(ushort) * mBlockCount * 6;
+    ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    ibd.CPUAccessFlags = 0;
+    ibd.MiscFlags = 0;
+	ibd.StructureByteStride = 0;
+    D3D11_SUBRESOURCE_DATA iinitData;
+    iinitData.pSysMem = inds;
+
+    //Create VB
+    if(FAILED(device->CreateBuffer(&ibd, &iinitData, &mCeilingIB))){
+        LOG_ERRO << "Unable to allocate index buffer for level floors" << LOG_INFO;
+        return false;
+    }
+
+    delete[] verts;
+    delete[] inds;
+
+    return true;
+}
+
 bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  )
 {
     ReleaseCOM( mWallsIB );
@@ -463,19 +617,6 @@ bool LevelDisplay::createWallsMesh( ID3D11Device* device, Level& level, float bl
                     verts[ v ].position.y = static_cast<float>(level.getBlock(i, j).getHeight()) * heightInterval ;
                     verts[ v ].position.z = static_cast<float>(j) * blockDimension;
 					verts[ v ].tex = XMFLOAT2(1, 0);
-                    
-                    /*
-					if(i % 3 == 0 && j % 4 == 0 && (level.getBlock( i, j ).getHeight() - level.getBlock( nextI, nextJ ).getHeight()) > 1)
-					{
-                        PointLight pl;
-						XMFLOAT3 pos = verts[v].position;
-						pos.y -= 0.5f * blockDimension;
-						pos.z += 0.5f * blockDimension;
-                        pl.set( pos, pl.getRadius(), pl.getIntensity(), pl.getColor() );
-                        level.addLight( pl );
-
-						level.addTorch(pos, XMConvertToRadians(-90.0f));
-					}*/
 					
                     v++;
 

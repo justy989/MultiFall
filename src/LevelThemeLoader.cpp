@@ -23,9 +23,11 @@ bool LevelThemeLoader::loadTheme( char* themePath, ID3D11Device* device, WorldGe
 
     WCHAR wallTexturePath[128];
     WCHAR floorTexturePath[128];
+    WCHAR ceilingTexturePath[128];
     Fog fog;
     float wallTextureClip = 1.0f;
     float floorTextureClip = 1.0f;
+    float ceilingTextureClip = 1.0f;
 
     while( !file.eof() ){
         file.getline( buffer, 128 );
@@ -57,6 +59,11 @@ bool LevelThemeLoader::loadTheme( char* themePath, ID3D11Device* device, WorldGe
             mbstowcs(floorTexturePath + 17, value, 128);
         }else if( strcmp( setting, "FloorClip" ) == 0  ){
             floorTextureClip = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "CeilingTexture" ) == 0  ){
+            wsprintf(ceilingTexturePath, L"content/textures/");
+            mbstowcs(ceilingTexturePath + 17, value, 128);
+        }else if( strcmp( setting, "CeilingClip" ) == 0  ){
+            ceilingTextureClip = static_cast<float>(atof( value ));
         }else if( strcmp( setting, "FogStart" ) == 0  ){
             fog.start = static_cast<float>(atof( value ));
         }else if( strcmp( setting, "FogEnd" ) == 0  ){
@@ -88,5 +95,7 @@ bool LevelThemeLoader::loadTheme( char* themePath, ID3D11Device* device, WorldGe
 	levelDisplay->setFog( fog );
 
     //Set the level display textures and clipping info
-    return levelDisplay->setTextures( device, floorTexturePath, floorTextureClip, wallTexturePath, wallTextureClip );
+    return levelDisplay->setTextures( device, floorTexturePath, floorTextureClip, 
+                                              wallTexturePath, wallTextureClip,
+                                              ceilingTexturePath, ceilingTextureClip);
 }

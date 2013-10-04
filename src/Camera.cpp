@@ -3,7 +3,9 @@
 Camera::Camera() :
     mPitch(0.0f),
     mYaw(0.0f),
-    mFOV(50.0f)
+    mFOV(50.0f),
+    mNearPlane(0.05f),
+    mFarPlane(15.0f)
 {
     mPosition.x = 0.0f;
     mPosition.y = 2.0f;
@@ -20,7 +22,7 @@ void Camera::update( float aspectRatio ){
 
     float radianFOV = (mFOV / 180.0f) * 3.14159f;
 
-    XMMATRIX P = XMMatrixPerspectiveFovLH(radianFOV, aspectRatio, 0.05f, 50.0f);
+    XMMATRIX P = XMMatrixPerspectiveFovLH(radianFOV, aspectRatio, mNearPlane, mFarPlane);
 	XMStoreFloat4x4(&mProj, P);
 
     XMVECTOR defaultForward = XMVectorSet( 1.0f, 0.0f, 0.0f, 1.0f );

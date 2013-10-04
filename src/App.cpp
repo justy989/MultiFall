@@ -7,7 +7,9 @@
 char* gDropDownOptions[] = {
     "Red",
     "Green",
-    "Blue"
+    "Blue",
+    "Black",
+    "White"
 };
 
 App::App()
@@ -405,7 +407,7 @@ bool App::init( )
 
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
     mEntity.getSolidity().radius = 0.15f;
-    mEntity.getSolidity().height = 0.25f;
+    mEntity.getSolidity().height = 0.32f;
 
     if( !mUIDisplay.init( mWindow.getDevice(), L"content/textures/multifall_ui.png", L"content/shaders/ui.fx" ) ){
         return false;
@@ -520,7 +522,7 @@ bool App::init( )
     mDropBox->setDimension( dim );
 
     mDropBox->setSelectedOption(0);
-    mDropBox->setOptions( gDropDownOptions, 3 );
+    mDropBox->setOptions( gDropDownOptions, 5 );
 
     mUIWindow.addElem( mDropBox, 2 );
 
@@ -924,9 +926,9 @@ void App::update( float dt )
             mCamera.setFOV( 40.0f + ( 20.0f * mSlider->getPercent() ) );
         }else if(change.action == UIWindow::UserChange::Action::SelectDropOption && change.id == 0 ){
             Fog fog;
-            fog.start = 15.0f;
-            fog.end = 25.0f;
-            fog.diff = 10.0f;
+            fog.start = 0.0f;
+            fog.end = 9.0f;
+            fog.diff = 9.0f;
             fog.color.w = 1.0f;
             switch( mDropBox->getSelectedOption() ){
             case 0:
@@ -944,6 +946,18 @@ void App::update( float dt )
             case 2:
                 fog.color.x = 0.0f;
                 fog.color.y = 0.0f;
+                fog.color.z = 1.0f;
+                mWorldDisplay.getLevelDisplay().setFog( fog );
+                break;
+            case 3:
+                fog.color.x = 0.0f;
+                fog.color.y = 0.0f;
+                fog.color.z = 0.0f;
+                mWorldDisplay.getLevelDisplay().setFog( fog );
+                break;
+            case 4:
+                fog.color.x = 1.0f;
+                fog.color.y = 1.0f;
                 fog.color.z = 1.0f;
                 mWorldDisplay.getLevelDisplay().setFog( fog );
                 break;
@@ -997,6 +1011,12 @@ void App::draw( )
 
 	ID3DX11EffectVectorVariable* mfxCameraPos = mFX->GetVariableByName("gCameraPos")->AsVector();
 	mfxCameraPos->SetFloatVector(reinterpret_cast<float*>(&mCamera.getPosition()));
+
+	ID3DX11EffectScalarVariable* mfxCameraNear = mFX->GetVariableByName("gCameraNear")->AsScalar();
+    mfxCameraNear->SetFloat( mCamera.getNear() );
+
+	ID3DX11EffectScalarVariable* mfxCameraFar = mFX->GetVariableByName("gCameraFar")->AsScalar();
+    mfxCameraFar->SetFloat( mCamera.getFar() );
 
 	//Start geometry fill pass
 	D3DX11_TECHNIQUE_DESC techDesc;

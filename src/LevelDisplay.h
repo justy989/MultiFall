@@ -32,7 +32,9 @@ public:
     bool init( ID3D11Device* device, ID3DX11EffectTechnique* technique );
 
     //Set the current textures used by the Level display
-    bool setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, float floorClip, LPCWSTR wallTexturePath, float wallClip );
+    bool setTextures( ID3D11Device* device, LPCWSTR floorTexturePath, float floorClip, 
+                                            LPCWSTR wallTexturePath, float wallClip,
+                                            LPCWSTR ceilingTexturePath, float ceilingClip);
 
     //Create the floor display mesh from a generated(hopefully) floor
     bool createMeshFromLevel( ID3D11Device* device, Level& level, float blockDimension, float heightInterval );
@@ -48,14 +50,17 @@ public:
 
 	void applyFog( ID3D11DeviceContext* device);
 
+    inline void setDrawRange( float drawRange );
+
     //Get the furniture meshes
     inline StaticMesh& getFurnitureMesh( Level::Furniture::Type type );
     inline float getFurnitureScale( Level::Furniture::Type type );
 
 protected:
 
-    bool createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  );
-    bool createWallsMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval  );
+    bool createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval );
+    bool createWallsMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval );
+    bool createCeilingMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval );
 
 protected:
 
@@ -76,16 +81,22 @@ protected:
     ID3D11Buffer* mWallsVB;
     ID3D11Buffer* mWallsIB;
 
+    //The floor that the player walks on, at every height
+    ID3D11Buffer* mCeilingVB;
+    ID3D11Buffer* mCeilingIB;
+
     //Ramp Walls have to be separate because they are annoying...
     ID3D11Buffer* mRampWallsVB;
 
     //Textures
 	ID3D11ShaderResourceView* mFloorTexture;
 	ID3D11ShaderResourceView* mWallTexture;
+    ID3D11ShaderResourceView* mCeilingTexture;
 
     //Used to clip the textures based on Level::Blocks tileID and wallIDs
     float mFloorClip;
     float mWallClip;
+    float mCeilingClip;
 
     int mBlockCount; //How many blocks are there that we needed to draw
     int mWallCount; //How many walls are there?
@@ -102,6 +113,9 @@ protected:
 
     float mFurnitureScale[ LEVEL_FURNITURE_TYPE_COUNT ];
     float mLightScale[ LEVEL_LIGHT_TYPE_COUNT ];
+
+    //Draw Range
+    float mDrawRange;
 };
 
 inline StaticMesh& LevelDisplay::getFurnitureMesh( Level::Furniture::Type type )
@@ -112,6 +126,11 @@ inline StaticMesh& LevelDisplay::getFurnitureMesh( Level::Furniture::Type type )
 inline float LevelDisplay::getFurnitureScale( Level::Furniture::Type type )
 {
     return mFurnitureScale[ type ];
+}
+
+inline void LevelDisplay::setDrawRange( float drawRange )
+{
+    mDrawRange = drawRange;
 }
 
 #endif  

@@ -289,7 +289,7 @@ bool DX11Window::onResize()
 	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.ArraySize = 1;
 	depthStencilDesc.Format    = DXGI_FORMAT_D24_UNORM_S8_UINT;
-
+   
     //Disable multisampling for now
 	depthStencilDesc.SampleDesc.Count   = 1;
 	depthStencilDesc.SampleDesc.Quality = 0;

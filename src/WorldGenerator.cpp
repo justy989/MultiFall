@@ -8,8 +8,8 @@ WorldGenerator::WorldGenerator() :
     mLevelRanges(NULL),
     mTileIDMax(16)
 {
-    mRand.seed( 41491 );
-    //mRand.seed( time( 0 ) );
+    //mRand.seed( 41491 );
+    mRand.seed( time( 0 ) );
 }
 
 WorldGenerator::~WorldGenerator()

@@ -42,6 +42,9 @@ cbuffer cbPerFrame : register( b0 )
 	float4x4 gViewProj;
 	float4x4 gInvViewProj;
 	float4 gCameraPos;
+    float gCameraNear;
+    float gCameraFar;
+    float2 gPerFramePadding;
 };
 
 cbuffer cbPerObject : register( b1 )
@@ -57,7 +60,11 @@ cbuffer cbPerLightPS : register( b2 )
 
 cbuffer cbFogPS : register( b3 )
 {
-	float4 gFogData;	//16 bytes
+    float gFogStart;
+    float gFogEnd;
+    float gFogDiff;
+    float gFogPadding;
+	float4 gFogColor;//16 bytes
 };
 
 cbuffer cbParticles : register( b4 )
@@ -158,10 +165,17 @@ VertexOut vs_fsquad(VertexIn input)
 
 float4 ps_ambient(VertexOut pin) : SV_TARGET0
 {
-	float4 color = colorBuffer.Sample( colorSampler_, pin.tex );
-	float depth = depthBuffer.Sample( colorSampler_, pin.tex ).r;
-	
-    return ( float4(gFogData.xyz, 0) * saturate((1.0 - depth) * gFogData.w) ) * color * 0.5f;
+	float4 color = colorBuffer.Sample( colorSampler_, pin.tex ) * 0.5f;
+    //return color * 0.5f;
+    float depth = depthBuffer.Sample( colorSampler_, pin.tex ).r;
+
+    float scaledDepth = (2.0f * depth) - 1.0f; //Convert to -1 to 1
+    depth = 2.0 * gCameraNear * gCameraFar / (gCameraFar + gCameraNear - scaledDepth * (gCameraFar - gCameraNear)); //Calculate world depths
+    //depth = 2.0 * 0.05f * 15.0f / (15.0f + 0.05f - scaledDepth * (15.0f - 0.05f));
+    float fogBlend = clamp( depth, gFogStart, gFogEnd );
+    fogBlend = ( fogBlend - gFogStart ) / gFogDiff;
+
+    return ( ( 1.0f - fogBlend ) * color ) + ( fogBlend * gFogColor );
 }
 
 float4 ps_point(PointVertexOut pin) : SV_TARGET0
@@ -197,7 +211,8 @@ float4 ps_point(PointVertexOut pin) : SV_TARGET0
     float NdL = saturate( dot( normal,lightVector ) );
 	float3 ambientLight = colorBuffer.Sample( colorSampler_, texCoord );
 
-    return float4(float4(normalize(gFogData.xyz), 0) * (saturate((1.0f - depth) * 2.0f * gFogData.w)) * attenuation * gLightRadIntensity.y * ambientLight, 1.0f);
+    //return float4(float4(normalize(gFogData.xyz), 0) * (saturate((1.0f - depth) * 2.0f * gFogData.w)) * attenuation * gLightRadIntensity.y * ambientLight, 1.0f);
+    return float4( NdL * attenuation * gLightRadIntensity * ambientLight, 1.0f );
 }
 
 LightParticleGSIn vs_lightparticle(LightParticleIn input, uint instanceID : SV_InstanceID)
