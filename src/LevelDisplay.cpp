@@ -104,8 +104,8 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
     mFurnitureScale[ Level::Furniture::Bed_Frame ] = 0.1f;
     mFurnitureScale[ Level::Furniture::Book_Case ] = 0.1f;
 
-    mLightScale[ Level::Light::Candle ] = 0.05f;
-    mLightScale[ Level::Light::Torch ] = 0.125f;
+    mLightScale[ Level::Light::Candle ] = 0.025f;
+    mLightScale[ Level::Light::Torch ] = 0.075f;
     mLightScale[ Level::Light::Chandelier ] = 0.5f;
 
     LOG_INFO << "Created Input Description and Texture Sampler for Level" << LOG_ENDL;
@@ -242,16 +242,21 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
     for(ushort i = 0; i < level.getNumLights(); i++){
         Level::Light& l = level.getLight( i );
 
-        float xOffset = l.getAttachedWall() == Level::Light::AttachedWall::Left ? -0.15f :
-                        (l.getAttachedWall() == Level::Light::AttachedWall::Right ? 0.15f : 0.0f);
-        float zOffset = l.getAttachedWall() == Level::Light::AttachedWall::Front ? -0.15f : 
-                        (l.getAttachedWall() == Level::Light::AttachedWall::Back ? 0.15f : 0.0f);
+        float xOffset = 0.0f;
+        float zOffset = 0.0f;
+
+        if( l.getType() == Level::Light::Type::Torch ){
+            xOffset =   l.getAttachedWall() == Level::Light::AttachedWall::Left ? -0.15f :
+                      ( l.getAttachedWall() == Level::Light::AttachedWall::Back ? 0.15f : 0.0f );
+            zOffset =   l.getAttachedWall() == Level::Light::AttachedWall::Right ? 0.15f : 
+                      ( l.getAttachedWall() == Level::Light::AttachedWall::Front ? -0.15f : 0.0f );
+        }
 
         worldm = XMMatrixScaling( mLightScale[ l.getType() ], mLightScale[ l.getType() ], mLightScale[ l.getType() ] ) * 
                  XMMatrixRotationY( static_cast<float>( l.getAttachedWall() ) * 3.14159f / 2.0f ) * 
-                 XMMatrixTranslation( static_cast<float>(l.getI()) * 0.3f + 0.15f,
-                                      0.3f * static_cast<float>(l.getHeight()),
-                                      static_cast<float>(l.getJ()) * 0.3f + 0.15f);
+                 XMMatrixTranslation( ( static_cast<float>(l.getI()) * 0.3f ) + 0.15f + xOffset,
+                                      l.getHeight(),
+                                      ( static_cast<float>(l.getJ()) * 0.3f ) + 0.15f + zOffset);
 
         worldm = XMMatrixTranspose( worldm );
 

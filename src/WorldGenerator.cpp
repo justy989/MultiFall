@@ -8,8 +8,8 @@ WorldGenerator::WorldGenerator() :
     mLevelRanges(NULL),
     mTileIDMax(16)
 {
-    //mRand.seed( 41491 );
-    mRand.seed( time( 0 ) );
+    mRand.seed( 41491 );
+    //mRand.seed( time( 0 ) );
 }
 
 WorldGenerator::~WorldGenerator()
@@ -59,8 +59,6 @@ void WorldGenerator::genRoom( WallSide attachSide, int attachX, int attachY, Roo
             break;
         }
     }
-
-    room.type = Room::Type::BedRoom;
 
     //Based on type, generate width and height
     int genWidth = mLevelRanges->rooms[ room.type ].dimensions.gen( mRand );
@@ -1135,6 +1133,7 @@ void WorldGenerator::genLevelRoomLights( Level& level, Room& room )
     struct FurnitureSurfaceIndex{
         ushort x;
         ushort y;
+        float h;
     };
 
     FurnitureSurfaceIndex* furnitureSurfaces = new FurnitureSurfaceIndex[ level.getNumFurniture() ];
@@ -1155,6 +1154,9 @@ void WorldGenerator::genLevelRoomLights( Level& level, Room& room )
                 level.getFurniture(i).getType() == Level::Furniture::Type::Table ){
                 furnitureSurfaces[ furnitureSurfaceCount ].x = fX;
                 furnitureSurfaces[ furnitureSurfaceCount ].y = fY;
+                furnitureSurfaces[ furnitureSurfaceCount ].h = 
+                    level.getFurnitureDimensions( level.getFurniture(i).getType() ).y + 
+                    ( static_cast<float>( level.getBlock(fX, fY).getHeight() ) * 0.3f );
                 furnitureSurfaceCount++;
             }
         }
@@ -1193,13 +1195,13 @@ void WorldGenerator::genLevelRoomLights( Level& level, Room& room )
         switch( genType ){
         case 0:
             genIndex = mRand.gen( 0, furnitureSurfaceCount );
-            l.set( furnitureSurfaces[ genIndex ].x, furnitureSurfaces[ genIndex ].y, 1, Level::Light::Candle );
+            l.set( furnitureSurfaces[ genIndex ].x, furnitureSurfaces[ genIndex ].y, furnitureSurfaces[ genIndex ].h, Level::Light::Candle );
             level.addLight( l );
             gennedLights++;
             break;
         case 1:
             genIndex = mRand.gen( 0, wallIndexCount );
-            l.set( wallIndices[ genIndex ].x, wallIndices[ genIndex ].y, 2, Level::Light::Type::Torch, (Level::Light::AttachedWall)(wallIndices[ genIndex ].side) );
+            l.set( wallIndices[ genIndex ].x, wallIndices[ genIndex ].y, 2.5f * 0.3f, Level::Light::Type::Torch, (Level::Light::AttachedWall)(wallIndices[ genIndex ].side) );
             level.addLight( l );
             gennedLights++;
             break;

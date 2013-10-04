@@ -169,7 +169,7 @@ public:
             Back
         };
 
-        inline void set( ushort i, ushort j, ushort height, Type type, AttachedWall = Front );
+        inline void set( ushort i, ushort j, float height, Type type, AttachedWall = Front );
 
         inline Type getType();
 
@@ -178,7 +178,7 @@ public:
         inline ushort getI();
         inline ushort getJ();
 
-        inline ushort getHeight();
+        inline float getHeight();
 
     protected:
 
@@ -190,7 +190,7 @@ public:
         ushort mJ;
 
         //height
-        ushort mHeight;
+        float mHeight;
 
         //Which wall it is attached to, if it is a torch
         AttachedWall mAttachedWall;
@@ -289,7 +289,7 @@ inline byte Level::Block::getTileID(){return mTileID;}
 inline byte Level::Block::getWallID(){return mWallID;}
 
 //Light Inline Functions
-inline void Level::Light::set( ushort i, ushort j, ushort height, Type type, Level::Light::AttachedWall attachedWall )
+inline void Level::Light::set( ushort i, ushort j, float height, Type type, Level::Light::AttachedWall attachedWall )
 {
     mI = i;
     mJ = j;
@@ -308,7 +308,7 @@ inline Level::Light::AttachedWall Level::Light::getAttachedWall(){return mAttach
 inline ushort Level::Light::getI(){return mI;}
 inline ushort Level::Light::getJ(){return mJ;}
 
-inline ushort Level::Light::getHeight(){return mHeight;}
+inline float Level::Light::getHeight(){return mHeight;}
 
 //Solid Object Index Functions
 inline void Level::SolidObject::setYRotation( float f ){mYRotation = f;}
