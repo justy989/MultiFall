@@ -43,7 +43,7 @@ public:
     void clear();
 
     //Draw the Level Mesh that we generated
-    void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world );
+    void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world, float blockDimension );
 
     //Set the fog we are going to display
     void setFog( Fog& fog );

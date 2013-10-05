@@ -219,16 +219,13 @@ void LevelDisplay::applyFog(ID3D11DeviceContext* device)
 	device->PSSetConstantBuffers( 3, 1, &mFogCB );
 }
 
-void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world )
+void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world, float blockDimensions )
 {
     UINT stride = sizeof(DungeonVertex);
     UINT offset = 0;
 
     //Update the world matrix
     XMMATRIX worldm = XMMatrixIdentity();
-    XMMATRIX ceilingWorldm = XMMatrixTranslation( 0.0f, world.getLevel().getHeight() * 0.3f, 0.0f );
-
-    ceilingWorldm = XMMatrixTranspose( ceilingWorldm );
 
     //Set input layout and topology
     device->IASetInputLayout( mInputLayout );
@@ -266,6 +263,7 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
     device->DrawIndexed(6 * mBlockCount, 0, 0);
 
 	Level& level = world.getLevel();
+    float halfBlockDimension = blockDimensions / 2.0f;
 
     //Draw light meshes at light locations
     for(ushort i = 0; i < level.getNumLights(); i++){
@@ -275,17 +273,17 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
         float zOffset = 0.0f;
 
         if( l.getType() == Level::Light::Type::Torch ){
-            xOffset =   l.getAttachedWall() == Level::Light::AttachedWall::Left ? -0.15f :
-                      ( l.getAttachedWall() == Level::Light::AttachedWall::Back ? 0.15f : 0.0f );
-            zOffset =   l.getAttachedWall() == Level::Light::AttachedWall::Right ? 0.15f : 
-                      ( l.getAttachedWall() == Level::Light::AttachedWall::Front ? -0.15f : 0.0f );
+            xOffset =   l.getAttachedWall() == Level::Light::AttachedWall::Left ? -halfBlockDimension :
+                      ( l.getAttachedWall() == Level::Light::AttachedWall::Back ? halfBlockDimension : 0.0f );
+            zOffset =   l.getAttachedWall() == Level::Light::AttachedWall::Right ? halfBlockDimension : 
+                      ( l.getAttachedWall() == Level::Light::AttachedWall::Front ? -halfBlockDimension : 0.0f );
         }
 
         worldm = XMMatrixScaling( mLightScale[ l.getType() ], mLightScale[ l.getType() ], mLightScale[ l.getType() ] ) * 
-                 XMMatrixRotationY( static_cast<float>( l.getAttachedWall() ) * 3.14159f / 2.0f ) * 
-                 XMMatrixTranslation( ( static_cast<float>(l.getI()) * 0.3f ) + 0.15f + xOffset,
+                 XMMatrixRotationY( static_cast<float>( l.getAttachedWall() ) * PI_OVER_2 ) * 
+                 XMMatrixTranslation( ( static_cast<float>(l.getI()) * blockDimensions ) + halfBlockDimension + xOffset,
                                       l.getHeight(),
-                                      ( static_cast<float>(l.getJ()) * 0.3f ) + 0.15f + zOffset);
+                                      ( static_cast<float>(l.getJ()) * blockDimensions ) + halfBlockDimension + zOffset);
 
         worldm = XMMatrixTranspose( worldm );
 

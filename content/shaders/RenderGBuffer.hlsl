@@ -54,8 +54,9 @@ cbuffer cbPerObject : register( b1 )
 
 cbuffer cbPerLightPS : register( b2 )
 {
-	float4 gLightPosition;	//16 bytes
+	float4 gLightPosition;	//32 bytes
 	float4 gLightRadIntensity; //16 bytes
+    float4 gLightColor; // 32 bytes
 };
 
 cbuffer cbFogPS : register( b3 )
@@ -72,18 +73,31 @@ cbuffer cbParticles : register( b4 )
 	ParticleInstanceData gParticles[100];
 };
 
+cbuffer cbBillboardFixed : register( b5 )
+{
+    float2 gBillboardTexCoord[6] =
+    {
+        float2(0, 1),
+	    float2(1, 1),
+	    float2(0, 0),
+        float2(1, 1),
+	    float2(0, 0),
+	    float2(1, 0)
+    };
+};
+
 struct VertexIn
 {
-	float3 pos  : POSITION;
+	float3 pos    : POSITION;
 	float3 normal : NORMAL;
-	float2 tex :	TEXCOORD;
+	float2 tex    :	TEXCOORD;
 };
 
 struct VertexOut
 {
-	float4 pos  : SV_POSITION;
+	float4 pos    : SV_POSITION;
 	float3 normal : NORMAL;
-	float2 tex :	TEXCOORD;
+	float2 tex    :	TEXCOORD;
 };
 
 struct LightParticleIn
@@ -93,20 +107,35 @@ struct LightParticleIn
 
 struct LightParticleGSIn
 {
-	float4 pos  : POSITION;
-	float2 tex :	TEXCOORD;
+	float4 pos : POSITION;
+	float2 tex : TEXCOORD;
 };
 
 struct LightParticleOut
 {
-	float4 pos  : SV_POSITION;
+	float4 pos       : SV_POSITION;
 	float4 screenPos : TEXCOORD0;
-	float2 tex :	TEXCOORD1;
+	float2 tex       : TEXCOORD1;
+};
+
+struct BillboardIn
+{
+    float4 pos     : POSITION;
+    float4 dim     : DIMENSION;
+    //float2 tex     : TEXCOORD;
+    //float2 texDim  : TEXDIM;
+};
+
+struct BillboardOut
+{
+	float4 pos       : SV_POSITION;
+	float4 screenPos : TEXCOORD0;
+	float2 tex       : TEXCOORD1;
 };
 
 struct PointVertexOut
 {
-	float4 pos  : SV_POSITION;
+	float4 pos       : SV_POSITION;
 	float4 screenPos :	TEXCOORD;
 };
 
@@ -209,10 +238,10 @@ float4 ps_point(PointVertexOut pin) : SV_TARGET0
 	
     //compute diffuse light
     float NdL = saturate( dot( normal,lightVector ) );
-	float3 ambientLight = colorBuffer.Sample( colorSampler_, texCoord );
+	float3 ambientLight = colorBuffer.Sample( colorSampler_, texCoord ) * 0.5f;
 
     //return float4(float4(normalize(gFogData.xyz), 0) * (saturate((1.0f - depth) * 2.0f * gFogData.w)) * attenuation * gLightRadIntensity.y * ambientLight, 1.0f);
-    return float4( NdL * attenuation * gLightRadIntensity * ambientLight, 1.0f );
+    return float4( NdL * attenuation * gLightRadIntensity.y * gLightColor.xyz * ambientLight, 1.0f );
 }
 
 LightParticleGSIn vs_lightparticle(LightParticleIn input, uint instanceID : SV_InstanceID)
@@ -274,13 +303,74 @@ float4 ps_lightparticle(LightParticleOut input) : SV_Target0
 
 	float geoDepth = depthBuffer.Sample( colorSampler_, texCoord ).r;
 	float particleDepth = input.screenPos.z / input.screenPos.w;
-	if(particleDepth > geoDepth)
+
+	if( particleDepth > geoDepth )
 	{
 		clip(-1);		
 	}
 
 	return texture_.Sample( colorSampler_, input.tex );	
 	
+}
+
+BillboardIn vs_billboard( BillboardIn bb )
+{
+    return bb;
+}
+
+[maxvertexcount(6)]
+void gs_billboard( point BillboardIn bb[1], inout TriangleStream<BillboardOut> output )
+{
+    float3 planeNormal = bb[0].pos.xyz - gCameraPos.xyz;
+	planeNormal = normalize(planeNormal);
+
+	float3 upVector = float3(0,1,0);
+	float3 rightVector = normalize(cross(planeNormal, upVector));
+
+	float4 vert[6];
+
+    float3 hOffset = rightVector * bb[0].dim.x;
+    float3 vOffset = upVector * bb[0].dim.y;
+
+	// We get the points by using the billboards right vector and the billboards height
+	vert[0] = float4(bb[0].pos.xyz - hOffset - vOffset, 1.0f); // Get bottom left vertex
+	vert[1] = float4(bb[0].pos.xyz + hOffset - vOffset, 1.0f); // Get bottom right vertex
+	vert[2] = float4(bb[0].pos.xyz - hOffset + vOffset, 1.0f); // Get top left vertex
+
+    vert[3] = vert[1];
+    vert[4] = vert[2];
+	vert[5] = float4(bb[0].pos.xyz + hOffset + vOffset, 1.0f); // Get top right vertex
+
+	// Now we "append" or add the vertices to the outgoing stream list
+	BillboardOut outputVert;
+	for(int i = 0; i < 6; i++)
+	{
+		outputVert.pos = mul(vert[i], gViewProj);
+		outputVert.screenPos = outputVert.pos;
+		outputVert.tex = gBillboardTexCoord[i];
+
+		output.Append(outputVert);
+	}
+}
+
+float4 ps_billboard(BillboardOut input) : SV_Target0
+{
+	input.screenPos.xy /= input.screenPos.w;
+	float2 texCoord = 0.5f * (float2(input.screenPos.x, -input.screenPos.y) + 1);
+
+	float geoDepth = depthBuffer.Sample( colorSampler_, texCoord ).r;
+	float particleDepth = input.screenPos.z / input.screenPos.w;
+
+	if( particleDepth > geoDepth )
+	{
+		clip(-1);		
+	}
+
+    float4 color = texture_.Sample( colorSampler_, input.tex );
+
+    clip( color.a < 0.1f ? -1 : 1 );
+
+	return color;	
 }
 
 technique11 GeoPass
@@ -314,6 +404,18 @@ technique11 PointLight
         SetVertexShader( CompileShader( vs_5_0, vs_point() ) );
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_5_0, ps_point() ) );
+    }
+}
+
+technique11 Billboard
+{
+    pass P0
+    {
+		SetDepthStencilState(depthState, 0);
+		SetBlendState(blendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF );
+        SetVertexShader( CompileShader( vs_5_0, vs_billboard() ) );
+		SetGeometryShader( CompileShader( gs_5_0, gs_billboard() ) );
+        SetPixelShader( CompileShader( ps_5_0, ps_billboard() ) );
     }
 }
 

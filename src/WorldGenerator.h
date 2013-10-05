@@ -116,7 +116,7 @@ public:
     ~WorldGenerator();
 
     //Generate a room's exits and floor layout
-    void genLevel( Level& level, LevelGenerationRanges& ranges );
+    void genLevel( Level& level, LevelGenerationRanges& ranges, float blockDimension );
 
     inline void setTileIDMax( uint tileIDMax );
 
@@ -142,7 +142,7 @@ protected:
     void genLevelRoomWalls( Level& level, Room& room );
 
     //Do a pass generating the furniture of each room
-    void genLevelRoomFurniture( Level& level, Room& room );
+    void genLevelRoomFurniture( Level& level, Room& room, float blockDimension );
 
     //Do a pass generating the lights of each room
     void genLevelRoomLights( Level& level, Room& room );

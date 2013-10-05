@@ -68,7 +68,7 @@ bool LightDisplay::init(ID3D11Device* device)
     }
 
     //Point light settings, should be moved to dungeon theme
-    mPointLights[ Level::Light::Candle - 1 ].set( XMFLOAT3(), 0.6f, 0.7f, XMFLOAT3( 1.0f, 0.5f, 0.0f ) );
+    mPointLights[ Level::Light::Candle - 1 ].set( XMFLOAT3(), 0.6f, 1.5f, XMFLOAT3( 1.0f, 0.5f, 0.0f ) );
     mPointLights[ Level::Light::Torch - 1 ].set( XMFLOAT3(), 1.2f, 0.85f, XMFLOAT3( 1.0f, 0.75f, 0.2f ) );
     mPointLights[ Level::Light::Chandelier - 1 ].set( XMFLOAT3(), 3.0f, 1.0f, XMFLOAT3( 1.0f, 1.0f, 0.2f ) );
 
@@ -87,7 +87,8 @@ void LightDisplay::clear()
 }
 
 void LightDisplay::drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* fx,
-                                    World& world, XMFLOAT4& cameraPos )
+                                    World& world, XMFLOAT4& cameraPos,
+                                    float blockDimension )
 {
     //Save the rasterizer state
 	ID3D11RasterizerState* prevRast;
@@ -95,15 +96,16 @@ void LightDisplay::drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* 
 
     Level& level = world.getLevel();
     PointLightCBLayout plCB;
+    float halfBlockDimension = blockDimension / 2.0f;
 
     for(ushort i = 0; i < level.getNumLights(); i++)
 	{
         Level::Light& levelLight = level.getLight(i);
         PointLight& pointLight = mPointLights[ levelLight.getType() - 1 ];
 
-        float tx = static_cast<float>(levelLight.getI()) * 0.3f + 0.15f;
-        float ty = levelLight.getHeight() + 0.15f;
-        float tz = static_cast<float>(levelLight.getJ()) * 0.3f + 0.15f;
+        float tx = static_cast<float>(levelLight.getI()) * blockDimension + halfBlockDimension;
+        float ty = levelLight.getHeight() + halfBlockDimension;
+        float tz = static_cast<float>(levelLight.getJ()) * blockDimension + halfBlockDimension;
 
         //Update the world Matrix Constant Buffer
         XMMATRIX world = XMMatrixScaling( pointLight.getRadius(), pointLight.getRadius(), pointLight.getRadius() ) *
@@ -120,6 +122,7 @@ void LightDisplay::drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* 
 
         plCB.position = lightPosition;
         plCB.radIntensity = lightRadIntensity;
+        plCB.color = XMFLOAT4( pointLight.getColor().x, pointLight.getColor().y, pointLight.getColor().z, 1.0f );
 
         device->UpdateSubresource( mPointLightCB, 0, 0, &plCB, 0, 0 );
 		device->PSSetConstantBuffers( 2, 1, &mPointLightCB );

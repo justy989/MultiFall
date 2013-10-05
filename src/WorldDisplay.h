@@ -3,6 +3,7 @@
 
 #include "LevelDisplay.h"
 #include "LightDisplay.h"
+#include "PopulationDisplay.h"
 
 class World;
 
@@ -16,17 +17,19 @@ public:
 	bool init( ID3D11Device* device, ID3DX11EffectTechnique* tech );
 
     //Draw the world in it's current state
-    void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world );
+    void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world, float blockDimension );
 
     //Draw the point lights in a scene as sphere for deferred rendering
 	void drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* fx,
-                          XMFLOAT4& cameraPos, World& world );
+                          XMFLOAT4& cameraPos, World& world, float blockDimension );
 
     //Clear the different displays
     void clear();
 
     //Accessors
     inline LevelDisplay& getLevelDisplay();
+    inline LightDisplay& getLightDisplay();
+    inline PopulationDisplay& getPopulationDisplay();
 
 protected:
 
@@ -37,6 +40,7 @@ protected:
     LightDisplay mLightDisplay;
 
     //PopulationDisplay: Draws Characters
+    PopulationDisplay mPopDisplay;
 
     //ProjectileDisplay: Draws Projectiles
 
@@ -44,5 +48,6 @@ protected:
 };
 
 inline LevelDisplay& WorldDisplay::getLevelDisplay(){return mLevelDisplay;}
-
+inline LightDisplay& WorldDisplay::getLightDisplay(){return mLightDisplay;}
+inline PopulationDisplay& WorldDisplay::getPopulationDisplay(){return mPopDisplay;}
 #endif

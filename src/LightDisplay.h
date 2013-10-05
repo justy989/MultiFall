@@ -25,7 +25,8 @@ public:
 
     //Draw point lights in the world
 	void drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* fx, 
-                          World& world, XMFLOAT4& cameraPos );
+                          World& world, XMFLOAT4& cameraPos,
+                          float blockDimension );
 
 protected:
 
@@ -34,6 +35,7 @@ protected:
 	{                             
 		XMFLOAT4 position;
 		XMFLOAT4 radIntensity;
+        XMFLOAT4 color;
 	};
 
     //World Matrix Constant Buffer

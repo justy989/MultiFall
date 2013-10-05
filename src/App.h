@@ -104,6 +104,8 @@ protected:
     bool mKeyPress;
     USHORT mKeyChar;
 
+    float mBlockDimenions;
+
 protected:	
 
 	ID3DX11Effect* mFX;
@@ -111,6 +113,7 @@ protected:
 	ID3DX11EffectTechnique* mAmbientLightTech;
 	ID3DX11EffectTechnique* mPointLightTech;
 	ID3DX11EffectTechnique* mLightParticleTech;
+    ID3DX11EffectTechnique* mCharacterBillboardTech;
 
 	ID3D11InputLayout* mInputLayout;
 	ID3D11Buffer* mFSQuadVB;

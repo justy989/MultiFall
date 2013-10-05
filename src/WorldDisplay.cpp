@@ -34,19 +34,20 @@ bool WorldDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tech )
     return true;
 }
 
-void WorldDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world )
+void WorldDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world, float blockDimension )
 {
-    mLevelDisplay.draw( device, fx, world );
+    mLevelDisplay.draw( device, fx, world, blockDimension );
 }
 
 void WorldDisplay::drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* fx,
-                                    XMFLOAT4& cameraPos, World& world )
+                                    XMFLOAT4& cameraPos, World& world, float blockDimension )
 {
-    mLightDisplay.drawPointLights( device, fx, world, cameraPos );
+    mLightDisplay.drawPointLights( device, fx, world, cameraPos, blockDimension );
 }
 
 void WorldDisplay::clear()
 {
     mLevelDisplay.clear();
     mLightDisplay.clear();
+    mPopDisplay.clear();
 }

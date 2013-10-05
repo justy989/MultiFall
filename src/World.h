@@ -2,7 +2,7 @@
 #define WORLD_H
 
 #include "Level.h"
-#include "WorldEntity.h"
+#include "Population.h"
 
 class World{
 public:
@@ -15,6 +15,7 @@ public:
 
     //Get the world's dungeon
     inline Level& getLevel();
+    inline Population& getPopulation();
 
     //Get the block dimensions
     inline float getBlockDimension();
@@ -27,7 +28,7 @@ protected:
     bool checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition, XMVECTOR* outWallVector);
 
     Level mLevel;
-    //Population mPop;
+    Population mPop;
     //Projectiles mProjs;
     //MagicFields mMagicFields;
     //Activatables mActivatables;
@@ -37,6 +38,7 @@ protected:
 };
 
 Level& World::getLevel(){return mLevel;}
+inline Population& World::getPopulation(){return mPop;}
 
 inline float World::getBlockDimension(){return mBlockDimension;}
 inline void World::setBlockDimension( float d ){mBlockDimension = d;}

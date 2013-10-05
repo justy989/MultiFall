@@ -28,6 +28,8 @@ App::App()
     MousePosString[0] = '\0';
 
     mLeftClick = false;
+
+    mBlockDimenions = 0.3f;
 }
 
 void App::handleInput( RAWINPUT* input )
@@ -88,10 +90,10 @@ void App::handleInput( RAWINPUT* input )
                     break;
                 }
 
-                mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges );
-                mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f);
-                mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * 0.3f;
-                mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * 0.3f;
+                mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, mBlockDimenions );
+                mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions);
+                mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * mBlockDimenions;
+                mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * mBlockDimenions;
             }
             break;
         case 'O':
@@ -282,7 +284,7 @@ bool App::init( )
     bedroomRanges.rampDensity.set( 0.0f, 0.0f );
     bedroomRanges.wallDensity.set( 0.0f, 0.2f );
     bedroomRanges.wallLength.set( 1, 4 );
-    bedroomRanges.furnitureDensity.set( 0.1f, 0.3f );
+    bedroomRanges.furnitureDensity.set( 0.1f, mBlockDimenions );
     bedroomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.7f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.05f;
@@ -311,8 +313,8 @@ bool App::init( )
     studyRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.2f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    studyRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.3f;
-    studyRanges.lightDensity.set( 0.3f, 0.5f );
+    studyRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = mBlockDimenions;
+    studyRanges.lightDensity.set( mBlockDimenions, 0.5f );
     studyRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     studyRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     studyRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
@@ -326,7 +328,7 @@ bool App::init( )
     libraryRanges.rampDensity.set( 0.0f, 0.0f );
     libraryRanges.wallDensity.set( 0.0f, 0.15f );
     libraryRanges.wallLength.set( 10, 20 );
-    libraryRanges.furnitureDensity.set( 0.3f, 0.5f );
+    libraryRanges.furnitureDensity.set( mBlockDimenions, 0.5f );
     libraryRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.75f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
@@ -356,7 +358,7 @@ bool App::init( )
     storageRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     storageRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     storageRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-    storageRanges.lightDensity.set( 0.1f, 0.3f );
+    storageRanges.lightDensity.set( 0.1f, mBlockDimenions );
     storageRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     storageRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     storageRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
@@ -450,8 +452,8 @@ bool App::init( )
 
     UIButton* btn = new UIButton();
 
-    XMFLOAT2 pos(0.1f, 0.3f);
-    XMFLOAT2 dim(0.3f, 0.1f);
+    XMFLOAT2 pos(0.1f, mBlockDimenions);
+    XMFLOAT2 dim(mBlockDimenions, 0.1f);
 
     btn->setPosition( pos );
     btn->setDimension( dim );
@@ -534,7 +536,7 @@ bool App::init( )
     mInputBox->setText( text );
 
     pos.y = 0.45f;
-    pos.x = 0.3f;
+    pos.x = mBlockDimenions;
 
     mInputBox->setPosition( pos );
 
@@ -582,14 +584,16 @@ bool App::init( )
 
 	ltl.loadTheme("content/themes/stone.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
 
-    mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges );
-    mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f );	
+    mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, mBlockDimenions );
+    mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions );	
 
-    mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * 0.3f;
-    mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * 0.3f;
-    mCamera.getPosition().y = static_cast<float>(mWorld.getLevel().getHeight() * 3) * 0.3f;
+    //mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * mBlockDimenions;
+    //mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * mBlockDimenions;
+    //mCamera.getPosition().y = static_cast<float>(mWorld.getLevel().getHeight() * 3) * mBlockDimenions;
 
 	mEmitterManager.init(mWindow.getDevice(), mLightParticleTech);
+
+    mWorld.getPopulation().spawn(0, XMFLOAT4(6.0f, 0.35f, 6.0f, 1.0f));
 
     return true;
 }
@@ -634,6 +638,7 @@ bool App::initShaders()
 	mAmbientLightTech = mFX->GetTechniqueByName("AmbientLight");
 	mPointLightTech = mFX->GetTechniqueByName("PointLight");
 	mLightParticleTech = mFX->GetTechniqueByName("LightParticle");
+    mCharacterBillboardTech = mFX->GetTechniqueByName("Billboard");
 
     LOG_INFO << "Loaded color.fx shader Successfully" << LOG_ENDL;
 
@@ -693,6 +698,10 @@ bool App::initShaders()
 	resourceData.pSysMem = indices;
     
 	mWindow.getDevice()->CreateBuffer( &indexDesc, &resourceData, &mFSQuadIB );
+
+    if( !mWorldDisplay.getPopulationDisplay().init( mWindow.getDevice(), mCharacterBillboardTech ) ){
+        return false;
+    }
 
 	return true;
 }
@@ -829,15 +838,15 @@ void App::update( float dt )
 
         //TEMPORARY WAY OF SOLVING THIS!
         //As long as we are not on a ramp, bring us to the floor
-        int bx = static_cast<int>( mEntity.getPosition().x / 0.3f);
-        int bz = static_cast<int>( mEntity.getPosition().z / 0.3f);
+        int bx = static_cast<int>( mEntity.getPosition().x / mBlockDimenions);
+        int bz = static_cast<int>( mEntity.getPosition().z / mBlockDimenions);
 
         CLAMP( bx, 0, mWorld.getLevel().getWidth() - 1 );
         CLAMP( bz, 0, mWorld.getLevel().getDepth() - 1 );
 
         if( mWorld.getLevel().getBlock(bx, bz).getCollidableType() == Level::Block::Collidable::None ){
             //Make sure we are on the floor, otherwise bring us down through gravity
-            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * 0.3f;
+            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * mBlockDimenions;
 
             if( distFromGround > 0.05f ){
                 moveVec -= XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -846,24 +855,24 @@ void App::update( float dt )
             }
         }else if( mWorld.getLevel().getBlock(bx, bz).getCollidableType() == Level::Block::Collidable::Ramp ){
             if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Front ){
-                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * 0.3f;
-                float rampUp = fmod(mEntity.getPosition().z, 0.3f);
+                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * mBlockDimenions;
+                float rampUp = fmod(mEntity.getPosition().z, mBlockDimenions);
                 rampUp *= 1.25f;
                 mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
             }else if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Back ){
-                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * 0.3f;
-                float rampUp = fmod(mEntity.getPosition().z, 0.3f);
-                rampUp = (0.3f - rampUp) * 1.25f;
+                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * mBlockDimenions;
+                float rampUp = fmod(mEntity.getPosition().z, mBlockDimenions);
+                rampUp = (mBlockDimenions - rampUp) * 1.25f;
                 mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
             }else if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Left ){
-                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * 0.3f;
-                float rampUp = fmod(mEntity.getPosition().x, 0.3f);
+                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * mBlockDimenions;
+                float rampUp = fmod(mEntity.getPosition().x, mBlockDimenions);
                 rampUp *= 1.25f;
                 mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
             }else if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Right ){
-                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * 0.3f;
-                float rampUp = fmod(mEntity.getPosition().x, 0.3f);
-                rampUp = (0.3f - rampUp) * 1.25f;
+                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * mBlockDimenions;
+                float rampUp = fmod(mEntity.getPosition().x, mBlockDimenions);
+                rampUp = (mBlockDimenions - rampUp) * 1.25f;
                 mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
             }
         }
@@ -919,8 +928,8 @@ void App::update( float dt )
 
         if( change.action == UIWindow::UserChange::Action::ClickButton &&
             change.id == 0 ){
-                mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges );
-            mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), 0.3f, 0.3f);
+                mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, mBlockDimenions );
+            mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions);
         }else if( change.action == UIWindow::UserChange::Action::MoveSlider &&
             change.id == 0 ){
             mCamera.setFOV( 40.0f + ( 20.0f * mSlider->getPercent() ) );
@@ -968,6 +977,7 @@ void App::update( float dt )
     }
 
 	mEmitterManager.Update(dt);
+    mWorldDisplay.getPopulationDisplay().updateBillboards( mWindow.getDeviceContext(), mWorld );
 }
 
 void App::draw( )
@@ -1025,7 +1035,7 @@ void App::draw( )
 	for(ushort p = 0; p < techDesc.Passes; ++p)
 	{
 		mRenderGBufferTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
-        mWorldDisplay.draw( mWindow.getDeviceContext(), mFX, mWorld );
+        mWorldDisplay.draw( mWindow.getDeviceContext(), mFX, mWorld, mBlockDimenions );
 		//drawDarkParticles
 	}
 
@@ -1067,26 +1077,27 @@ void App::draw( )
 	{
 		mPointLightTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
 		mWorldDisplay.getLevelDisplay().applyFog(mWindow.getDeviceContext()); 
-		mWorldDisplay.drawPointLights(mWindow.getDeviceContext(), mFX, mCamera.getPosition(), mWorld);
+		mWorldDisplay.drawPointLights(mWindow.getDeviceContext(), mFX, mCamera.getPosition(), mWorld, mBlockDimenions);
+	}
+
+    //pass for character billboards
+    mCharacterBillboardTech->GetDesc( &techDesc );
+    for(ushort p = 0; p < techDesc.Passes; ++p)
+	{
+		mCharacterBillboardTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
+        mWorldDisplay.getPopulationDisplay().draw(mWindow.getDeviceContext());
 	}
 
 	//pass for LightParticles
-
-	//mWindow.getDeviceContext()->OMSetRenderTargets(1, &prevRTV, mDepthStencilView);
-
 	mLightParticleTech->GetDesc( &techDesc );
     for(ushort p = 0; p < techDesc.Passes; ++p)
 	{
 		mLightParticleTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
 		mEmitterManager.Draw(mWindow.getDeviceContext());
 	}
-
-	//mWindow.getDeviceContext()->OMSetRenderTargets(1, &prevRTV, prevDSV);
 	
 	mWindow.getDeviceContext()->OMSetDepthStencilState(prevDSS, 0);
-
 	mWindow.getDeviceContext()->OMSetBlendState(prevBS, prevfloat, prevMask);
-    
     mWindow.getDeviceContext()->RSSetState( NULL );
     
     //For testing drawing windows

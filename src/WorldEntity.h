@@ -8,7 +8,7 @@ public:
 
     WorldEntity();
 
-    //virtual void update( float dt ) = 0;
+    virtual void update( float dt ){}
 
     enum Existence{
         Dead,
@@ -47,6 +47,8 @@ public:
         Line
     };
 
+    inline void setExistence( Existence existence );
+
     static bool circleAALineIntersect( XMVECTOR start, XMVECTOR end, XMVECTOR circleCenter, float circleRadius );
     static bool circlePointIntersect( XMVECTOR point, XMVECTOR circleCenter, float circleRadius );
 
@@ -69,5 +71,7 @@ inline WorldEntity::Existence WorldEntity::getExistence(){return mExistence;}
 inline int WorldEntity::getID(){return mID;}
 inline XMFLOAT4& WorldEntity::getPosition(){return mPosition;}
 inline WorldEntity::Solidity& WorldEntity::getSolidity(){return mSolidity;}
+
+inline void WorldEntity::setExistence( Existence existence ){mExistence = existence;}
 
 #endif

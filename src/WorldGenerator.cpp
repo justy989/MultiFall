@@ -17,7 +17,7 @@ WorldGenerator::~WorldGenerator()
     mLevelRanges = NULL;
 }
 
-void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges )
+void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges, float blockDimension )
 {
     //Generate number of rooms that will exist in the level and allocate space for it
     int roomCount = ranges.roomCount.gen( mRand );
@@ -34,7 +34,7 @@ void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges )
     }
 
     for(int i = 0; i < roomCount; i++){    
-        genLevelRoomFurniture( level, rooms[i] );
+        genLevelRoomFurniture( level, rooms[i], blockDimension );
         //genLevelRoomContainers( level, rooms[i] );
         genLevelRoomWalls( level, rooms[i] );
         genLevelRoomLights( level, rooms[i] );
@@ -535,7 +535,7 @@ void WorldGenerator::genDoors( Room* allRooms, int currentGeneratedRoomCount,
 }
 
 
-void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room )
+void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room, float blockDimension )
 {
     float genFurnitureDensity = mLevelRanges->rooms[ room.type ].furnitureDensity.gen( mRand );
     int furnitureCount = static_cast<int>(static_cast<float>((room.right - room.left) * (room.bottom - room.top)) * genFurnitureDensity);
@@ -576,8 +576,8 @@ void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room )
         if( furniture.getType() == Level::Furniture::Type::Desk ){
             int wall = mRand.gen( 0, 4 );
 
-            int furnWidth = static_cast<int>( ( level.getFurnitureDimensions( Level::Furniture::Type::Desk ).x / 2.0f ) / 0.3f );
-            int furnDepth = static_cast<int>( ( level.getFurnitureDimensions( Level::Furniture::Type::Desk ).z / 2.0f ) / 0.3f );
+            int furnWidth = static_cast<int>( ( level.getFurnitureDimensions( Level::Furniture::Type::Desk ).x / 2.0f ) / blockDimension );
+            int furnDepth = static_cast<int>( ( level.getFurnitureDimensions( Level::Furniture::Type::Desk ).z / 2.0f ) / blockDimension );
 
             switch( wall ){
             case 0:
@@ -606,9 +606,9 @@ void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room )
         }
 
         //Position the furniture
-        furniture.getPosition().x = ( static_cast<float>( gX ) * 0.3f ) + 0.15f;
-        furniture.getPosition().z = ( static_cast<float>( gZ ) * 0.3f ) + 0.15f;
-        furniture.getPosition().y = ( level.getBlock( gX, gZ ).getHeight() * 0.3f );
+        furniture.getPosition().x = ( static_cast<float>( gX ) * blockDimension ) + blockDimension / 2.0f;
+        furniture.getPosition().z = ( static_cast<float>( gZ ) * blockDimension ) + blockDimension / 2.0f;
+        furniture.getPosition().y = ( level.getBlock( gX, gZ ).getHeight() * blockDimension );
 
         //Rotate the furniture
         furniture.setYRotation( static_cast<float>( yRot ) * ( 3.14159f / 2.0f ) );
@@ -619,10 +619,10 @@ void WorldGenerator::genLevelRoomFurniture( Level& level, Room& room )
         level.getFurnitureAABoundingSquare( furniture, left, front, right, back );
 
         //Convert to indices touched
-        short iLeft = static_cast<short>( left / 0.3f );
-        short iFront = static_cast<short>( front / 0.3f );
-        short iRight = static_cast<short>( right / 0.3f );
-        short iBack = static_cast<short>( back / 0.3f );
+        short iLeft = static_cast<short>( left / blockDimension );
+        short iFront = static_cast<short>( front / blockDimension );
+        short iRight = static_cast<short>( right / blockDimension );
+        short iBack = static_cast<short>( back / blockDimension );
 
         //Make sure the area we want to set to furniture is clear
         if( !level.isRectOfBlocksLevelAndOpen(iLeft, iRight, iFront, iBack) ){

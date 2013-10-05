@@ -7,7 +7,7 @@ World::World()
 
 void World::update( float dt )
 {
-
+    mPop.update( dt );
 }
 
 void World::moveEntity( WorldEntity* entity, XMVECTOR moveVec, float dist )

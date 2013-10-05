@@ -19,6 +19,8 @@
 #define MAX_EMITTERS 50
 #define MAX_PARTICLES 100
 
+#define PI_OVER_2 ( 3.14159f / 2.0f )
+
 //Typedefs
 typedef unsigned char byte;
 typedef unsigned short ushort;
