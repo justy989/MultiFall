@@ -34,7 +34,9 @@ public:
     void draw( ID3D11DeviceContext* device );
 
     //Update billboard Instance list
-    void updateBillboards( ID3D11DeviceContext* device, World& world );
+    void updateBillboards( ID3D11DeviceContext* device, World& world, XMFLOAT4& CameraPos );
+
+    inline void setDrawRange( float range );
 
 protected:
     ID3D11InputLayout* mInputLayout; //Input Layout
@@ -46,6 +48,10 @@ protected:
 	ID3D11Buffer* mInstanceDataCB;
 
     ID3D11ShaderResourceView* mTextures[ 1 ];
+
+    float mDrawRange;
 };
+
+inline void PopulationDisplay::setDrawRange( float range ){mDrawRange = range;}
 
 #endif

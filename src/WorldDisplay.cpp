@@ -34,9 +34,9 @@ bool WorldDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tech )
     return true;
 }
 
-void WorldDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world, float blockDimension )
+void WorldDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world, XMFLOAT4& cameraPos, float blockDimension )
 {
-    mLevelDisplay.draw( device, fx, world, blockDimension );
+    mLevelDisplay.draw( device, fx, world, cameraPos, blockDimension );
 }
 
 void WorldDisplay::drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* fx,

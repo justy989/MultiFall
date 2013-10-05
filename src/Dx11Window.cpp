@@ -12,7 +12,7 @@ namespace
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	return gdx11Wndow->mainWndProc(hwnd, msg, wParam, lParam);
+    return gdx11Wndow->mainWndProc(hwnd, msg, wParam, lParam);
 }
 
 DX11Window::DX11Window() : 
@@ -65,7 +65,7 @@ bool DX11Window::init( LPCWSTR windowCaption, unsigned int windowWidth, unsigned
         LOG_ERRO << "Unable to initialize DX11 Window" << LOG_ENDL;
 		return false;
     }
-        
+    
 	if(!initDirect3D()){
         LOG_ERRO << "Unable to initialize Direct3D 11" << LOG_ENDL;
 		return false;

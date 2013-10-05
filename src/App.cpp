@@ -193,9 +193,9 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 
 				update( d );
                 draw();
+			}else{
+				Sleep(100);
 			}
-
-            Sleep(10);
 
             mTimer.stop();
 
@@ -598,7 +598,9 @@ bool App::init( )
 
 	mEmitterManager.init(mWindow.getDevice(), mLightParticleTech);
 
-    //mWorld.getPopulation().spawn(0, XMFLOAT4(6.0f, 0.35f, 6.0f, 1.0f));
+    mWorldDisplay.getLevelDisplay().setDrawRange( 10.0f ); // 10.0f / 0.3f = 90 block range
+    mWorldDisplay.getLightDisplay().setDrawRange( 15.0f ); //180 block range
+    mWorldDisplay.getPopulationDisplay().setDrawRange( 10.0f ); // 10.0f / 0.3f = 90 block range
 
     return true;
 }
@@ -982,7 +984,7 @@ void App::update( float dt )
     }
 
 	mEmitterManager.Update(dt);
-    mWorldDisplay.getPopulationDisplay().updateBillboards( mWindow.getDeviceContext(), mWorld );
+    mWorldDisplay.getPopulationDisplay().updateBillboards( mWindow.getDeviceContext(), mWorld, mCamera.getPosition() );
 }
 
 void App::draw( )
@@ -1040,7 +1042,7 @@ void App::draw( )
 	for(ushort p = 0; p < techDesc.Passes; ++p)
 	{
 		mRenderGBufferTech->GetPassByIndex(p)->Apply(0, mWindow.getDeviceContext());
-        mWorldDisplay.draw( mWindow.getDeviceContext(), mFX, mWorld, mBlockDimenions );
+        mWorldDisplay.draw( mWindow.getDeviceContext(), mFX, mWorld,  mCamera.getPosition(), mBlockDimenions );
 		//drawDarkParticles
 	}
 

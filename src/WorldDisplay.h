@@ -17,7 +17,7 @@ public:
 	bool init( ID3D11Device* device, ID3DX11EffectTechnique* tech );
 
     //Draw the world in it's current state
-    void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world, float blockDimension );
+    void draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world, XMFLOAT4& cameraPos, float blockDimension );
 
     //Draw the point lights in a scene as sphere for deferred rendering
 	void drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* fx,

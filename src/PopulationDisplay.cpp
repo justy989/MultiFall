@@ -6,7 +6,8 @@ PopulationDisplay::PopulationDisplay() :
     mInputLayout(NULL),
 	mBillboardCount(0),
 	mBillboardBuffer(NULL),
-	mInstanceDataCB(NULL)
+	mInstanceDataCB(NULL),
+    mDrawRange( 10.0f )
 {
     mTextures[0] = NULL;
 }
@@ -82,29 +83,40 @@ void PopulationDisplay::draw( ID3D11DeviceContext* device )
     device->Draw(mBillboardCount, 0);
 }
 
-void PopulationDisplay::updateBillboards( ID3D11DeviceContext* device, World& world )
+void PopulationDisplay::updateBillboards( ID3D11DeviceContext* device, World& world, XMFLOAT4& cameraPos )
 {
     mBillboardCount = 0;
 
     Population& p = world.getPopulation();
-
-    for(int i = 0; i < POPULATION_MAX_CHARACTERS; i++){
-        if( p.getCharacter(i).getExistence() == WorldEntity::Existence::Alive ){
-            mBillboards[mBillboardCount].pos = p.getCharacter(i).getPosition();
-            mBillboards[mBillboardCount].dimensions.x = 0.1f;
-            mBillboards[mBillboardCount].dimensions.y = 0.25f;
-            mBillboards[mBillboardCount].dimensions.z = 0.0f;
-            mBillboards[mBillboardCount].dimensions.w = 0.0f;
-            mBillboardCount++;
-        }
-    }
     
 	D3D11_MAPPED_SUBRESOURCE mappedData;
     if( FAILED(device->Map(mBillboardBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedData) ) ){
         return;
     }
 
-    memcpy( mappedData.pData, mBillboards, sizeof(CharacterBillboard) * mBillboardCount);
+    CharacterBillboard* billboards = (CharacterBillboard*)(mappedData.pData);
+
+    for(int i = 0; i < POPULATION_MAX_CHARACTERS; i++){
+        if( p.getCharacter(i).getExistence() == WorldEntity::Existence::Alive ){
+
+            float dx = (cameraPos.x - p.getCharacter(i).getPosition().x);
+            float dz = (cameraPos.z - p.getCharacter(i).getPosition().z);
+
+            float d = sqrt( (dx * dx) + (dz * dz) );
+
+            //If we are outside the draw range, skip drawing this one
+            if( d > mDrawRange ){
+                continue;
+            }
+
+            billboards[mBillboardCount].pos = p.getCharacter(i).getPosition();
+            billboards[mBillboardCount].dimensions.x = 0.1f;
+            billboards[mBillboardCount].dimensions.y = 0.25f;
+            billboards[mBillboardCount].dimensions.z = 0.0f;
+            billboards[mBillboardCount].dimensions.w = 0.0f;
+            mBillboardCount++;
+        }
+    }
 
     device->Unmap( mBillboardBuffer, 0 );
 }

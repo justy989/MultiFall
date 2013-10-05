@@ -5,7 +5,8 @@ LightDisplay::LightDisplay() :
     mWorldCB(NULL),
     mPointLightCB(NULL),
     mInsideLightRS(NULL),
-    mOutsideLightRS(NULL)
+    mOutsideLightRS(NULL),
+    mDrawRange(20.0f)
 {
 
 }
@@ -101,11 +102,22 @@ void LightDisplay::drawPointLights( ID3D11DeviceContext* device, ID3DX11Effect* 
     for(ushort i = 0; i < level.getNumLights(); i++)
 	{
         Level::Light& levelLight = level.getLight(i);
-        PointLight& pointLight = mPointLights[ levelLight.getType() - 1 ];
 
         float tx = static_cast<float>(levelLight.getI()) * blockDimension + halfBlockDimension;
         float ty = levelLight.getHeight() + halfBlockDimension;
         float tz = static_cast<float>(levelLight.getJ()) * blockDimension + halfBlockDimension;
+
+        float dx = (cameraPos.x - tx);
+        float dz = (cameraPos.z - tz);
+
+        float d = sqrt( (dx * dx) + (dz * dz) );
+
+        //If we are outside the draw range, skip drawing this one
+        if( d > mDrawRange ){
+            continue;
+        }
+
+        PointLight& pointLight = mPointLights[ levelLight.getType() - 1 ];
 
         //Update the world Matrix Constant Buffer
         XMMATRIX world = XMMatrixScaling( pointLight.getRadius(), pointLight.getRadius(), pointLight.getRadius() ) *

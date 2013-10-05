@@ -19,7 +19,8 @@ LevelDisplay::LevelDisplay() :
     mRampCount(0),
     mFloorClip(1.0f),
     mWallClip(1.0f),
-    mFloorTileRows(4)
+    mFloorTileRows(4),
+    mDrawRange(5.0f)
 {
 
 }
@@ -219,7 +220,7 @@ void LevelDisplay::applyFog(ID3D11DeviceContext* device)
 	device->PSSetConstantBuffers( 3, 1, &mFogCB );
 }
 
-void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world, float blockDimensions )
+void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& world, XMFLOAT4& cameraPos, float blockDimensions )
 {
     UINT stride = sizeof(DungeonVertex);
     UINT offset = 0;
@@ -279,11 +280,23 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
                       ( l.getAttachedWall() == Level::Light::AttachedWall::Front ? -halfBlockDimension : 0.0f );
         }
 
+        float tx = ( static_cast<float>(l.getI()) * blockDimensions ) + halfBlockDimension + xOffset;
+        float ty = l.getHeight();
+        float tz = ( static_cast<float>(l.getJ()) * blockDimensions ) + halfBlockDimension + zOffset;
+
+        float dx = (cameraPos.x - tx);
+        float dz = (cameraPos.z - tz);
+
+        float d = sqrt( (dx * dx) + (dz * dz) );
+
+        //If we are outside the draw range, skip drawing this one
+        if( d > mDrawRange ){
+            continue;
+        }
+
         worldm = XMMatrixScaling( mLightScale[ l.getType() ], mLightScale[ l.getType() ], mLightScale[ l.getType() ] ) * 
                  XMMatrixRotationY( static_cast<float>( l.getAttachedWall() ) * PI_OVER_2 ) * 
-                 XMMatrixTranslation( ( static_cast<float>(l.getI()) * blockDimensions ) + halfBlockDimension + xOffset,
-                                      l.getHeight(),
-                                      ( static_cast<float>(l.getJ()) * blockDimensions ) + halfBlockDimension + zOffset);
+                 XMMatrixTranslation( tx, ty, tz );
 
         worldm = XMMatrixTranspose( worldm );
 
@@ -297,6 +310,16 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
     for(uint i = 0; i < level.getNumFurniture(); i++)
 	{
         Level::Furniture& f = level.getFurniture(i);
+
+        float dx = (cameraPos.x - f.getPosition().x);
+        float dz = (cameraPos.z - f.getPosition().z);
+
+        float d = sqrt( (dx * dx) + (dz * dz) );
+
+        //If we are outside the draw range, skip drawing this one
+        if( d > mDrawRange ){
+            continue;
+        }
 
         worldm = XMMatrixScaling( mFurnitureScale[ f.getType() ], 
                                   mFurnitureScale[ f.getType() ], 

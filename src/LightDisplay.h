@@ -28,6 +28,8 @@ public:
                           World& world, XMFLOAT4& cameraPos,
                           float blockDimension );
 
+    inline void setDrawRange( float drawRange );
+
 protected:
 
     //Point Light Constant Buffer
@@ -50,6 +52,10 @@ protected:
     PointLight mPointLights[ LEVEL_LIGHT_TYPE_COUNT - 1 ];
 
 	StaticMesh mSphere; //for point lights
+
+    float mDrawRange;
 };
+
+inline void LightDisplay::setDrawRange( float drawRange ){mDrawRange = drawRange;}
 
 #endif
