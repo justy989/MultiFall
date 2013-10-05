@@ -37,6 +37,19 @@ BlendState blendState
 	BlendOpAlpha[0] = ADD;
 };
 
+BlendState alphaToCoverageBlendState
+{
+	BlendEnable[0] = TRUE;
+	BlendOp[0] = ADD;
+	SrcBlend[0] = ONE;
+	DestBlend[0] = ONE;
+	RenderTargetWriteMask[0] = 0x0F;
+	SrcBlendAlpha[0] = ONE;
+	DestBlendAlpha[0] = ONE;
+	BlendOpAlpha[0] = ADD;
+    AlphaToCoverageEnable = TRUE;
+};
+
 cbuffer cbPerFrame : register( b0 )
 {
 	float4x4 gViewProj;
@@ -412,7 +425,8 @@ technique11 Billboard
     pass P0
     {
 		SetDepthStencilState(depthState, 0);
-		SetBlendState(blendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF );
+		SetBlendState(alphaToCoverageBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF );
+        //SetBlendState(blendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF );
         SetVertexShader( CompileShader( vs_5_0, vs_billboard() ) );
 		SetGeometryShader( CompileShader( gs_5_0, gs_billboard() ) );
         SetPixelShader( CompileShader( ps_5_0, ps_billboard() ) );

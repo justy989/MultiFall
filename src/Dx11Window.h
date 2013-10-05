@@ -74,7 +74,8 @@ protected:
 	bool      mIsMinimized;
 	bool      mIsMaximized;
 	bool      mIsResizing;
-	UINT      m4xMsaaQuality;
+    UINT      mMsaaCount;
+	UINT      mMsaaQuality;
 
 	ID3D11Device* md3dDevice;
 	ID3D11DeviceContext* md3dImmediateContext;

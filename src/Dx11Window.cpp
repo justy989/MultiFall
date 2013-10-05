@@ -28,7 +28,10 @@ DX11Window::DX11Window() :
 	mIsMinimized(false),
 	mIsMaximized(false),
 	mIsResizing(false),
-	m4xMsaaQuality(0),
+    //mMsaaCount(1),
+	//mMsaaQuality(0),
+    mMsaaCount(4),
+	mMsaaQuality(1),
 	md3dDevice(NULL),
 	md3dImmediateContext(NULL),
 	mSwapChain(NULL),
@@ -180,8 +183,8 @@ bool DX11Window::initDirect3D()
 	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
     //Disable multisampling for now
-	sd.SampleDesc.Count   = 1; 
-	sd.SampleDesc.Quality = 0;
+    sd.SampleDesc.Count   = mMsaaCount; 
+    sd.SampleDesc.Quality = mMsaaQuality;
 
 	sd.BufferUsage  = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	sd.BufferCount  = 1;
@@ -291,8 +294,8 @@ bool DX11Window::onResize()
 	depthStencilDesc.Format    = DXGI_FORMAT_D24_UNORM_S8_UINT;
    
     //Disable multisampling for now
-	depthStencilDesc.SampleDesc.Count   = 1;
-	depthStencilDesc.SampleDesc.Quality = 0;
+	depthStencilDesc.SampleDesc.Count   = mMsaaCount;
+	depthStencilDesc.SampleDesc.Quality = mMsaaQuality;
 
 	depthStencilDesc.Usage          = D3D11_USAGE_DEFAULT;
 	depthStencilDesc.BindFlags      = D3D11_BIND_DEPTH_STENCIL;
