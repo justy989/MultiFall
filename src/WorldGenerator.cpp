@@ -1368,3 +1368,63 @@ void WorldGenerator::genLevelRoomLights( Level& level, Room& room )
     delete[] wallIndices;
     delete[] furnitureSurfaces;
 }
+
+void WorldGenerator::genPopulation( Population& population, Level& level, PopulationGenerationRanges& ranges, float blockDimension )
+{
+    struct OpenBlock{
+        ushort i;
+        ushort j;
+    };
+
+    //Allocate space for open blocks
+    ushort numOpens = 0;
+    OpenBlock* opens = new OpenBlock[ level.getWidth() * level.getDepth() ];
+
+    population.clear();
+
+    //fill the array with open blocks
+    for(ushort i = 0; i < level.getWidth(); i++){
+        for(ushort j = 0; j < level.getDepth(); j++){
+            if( level.getBlock(i, j).getCollidableType() == Level::Block::Collidable::None ){
+                opens[ numOpens ].i = i;
+                opens[ numOpens ].j = j;
+                numOpens++;
+            }
+        }
+    }
+
+    float popDensity = ranges.density.gen( mRand );
+    int popCount = static_cast<int>( static_cast<float>( numOpens ) * popDensity ) + 1;
+    int gennedPop = 0;
+    int attempts = 0;
+    float halfBlockDimension = blockDimension * 0.5f;
+
+    while( gennedPop < popCount ){
+        if( attempts > WORLD_GEN_ATTEMPTS ){
+            break;
+        }
+
+        //Generate a spot in the list
+        ushort genOpen = mRand.gen( 0, numOpens );
+
+        //Spawn an entity 0 to start
+        population.spawn( 0, 
+                          XMFLOAT4( static_cast<float>( opens[ genOpen ].i ) * blockDimension + halfBlockDimension,
+                                    static_cast<float>( level.getBlock( opens[ genOpen ].i, opens[ genOpen ].j ).getHeight() ) * blockDimension + 0.25f,
+                                    static_cast<float>( opens[ genOpen ].j ) * blockDimension + halfBlockDimension,
+                                    1.0f ) );
+
+        //Remove the spot from the list
+        numOpens--;
+
+        if( genOpen < numOpens ){
+            for(ushort i = genOpen; i < numOpens; i++){
+                opens[i] = opens[i+1];
+            }
+        }
+
+        gennedPop++;
+    }
+
+    delete[] opens;
+}

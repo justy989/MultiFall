@@ -87,6 +87,7 @@ protected:
     WorldEntity mEntity;
 
     WorldGenerator::LevelGenerationRanges mLevelGenRanges;
+    WorldGenerator::PopulationGenerationRanges mPopGenRanges;
     WorldGenerator mWorldGen;
 
     UIDisplay mUIDisplay;

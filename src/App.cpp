@@ -91,6 +91,7 @@ void App::handleInput( RAWINPUT* input )
                 }
 
                 mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, mBlockDimenions );
+                mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
                 mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions);
                 mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * mBlockDimenions;
                 mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * mBlockDimenions;
@@ -407,6 +408,9 @@ bool App::init( )
     ballRoomRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     ballRoomRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
 
+    mPopGenRanges.density.set( 0.01f, 0.03f );
+    mPopGenRanges.enemyIDChance[ 0 ] = 1.0f;
+
     mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
     mEntity.getSolidity().radius = 0.15f;
     mEntity.getSolidity().height = 0.32f;
@@ -585,7 +589,8 @@ bool App::init( )
 	ltl.loadTheme("content/themes/stone.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
 
     mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, mBlockDimenions );
-    mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions );	
+    mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
+    mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions );
 
     //mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * mBlockDimenions;
     //mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * mBlockDimenions;
@@ -593,7 +598,7 @@ bool App::init( )
 
 	mEmitterManager.init(mWindow.getDevice(), mLightParticleTech);
 
-    mWorld.getPopulation().spawn(0, XMFLOAT4(6.0f, 0.35f, 6.0f, 1.0f));
+    //mWorld.getPopulation().spawn(0, XMFLOAT4(6.0f, 0.35f, 6.0f, 1.0f));
 
     return true;
 }

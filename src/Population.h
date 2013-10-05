@@ -20,6 +20,9 @@ public:
     //Get a character from the population
     Character& getCharacter( ushort index );
 
+    //Clear the population... mass genocide, nbd
+    void clear();
+
 protected:
 
     Character mCharacters[ POPULATION_MAX_CHARACTERS ];

@@ -4,9 +4,7 @@
 
 Population::Population()
 {
-    for(int i = 0; i < POPULATION_MAX_CHARACTERS; i++){
-        mCharacters[i].setExistence( WorldEntity::Existence::Dead );
-    }
+    clear();
 }
 
 void Population::update( float dt )
@@ -36,4 +34,11 @@ Character& Population::getCharacter( ushort index )
 {
     assert( index < POPULATION_MAX_CHARACTERS );
     return mCharacters[ index ];
+}
+
+void Population::clear()
+{
+    for(int i = 0; i < POPULATION_MAX_CHARACTERS; i++){
+        mCharacters[i].setExistence( WorldEntity::Existence::Dead );
+    }
 }

@@ -3,6 +3,7 @@
 
 #include "Random.h"
 #include "Level.h"
+#include "Population.h"
 
 #define ROOM_MAX_DIMENSION 16
 #define ROOM_TYPE_COUNT 8
@@ -112,11 +113,17 @@ public:
         Door doors[ ROOM_MAX_DOORS ]; //One for each side
     };
 
+    struct PopulationGenerationRanges{
+        FRange density;
+        float enemyIDChance[ 1 ];
+    };
+
     WorldGenerator();
     ~WorldGenerator();
 
     //Generate a room's exits and floor layout
     void genLevel( Level& level, LevelGenerationRanges& ranges, float blockDimension );
+    void genPopulation( Population& population, Level& level, PopulationGenerationRanges& ranges, float blockDimension );
 
     inline void setTileIDMax( uint tileIDMax );
 

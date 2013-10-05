@@ -91,8 +91,8 @@ void PopulationDisplay::updateBillboards( ID3D11DeviceContext* device, World& wo
     for(int i = 0; i < POPULATION_MAX_CHARACTERS; i++){
         if( p.getCharacter(i).getExistence() == WorldEntity::Existence::Alive ){
             mBillboards[mBillboardCount].pos = p.getCharacter(i).getPosition();
-            mBillboards[mBillboardCount].dimensions.x = 0.2f;
-            mBillboards[mBillboardCount].dimensions.y = 0.35f;
+            mBillboards[mBillboardCount].dimensions.x = 0.1f;
+            mBillboards[mBillboardCount].dimensions.y = 0.25f;
             mBillboards[mBillboardCount].dimensions.z = 0.0f;
             mBillboards[mBillboardCount].dimensions.w = 0.0f;
             mBillboardCount++;
