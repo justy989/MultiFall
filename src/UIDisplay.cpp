@@ -94,6 +94,20 @@ bool UIDisplay::init( ID3D11Device* device, LPCWSTR uiTexturePath, LPCWSTR uiSha
         return false;
     }
 
+    //Setup the vertex buffer
+    D3D11_BUFFER_DESC vbd;
+    vbd.Usage = D3D11_USAGE_DYNAMIC;
+    vbd.ByteWidth = sizeof(FontVertex) * UI_VERTEX_COUNT;
+    vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    vbd.MiscFlags = 0;
+	vbd.StructureByteStride = 0;
+
+    if( FAILED(device->CreateBuffer(&vbd, NULL, &mVB) ) ){
+        LOG_ERRO << "Unable to allocate Vertex Buffer for UI" << LOG_ENDL;
+        return false;
+    }
+
     return true;
 }
 
@@ -274,27 +288,6 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
 
 void UIDisplay::drawUI( ID3D11DeviceContext* device )
 {
-    if( mVertsGenerated > 0 ){
-        //Setup the vertex buffer
-        D3D11_BUFFER_DESC vbd;
-        vbd.Usage = D3D11_USAGE_IMMUTABLE;
-        vbd.ByteWidth = sizeof(FontVertex) * mVertsGenerated;
-        vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        vbd.CPUAccessFlags = 0;
-        vbd.MiscFlags = 0;
-	    vbd.StructureByteStride = 0;
-
-        D3D11_SUBRESOURCE_DATA vinitData;
-        vinitData.pSysMem = mVerts;
-        ID3D11Device* dev;
-        device->GetDevice(&dev);
-
-        if( FAILED(dev->CreateBuffer(&vbd, &vinitData, &mVB) ) ){
-            LOG_ERRO << "Unable to allocate Vertex Buffer for UI" << LOG_ENDL;
-            //return false;
-        }
-    }
-
     //Setup temp vars
     uint stride = sizeof(FontVertex);
     uint offset = 0;
@@ -330,8 +323,23 @@ void UIDisplay::drawUI( ID3D11DeviceContext* device )
     }
 
     mVertsGenerated = 0;
+}
 
-    ReleaseCOM(mVB);
+void UIDisplay::updateBuffers( ID3D11DeviceContext* device )
+{
+    if( mVertsGenerated <= 0 ){
+        return;
+    }
+
+    D3D11_MAPPED_SUBRESOURCE res;
+
+    if( FAILED( device->Map( mVB, 0, D3D11_MAP_WRITE_DISCARD, 0, &res ) ) ){
+        return;
+    }
+
+    memcpy( res.pData, mVerts, sizeof( FontVertex ) * mVertsGenerated );
+
+    device->Unmap( mVB, 0 );
 }
 
 void UIDisplay::buildBorderVB( UIElement* elem, float aspectRatio, XMFLOAT2 offset )

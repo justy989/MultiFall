@@ -224,12 +224,19 @@ float4 ps_point(PointVertexOut pin) : SV_TARGET0
 {
 	pin.screenPos.xy /= pin.screenPos.w;
 	float2 texCoord = 0.5f * (float2(pin.screenPos.x, -pin.screenPos.y) + 1);
-	
+	float depth = depthBuffer.Sample( colorSampler_, texCoord ).r;
+
+    //float lDepth = pin.screenPos.z /= pin.screenPos.w;
+
+    //if( lDepth > depth )
+	//{
+		//clip(-1);		
+	//}
+
     float4 n = normalBuffer.Sample( colorSampler_, texCoord );
 	float3 normal = 2.0f * n.xyz - 1.0f; //transform back into (-1, 1)
 	normal = normalize(normal);
 	
-	float depth = depthBuffer.Sample( colorSampler_, texCoord ).r;
 	
 	float4 position;
     position.xy = pin.screenPos.xy;
@@ -253,8 +260,16 @@ float4 ps_point(PointVertexOut pin) : SV_TARGET0
     float NdL = saturate( dot( normal,lightVector ) );
 	float3 ambientLight = colorBuffer.Sample( colorSampler_, texCoord ) * 0.5f;
 
-    //return float4(float4(normalize(gFogData.xyz), 0) * (saturate((1.0f - depth) * 2.0f * gFogData.w)) * attenuation * gLightRadIntensity.y * ambientLight, 1.0f);
-    return float4( NdL * attenuation * gLightRadIntensity.y * gLightColor.xyz * ambientLight, 1.0f );
+    float4 litColor = float4( NdL * attenuation * gLightRadIntensity.y * gLightColor.xyz * ambientLight, 1.0f );
+
+    return litColor;
+
+    //I tried fogging up the lights but on any other color than black it looked horrible
+    //Calculate fog based on scaled depth
+    //float fogBlend = clamp( lDepth, gFogStart, gFogEnd );
+    //fogBlend = ( fogBlend - gFogStart ) / gFogDiff;
+
+    //return ( ( 1.0f - fogBlend ) * litColor ) + ( fogBlend * gFogColor );
 }
 
 LightParticleGSIn vs_lightparticle(LightParticleIn input, uint instanceID : SV_InstanceID)

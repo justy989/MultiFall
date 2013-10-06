@@ -43,6 +43,9 @@ public:
     //Setup VB for drawing a window
     void buildWindowVB( UIWindow& window, float aspectRatio );
 
+    //Update the buffers
+    void updateBuffers( ID3D11DeviceContext* device );
+
     //Clear everything we've allocated
     void clear();
 

@@ -985,6 +985,11 @@ void App::update( float dt )
 
 	mEmitterManager.Update(dt);
     mWorldDisplay.getPopulationDisplay().updateBillboards( mWindow.getDeviceContext(), mWorld, mCamera.getPosition() );
+
+    if( drawUI ){
+        mUIDisplay.buildWindowVB( mUIWindow, mWindow.getAspectRatio() );
+        mUIDisplay.updateBuffers( mWindow.getDeviceContext() );
+    }
 }
 
 void App::draw( )
@@ -1106,11 +1111,6 @@ void App::draw( )
 	mWindow.getDeviceContext()->OMSetDepthStencilState(prevDSS, 0);
 	mWindow.getDeviceContext()->OMSetBlendState(prevBS, prevfloat, prevMask);
     mWindow.getDeviceContext()->RSSetState( NULL );
-    
-    //For testing drawing windows
-    if( drawUI ){
-        mUIDisplay.buildWindowVB( mUIWindow, mWindow.getAspectRatio() );
-    }
 
     //Draw!
     mUIDisplay.drawUI( mWindow.getDeviceContext() );
