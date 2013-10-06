@@ -271,6 +271,11 @@ UIElement::UserChange UIInputBox::update( bool mouseClick, XMFLOAT2 mousePositio
                 }
             }else{
                 if( mCursor < (INPUTBOX_MAX_INPUT_LEN - 1) ){
+
+                    if( key >= 'A' && key <= 'Z' ){
+                        key += 32;
+                    }
+
                     mInput[ mCursor ] = key; 
                     mCursor++;
                     mInput[ mCursor ] = '\0';
@@ -313,7 +318,7 @@ void UITextBox::getText( Text** text, uint* textCount )
     *textCount = mLineCount;
 }
 
-void UITextBox::setText( char* text, uint len )
+int UITextBox::setText( char* text, uint len )
 {
     //Make a copy of the text in order to insert new lines
     strcpy( mFullText, text );
@@ -321,9 +326,42 @@ void UITextBox::setText( char* text, uint len )
     uint lineLen = static_cast<int>( mDimensions.x / FONTWIDTH );
     uint textItr = 0;
 
+    mLineCount = 0;
+
     //The best kind of inifite loops, while( true ) is overrated
     while( textItr < len ){
-       //Start at the end of the line and loop back until we find a space
+
+        bool foundNewline = false;
+
+        //Loop through the line first checking for newlines
+        for( uint c = textItr; c <= (textItr + lineLen); c++){
+            if( c >= len ){
+                mTextLines[ mLineCount ].message = mFullText + textItr;
+                mTextLines[ mLineCount ].offset.x = 0.0f;
+                mTextLines[ mLineCount ].offset.y = mLineCount * (FONTHEIGHT * 1.5f);
+                mLineCount++;
+                textItr = len;
+                foundNewline = true;
+                break;
+            }
+
+            if( text[c] == '\n' ){
+                mFullText[ c ] = '\0';
+                mTextLines[ mLineCount ].message = mFullText + textItr;
+                mTextLines[ mLineCount ].offset.x = 0.0f;
+                mTextLines[ mLineCount ].offset.y = mLineCount * (FONTHEIGHT * 1.5f);
+                mLineCount++;
+                textItr = c + 1;
+                foundNewline = true;
+                break;
+            }
+        }
+
+        if(foundNewline){
+            continue;
+        }
+
+        //Start at the end of the line and loop back until we find a space
         for(uint c = textItr + lineLen; c > textItr; c--){
             if( c >= len ){
                 mTextLines[ mLineCount ].message = mFullText + textItr;
@@ -345,6 +383,18 @@ void UITextBox::setText( char* text, uint len )
                     break;
                 }
             }
-       }
+
+            if( c == ( textItr + 1 ) ){
+                mFullText[ c ] = '\0';
+                mTextLines[ mLineCount ].message = mFullText + textItr;
+                mTextLines[ mLineCount ].offset.x = 0.0f;
+                mTextLines[ mLineCount ].offset.y = mLineCount * (FONTHEIGHT * 1.5f);
+                mLineCount++;
+                textItr += lineLen;
+                break;
+            }
+        }
     }
+
+    return mLineCount;
 }

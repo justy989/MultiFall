@@ -13,6 +13,7 @@ public:
 	ParticleDisplay();
 
 	bool init(ID3D11Device* device, ID3DX11EffectTechnique* technique);
+    void clear();
 
 	void Draw(ParticleInstanceData* stuff, ID3D11DeviceContext* device, ID3D11ShaderResourceView* texture);
 

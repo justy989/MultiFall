@@ -122,7 +122,7 @@ public:
     ~WorldGenerator();
 
     //Generate a room's exits and floor layout
-    void genLevel( Level& level, LevelGenerationRanges& ranges, float blockDimension );
+    void genLevel( Level& level, LevelGenerationRanges& ranges, uint seed, float blockDimension );
     void genPopulation( Population& population, Level& level, PopulationGenerationRanges& ranges, float blockDimension );
 
     inline void setTileIDMax( uint tileIDMax );

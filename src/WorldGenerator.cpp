@@ -8,8 +8,7 @@ WorldGenerator::WorldGenerator() :
     mLevelRanges(NULL),
     mTileIDMax(16)
 {
-    //mRand.seed( 41491 );
-    mRand.seed( time( 0 ) );
+
 }
 
 WorldGenerator::~WorldGenerator()
@@ -17,8 +16,10 @@ WorldGenerator::~WorldGenerator()
     mLevelRanges = NULL;
 }
 
-void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges, float blockDimension )
+void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges, uint seed, float blockDimension )
 {
+    mRand.seed( seed );
+
     //Generate number of rooms that will exist in the level and allocate space for it
     int roomCount = ranges.roomCount.gen( mRand );
     Room* rooms = new Room[ roomCount ];

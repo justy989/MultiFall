@@ -23,11 +23,15 @@ App::App()
     freeLook = true;
     drawUI = false;
 
+    consoleMode = false;
+
     FPSString[0] = '\0';
     CameraPosString[0] = '\0';
     MousePosString[0] = '\0';
 
     mLeftClick = false;
+    mKeyPress = false;
+    mKeyChar = 0;
 
     mBlockDimenions = 0.3f;
 }
@@ -63,61 +67,75 @@ void App::handleInput( RAWINPUT* input )
         mKeyPress = !keyUp;
         mKeyChar = VKey;
 
-        switch( VKey ){
-        case 'A':
-            camKeyDown[0] = !keyUp;
-            break;
-        case 'D':
-            camKeyDown[1] = !keyUp;
-            break;
-        case 'W':
-            camKeyDown[2] = !keyUp;
-            break;
-        case 'S':
-            camKeyDown[3] = !keyUp;
-            break;
-        case 'U':
-            if( keyUp ){
-                break;
+        if( !keyUp && mKeyChar == 192){
+            consoleMode = !consoleMode;
+
+            if( consoleMode ){
+                freeLook = false;
+                mCheckBox->setChecked(false);
+            }else{
+                freeLook = true;
+                mCheckBox->setChecked(true);
             }
+        }
 
-            drawUI = !drawUI;
-
-            break;
-        case 'R':
-            {
+        if( !consoleMode ){
+            switch( VKey ){
+            case 'A':
+                camKeyDown[0] = !keyUp;
+                break;
+            case 'D':
+                camKeyDown[1] = !keyUp;
+                break;
+            case 'W':
+                camKeyDown[2] = !keyUp;
+                break;
+            case 'S':
+                camKeyDown[3] = !keyUp;
+                break;
+            case 'U':
                 if( keyUp ){
                     break;
                 }
 
-                mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, mBlockDimenions );
-                mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
-                mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions);
-                mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * mBlockDimenions;
-                mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * mBlockDimenions;
-            }
-            break;
-        case 'O':
-            if( keyUp ){
+                drawUI = !drawUI;
+
+                break;
+            case 'R':
+                {
+                    if( keyUp ){
+                        break;
+                    }
+
+                    mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, time(0), mBlockDimenions );
+                    mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
+                    mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions);
+                    mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * mBlockDimenions;
+                    mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * mBlockDimenions;
+                }
+                break;
+            case 'O':
+                if( keyUp ){
+                    break;
+                }
+
+                collisionMode = !collisionMode;
+
+                if( collisionMode ){
+                    mEntity.getPosition() = mCamera.getPosition();
+                }
+                break;
+            case 'I':
+                if( keyUp ){
+                    break;
+                }
+
+                freeLook = !freeLook;
+
+                break;
+            default:
                 break;
             }
-
-            collisionMode = !collisionMode;
-
-            if( collisionMode ){
-                mEntity.getPosition() = mCamera.getPosition();
-            }
-            break;
-        case 'I':
-            if( keyUp ){
-                break;
-            }
-
-            freeLook = !freeLook;
-
-            break;
-        default:
-            break;
         }
     }
 
@@ -573,6 +591,8 @@ bool App::init( )
 
     mUIWindow.addElem( mTextBox, 2 );
 
+    mConsole.init( this );
+
     D3D11_BUFFER_DESC constDesc;
     ZeroMemory( &constDesc, sizeof( constDesc ) );
     constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -588,7 +608,7 @@ bool App::init( )
 
 	ltl.loadTheme("content/themes/stone.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
 
-    mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, mBlockDimenions );
+    mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, time(0), mBlockDimenions );
     mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
     mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions );
 
@@ -935,7 +955,7 @@ void App::update( float dt )
 
         if( change.action == UIWindow::UserChange::Action::ClickButton &&
             change.id == 0 ){
-                mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, mBlockDimenions );
+                mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, time(0), mBlockDimenions );
             mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions);
         }else if( change.action == UIWindow::UserChange::Action::MoveSlider &&
             change.id == 0 ){
@@ -983,13 +1003,22 @@ void App::update( float dt )
         }
     }
 
+
 	mEmitterManager.Update(dt);
     mWorldDisplay.getPopulationDisplay().updateBillboards( mWindow.getDeviceContext(), mWorld, mCamera.getPosition() );
 
     if( drawUI ){
         mUIDisplay.buildWindowVB( mUIWindow, mWindow.getAspectRatio() );
-        mUIDisplay.updateBuffers( mWindow.getDeviceContext() );
     }
+
+    if( consoleMode ){
+        mConsole.update( dt, mLeftClick, mousePos, mKeyPress, (byte)mKeyChar );
+        mUIDisplay.buildWindowVB( mConsole.getWindow(), mWindow.getAspectRatio() );
+    }
+
+    mUIDisplay.updateBuffers( mWindow.getDeviceContext() );
+
+    mKeyPress = false;
 }
 
 void App::draw( )
@@ -1117,6 +1146,10 @@ void App::draw( )
 
     if( drawUI ){
         mUIDisplay.drawWindowText( mWindow.getDeviceContext(), mUIWindow, mTextManager );
+    }
+
+    if( consoleMode ){
+        mUIDisplay.drawWindowText( mWindow.getDeviceContext(), mConsole.getWindow(), mTextManager );
     }
 
     if( mCheckBox->isChecked() ){

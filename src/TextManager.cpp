@@ -210,17 +210,17 @@ bool TextManager::setFontQuad(char c, FontVertex* fontQuad)
 	float dy = ((float)charHeight) / imgHeight;
 
 	//get texcoords
-	fontQuad[0].tex.x = (float)(column * dx);
-	fontQuad[0].tex.y = (float)(row * dy);
+	fontQuad[0].tex.x = (float)(column * dx) + 0.01f;
+	fontQuad[0].tex.y = (float)(row * dy) + 0.01f;
 
-	fontQuad[1].tex.x = (float)(column * dx) + dx;
-	fontQuad[1].tex.y = (float)(row * dy);
+	fontQuad[1].tex.x = (float)(column * dx) + dx - 0.01f;
+	fontQuad[1].tex.y = (float)(row * dy) + 0.01f;
 
-	fontQuad[2].tex.x = (float)(column * dx);
-	fontQuad[2].tex.y = (float)(row * dy)    + dy;
+	fontQuad[2].tex.x = (float)(column * dx) + 0.01f;
+	fontQuad[2].tex.y = (float)(row * dy)    + dy - 0.01f;
 
-	fontQuad[3].tex.x = (float)(column * dx) + dx;
-	fontQuad[3].tex.y = (float)(row * dy)	 + dy;
+	fontQuad[3].tex.x = (float)(column * dx) + dx - 0.01f;
+	fontQuad[3].tex.y = (float)(row * dy)	 + dy - 0.01f;
 
 	return true;
 }

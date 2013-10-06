@@ -22,6 +22,11 @@ bool Emitter::init(ID3D11Device* device, ID3DX11EffectTechnique* technique)
 	return true;
 }
 
+void Emitter::clear()
+{
+    mParticleDisplay.clear();
+}
+
 void Emitter::setTexture(ID3D11ShaderResourceView* srv)
 {
 	mTexture = srv;

@@ -85,6 +85,7 @@ public:
     inline void setActive( bool active );
 
     inline SelectedState getSelectedState();
+    inline void setSelectedstate( SelectedState state );
 
 protected:
 
@@ -104,6 +105,7 @@ protected:
 
 inline bool UIElement::isActive(){return mIsActive;}
 inline UIElement::SelectedState UIElement::getSelectedState(){return mSelected;}
+inline void UIElement::setSelectedstate( UIElement::SelectedState state ){mSelected = state;}
 
 inline void UIElement::setActive( bool active ){mIsActive = active;}
 
@@ -215,7 +217,9 @@ public:
 
     virtual ElemType getElemType(){return InputBox;}
 
+    inline void setInput( char* input );
     inline char* getInput();
+    inline void clearInput();
 
 protected:
 
@@ -223,10 +227,12 @@ protected:
     uint mCursor;
 };
 
+inline void UIInputBox::setInput( char* input ){strncpy(mInput, input, INPUTBOX_MAX_INPUT_LEN); mCursor = strlen(input);}
 inline char* UIInputBox::getInput(){return mInput;}
+inline void UIInputBox::clearInput(){mCursor = 0; mInput[0] = '\0';}
 
 #define TEXTBOX_MAX_LINES 128
-#define TEXTBOX_MAX_TEXT_LEN 1024
+#define TEXTBOX_MAX_TEXT_LEN 4096
 
 class UITextBox : public UIElement{
 public:
@@ -240,7 +246,7 @@ public:
 
     virtual ElemType getElemType(){return TextBox;}
 
-    void setText( char* text, uint len );
+    int setText( char* text, uint len );
 
 protected:
 

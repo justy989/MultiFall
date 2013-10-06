@@ -20,6 +20,7 @@ public:
 	void setAlive();
 
 	bool init(ID3D11Device* device, ID3DX11EffectTechnique* technique);
+    void clear();
 
 	void Draw(ID3D11DeviceContext* device);
 

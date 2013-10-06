@@ -33,6 +33,7 @@ public:
 
     //Degrees
     inline void setFOV( float f );
+    inline float getFOV();
 
     inline void setNear( float f );
     inline void setFar( float f );
@@ -73,6 +74,7 @@ inline void Camera::moveForwardBack( float d ){mMove.z = d;}
 inline void Camera::moveLeftRight( float d ){mMove.x = d;}
 
 inline void Camera::setFOV( float f ){mFOV = f;}
+inline float Camera::getFOV(){return mFOV;}
 
 inline float Camera::getPitch(){return mPitch;}
 inline float Camera::getYaw(){return mYaw;}

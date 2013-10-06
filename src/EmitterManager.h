@@ -11,6 +11,7 @@ public:
 	EmitterManager();
 
 	bool init(ID3D11Device* device, ID3DX11EffectTechnique* tech);
+    void clear();
 
 	void spawnEmitter(XMFLOAT3 gravity, XMFLOAT3 position, XMFLOAT3 velocity, float maxTime);
 

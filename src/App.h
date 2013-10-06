@@ -23,6 +23,8 @@
 
 #include "EmitterManager.h"
 
+#include "Console.h"
+
 #include <d3dx11effect.h>
 
 class App : public WMInputHandler{
@@ -57,6 +59,8 @@ protected:
 
 protected:
 
+    friend class Console;
+
     Configuration mConfig;
 
     UserBinds mBinds;
@@ -73,12 +77,15 @@ protected:
 
 	TextManager mTextManager;
 
+    Console mConsole;
+
     //Tmp
     bool camKeyDown[4];
 
     bool collisionMode;
     bool drawUI;
     bool freeLook;
+    bool consoleMode;
 
     char FPSString[128];
     char CameraPosString[128];

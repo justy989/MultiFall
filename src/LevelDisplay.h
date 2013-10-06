@@ -47,6 +47,7 @@ public:
 
     //Set the fog we are going to display
     void setFog( Fog& fog );
+    inline Fog& getFog();
 
 	void applyFog( ID3D11DeviceContext* device);
 
@@ -132,5 +133,8 @@ inline void LevelDisplay::setDrawRange( float drawRange )
 {
     mDrawRange = drawRange;
 }
+
+
+inline Fog& LevelDisplay::getFog(){return mFog;}
 
 #endif  

@@ -74,6 +74,18 @@ bool ParticleDisplay::init(ID3D11Device* device, ID3DX11EffectTechnique* techniq
 	return true;
 }
 
+void ParticleDisplay::clear()
+{
+    ReleaseCOM(mInputLayout);
+    ReleaseCOM(mParticleInstanceDataCB);
+    ReleaseCOM(mVertexBuffer);
+
+    if( mVertices ){
+        delete[] mVertices;
+        mVertices = NULL;
+    }
+}
+
 void ParticleDisplay::UpdateBuffers(ParticleInstanceData* pos, ID3D11DeviceContext* device)
 {
 	

@@ -6,6 +6,14 @@ EmitterManager::EmitterManager() :
 
 }
 
+void EmitterManager::clear()
+{
+	for(int i = 0; i < MAX_EMITTERS; i++)
+	{
+        mEmitters[i].clear();
+    }
+}
+
 void EmitterManager::Update(float dt)
 {
 	for(int i = 0; i < MAX_EMITTERS; i++)

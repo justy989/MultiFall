@@ -68,6 +68,7 @@ void PopulationDisplay::clear()
     ReleaseCOM( mInputLayout );
     ReleaseCOM( mBillboardBuffer );
     ReleaseCOM( mInstanceDataCB );
+    ReleaseCOM( mTextures[0] );
 }
 
 void PopulationDisplay::draw( ID3D11DeviceContext* device )
