@@ -25,6 +25,8 @@
 
 #include "Console.h"
 
+#include "EventManager.h"
+
 #include <d3dx11effect.h>
 
 class App : public WMInputHandler{
@@ -78,6 +80,8 @@ protected:
 	TextManager mTextManager;
 
     Console mConsole;
+
+    EventManager mEventManager;
 
     //Tmp
     bool camKeyDown[4];

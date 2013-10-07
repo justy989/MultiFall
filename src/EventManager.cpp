@@ -14,6 +14,7 @@ bool EventManager::registerHandler( EventHandler* handler )
     }
 
     mHandlers[ mNumHandlers ] = handler;
+    mHandlers[ mNumHandlers ]->setEventManager( this );
     mNumHandlers++;
     return true;
 }

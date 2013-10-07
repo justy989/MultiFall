@@ -182,7 +182,7 @@ void Console::sendCmd( char* cmd )
             LOG_INFO << "Type 'help (command from list)' to get info on a command" << LOG_ENDL;
             LOG_INFO << "Calling a command without arguments generally prints info" << LOG_ENDL;
             LOG_INFO << "Commands: " << LOG_ENDL;
-            LOG_INFO << "print camfov fogcolor fogrange genlevel spawn" << LOG_ENDL;
+            LOG_INFO << "print camfov fogcolor fogrange genlevel spawn kill" << LOG_ENDL;
             return;
         }
     }
@@ -264,24 +264,25 @@ void Console::sendCmd( char* cmd )
             LOG_INFO << "Spawns a character at the specified location: X, Y" << LOG_ENDL;
         }else{
             if( argCount == 2 ){
-
-                float tx = atof( args[0] );
-                float tz = atof( args[1] );
-                float ty = 0.0f;
-
-                uint tix = static_cast<uint>( tx / mApp->mBlockDimenions );
-                uint tiz = static_cast<uint>( tz / mApp->mBlockDimenions );
-
-                if( tix < mApp->mWorld.getLevel().getWidth() &&
-                    tiz < mApp->mWorld.getLevel().getDepth() ){
-                        ty = static_cast<float>( mApp->mWorld.getLevel().getBlock(tix, tiz).getHeight() ) * mApp->mBlockDimenions + 0.25f;
-                }
-
-                mApp->mWorld.getPopulation().spawn( 0, 
-                    XMFLOAT4( tx,
-                              ty,
-                              tz,
-                              1.0f ) );
+                Event e;
+                e.type = Event::Type::CharacterSpawn;
+                e.characterSpawnInfo.id = 0;
+                e.characterSpawnInfo.x = atof( args[0] );
+                e.characterSpawnInfo.z = atof( args[1] );
+                mApp->mEventManager.enqueueEvent( e );
+            }else{
+                LOG_INFO << "Proved 2 arguments for the x and z positions of the character" << LOG_ENDL;
+            }
+        }
+    }else if(strcmp( op, "kill" ) == 0 ){
+        if( help ){
+            LOG_INFO << "Kills a character at the specified index" << LOG_ENDL;
+        }else{
+            if( argCount == 1 ){
+                Event e;
+                e.type = Event::Type::CharacterKill;
+                e.characterSpawnInfo.id = atoi( args[0] );
+                mApp->mEventManager.enqueueEvent( e );
             }else{
                 LOG_INFO << "Proved 2 arguments for the x and z positions of the character" << LOG_ENDL;
             }

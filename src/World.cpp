@@ -10,6 +10,40 @@ void World::update( float dt )
     mPop.update( dt );
 }
 
+void World::handleEvent( Event& e )
+{
+    switch( e.type ){
+    case Event::Type::CharacterSpawn:
+        {
+            float tx = e.characterSpawnInfo.x;
+            float tz = e.characterSpawnInfo.z;
+            float ty = 0.0f;
+
+            uint tix = static_cast<uint>( tx / 0.3f );
+            uint tiz = static_cast<uint>( tz / 0.3f );
+
+            if( tix < mLevel.getWidth() &&
+                tiz < mLevel.getDepth() ){
+                ty = static_cast<float>( mLevel.getBlock(tix, tiz).getHeight() ) * 0.3f + 0.25f;
+            }
+
+            mPop.spawn( e.characterSpawnInfo.id, 
+            XMFLOAT4( tx,
+                ty,
+                tz,
+                1.0f ) );
+        }
+        break;
+    case Event::Type::CharacterKill:
+        mPop.kill( e.characterKillInfo.id );
+        break;
+    case Event::Type::CharacterWalk:
+        break;
+    default:
+        break;
+    }
+}
+
 void World::moveEntity( WorldEntity* entity, XMVECTOR moveVec, float dist )
 {
     //Try to move the entity in the world along the moveVec

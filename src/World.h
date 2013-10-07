@@ -3,8 +3,9 @@
 
 #include "Level.h"
 #include "Population.h"
+#include "EventManager.h"
 
-class World{
+class World : public EventHandler{
 public:
 
     World();
@@ -12,6 +13,8 @@ public:
     void moveEntity( WorldEntity* entity, XMVECTOR moveVec, float dist );
 
     void update( float dt );
+
+    virtual void handleEvent( Event& e );
 
     //Get the world's dungeon
     inline Level& getLevel();

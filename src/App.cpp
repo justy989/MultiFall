@@ -230,9 +230,11 @@ bool App::init( )
 {
 	if( !mWorldDisplay.init( mWindow.getDevice(), mRenderGBufferTech ) ){
         return false;
-    }	
+    }
 
 	mTextManager.init(mWindow.getDevice());
+
+    mEventManager.registerHandler( &mWorld );
 
     //Level Generation Data
     mLevelGenRanges.roomCount.set( 8, 16 );
@@ -1003,7 +1005,6 @@ void App::update( float dt )
         }
     }
 
-
 	mEmitterManager.Update(dt);
     mWorldDisplay.getPopulationDisplay().updateBillboards( mWindow.getDeviceContext(), mWorld, mCamera.getPosition() );
 
@@ -1019,6 +1020,8 @@ void App::update( float dt )
     mUIDisplay.updateBuffers( mWindow.getDeviceContext() );
 
     mKeyPress = false;
+
+    mEventManager.process();
 }
 
 void App::draw( )

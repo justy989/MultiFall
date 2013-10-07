@@ -17,6 +17,9 @@ public:
     //Spawn an entity, return index 
     ushort spawn( ushort id, XMFLOAT4 position );
 
+    //Kill a character
+    void kill( ushort id );
+
     //Get a character from the population
     Character& getCharacter( ushort index );
 

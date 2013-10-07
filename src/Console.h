@@ -33,6 +33,7 @@ protected:
     void scrollHistory( bool up );
 
 protected:
+
     UIWindow mWindow;
 
     UITextBox* mTextbox;

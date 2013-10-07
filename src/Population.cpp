@@ -30,6 +30,15 @@ ushort Population::spawn( ushort id, XMFLOAT4 position )
     return POPULATION_MAX_CHARACTERS;
 }
 
+void Population::kill( ushort id )
+{
+    if( id < POPULATION_MAX_CHARACTERS ){
+        if( mCharacters[ id ].getExistence() != WorldEntity::Existence::Dead ){
+            mCharacters[ id ].setExistence( WorldEntity::Existence::Dead );
+        }
+    }
+}
+
 Character& Population::getCharacter( ushort index )
 {
     assert( index < POPULATION_MAX_CHARACTERS );
