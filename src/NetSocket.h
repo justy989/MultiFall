@@ -10,8 +10,11 @@
 #define NET_MAX_PACKET_SIZE 256
 #define NET_MAX_PACKET_COUNT 128
 #define NET_DEFAULT_TIMEOUT 1000
+#define NET_IP_ADDR_LEN 16
 
 #define SOCKET_MAX_RECV_BUFFER ( NET_MAX_PACKET_SIZE * NET_MAX_PACKET_COUNT )
+
+#define SOCKET_NONBLOCKING 1
 
 class NetSocket{
 public:
@@ -20,27 +23,50 @@ public:
         Invalid,
         Connected,
         Timed_Out,
-        Disconnected
+        Disconnected,
+        Listening
     };
 
     NetSocket();
     ~NetSocket();
 
-    bool connect( char* host, ushort port, uint timeout = NET_DEFAULT_TIMEOUT );
-    void createFromConnectedSocket( SOCKET socket, uint timeout = NET_DEFAULT_TIMEOUT );
+    //Connect to a host
+    bool connectTo( char* host, ushort port, uint timeout = NET_DEFAULT_TIMEOUT );
+
+    //Create a NetSocket from an accept()
+    void createFromConnectedSocket( SOCKET socket, char* ip, ushort port, uint timeout = NET_DEFAULT_TIMEOUT );
+    
+    //Disconnect the socket
     void disconnect( );
 
+    //Check if the socket is connected
     bool isConnected();
+
+    //Get the exact status
     Status getStatus();
 
+    //Get the IP
     char* getConnectedIP();
+
+    //Get the port
     uint getConnectedPort();
 
-    bool sendPacket( NetPacket& packet );
-    void receivePackets();
+    //Push packets to be sent
+    bool pushPacket( NetPacket& packet );
 
+    //Send packets then receive packets
+    void process();
+
+    //Are there any packets we have received during processing?
     bool hasReceivedPackets();
-    NetPacket getReceivedPacket();
+
+    //Consumes a packet from the recevied packet queue
+    NetPacket popReceivedPacket();
+
+protected:
+
+    void setSocketOptions();
+    void setSocketNonBlocking();
 
 protected:
 
@@ -64,7 +90,7 @@ protected:
     struct sockaddr_in mHostAddress;
 
     //Hold human readable ip and port
-    char* mIP;
+    char mIP[ NET_IP_ADDR_LEN ];
     ushort mPort;
 
     //Hold connection status

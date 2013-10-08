@@ -9,6 +9,11 @@ struct Event{
         GenerateLevel,
 
         //Network Events
+        NetworkTimeout,
+
+        //Party
+        PartyChat,
+        PartyJoin,
 
         //World Events
         CharacterSpawn,
@@ -18,6 +23,16 @@ struct Event{
 
     struct GenerateLevelInfo{
         uint seed;
+    };
+
+    struct PartyJoinInfo{
+        uint index;
+        char name[32];
+    };
+
+    struct PartyChatInfo{
+        uint index;
+        char message[256];
     };
 
     struct CharacterSpawnInfo{
@@ -40,6 +55,8 @@ struct Event{
 
     union{
         GenerateLevelInfo generateLevelInfo;
+        PartyJoinInfo partyJoinInfo;
+        PartyChatInfo partyChatInfo;
         CharacterSpawnInfo characterSpawnInfo;
         CharacterKillInfo characterKillInfo;
         CharacterWalkInfo characterWalkInfo;
