@@ -252,9 +252,7 @@ void Console::sendCmd( char* cmd )
             LOG_INFO << "Generates the level from scratch given a seed." << LOG_ENDL;
         }else{
             if( argCount == 1 ){
-                mApp->mWorldGen.genLevel( mApp->mWorld.getLevel(), mApp->mLevelGenRanges, atoi( args[0] ), mApp->mBlockDimenions );
-                mApp->mWorldGen.genPopulation( mApp->mWorld.getPopulation(), mApp->mWorld.getLevel(), mApp->mPopGenRanges, mApp->mBlockDimenions );
-                mApp->mWorldDisplay.getLevelDisplay().createMeshFromLevel( mApp->mWindow.getDevice(), mApp->mWorld.getLevel(), mApp->mBlockDimenions, mApp->mBlockDimenions );
+                mApp->genLevel();
             }else{
                 LOG_INFO << "Provide 1 argument for the seed to genlevel" << LOG_ENDL;
             }

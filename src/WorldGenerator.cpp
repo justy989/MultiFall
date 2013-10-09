@@ -16,7 +16,7 @@ WorldGenerator::~WorldGenerator()
     mLevelRanges = NULL;
 }
 
-void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges, uint seed, float blockDimension )
+void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges, uint seed, float blockDimension, XMFLOAT3& spawn )
 {
     mRand.seed( seed );
 
@@ -25,6 +25,9 @@ void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges, uint
     Room* rooms = new Room[ roomCount ];
 
     mLevelRanges = &ranges;
+
+    //Set the first room to empty
+    rooms[0].type = Room::Type::Empty;
 
     //Gen the rooms that make up the level
     genLevelBlueprint( level, rooms, (short)(roomCount) );
@@ -43,6 +46,15 @@ void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges, uint
 
     LOG_INFO << "Generated Level: " << level.getWidth() << ", " << level.getDepth() << LOG_ENDL;
     LOG_INFO << "Level has " << roomCount << " rooms " << LOG_ENDL;
+
+    //Set the spawn point
+    for(int i = 0; i < ROOM_MAX_DOORS; i++){
+        if( rooms[0].doors[i].essential ){
+            spawn.x = static_cast<float>(rooms[0].doors[i].x) * blockDimension;
+            spawn.y = static_cast<float>( level.getBlock( rooms[0].doors[i].x, rooms[0].doors[i].y ).getHeight() ) * blockDimension;
+            spawn.z = static_cast<float>(rooms[0].doors[i].y) * blockDimension; 
+        }
+    }
 
     delete[] rooms;
     rooms = NULL;

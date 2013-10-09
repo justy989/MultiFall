@@ -22,13 +22,16 @@
 #include "StaticMesh.h"
 
 #include "UIDisplay.h"
-#include "UIElement.h"
 
 #include "EmitterManager.h"
 
 #include "Console.h"
 
 #include "EventManager.h"
+
+#include "Party.h"
+
+#include "ScreenManager.h"
 
 #include <d3dx11effect.h>
 
@@ -64,6 +67,10 @@ protected:
 
 protected:
 
+    void genLevel();
+
+protected:
+
     friend class Console;
 
     Configuration mConfig;
@@ -80,17 +87,23 @@ protected:
 
     World mWorld;
 
+    Party mParty;
+
 	TextManager mTextManager;
 
     Console mConsole;
 
     EventManager mEventManager;
 
+    ScreenManager mScreenManager;
+
+    UIDisplay mUIDisplay;
+
     //Tmp
     bool camKeyDown[4];
 
     bool collisionMode;
-    bool drawUI;
+    bool drawStats;
     bool freeLook;
     bool consoleMode;
 
@@ -103,14 +116,6 @@ protected:
     WorldGenerator::LevelGenerationRanges mLevelGenRanges;
     WorldGenerator::PopulationGenerationRanges mPopGenRanges;
     WorldGenerator mWorldGen;
-
-    UIDisplay mUIDisplay;
-    UIWindow mUIWindow;
-    UISlider* mSlider;
-    UICheckbox* mCheckBox;
-    UIDropMenu* mDropBox;
-    UIInputBox* mInputBox;
-    UITextBox* mTextBox;
 
 	EmitterManager mEmitterManager;
 

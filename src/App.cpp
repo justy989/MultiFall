@@ -12,7 +12,7 @@ char* gDropDownOptions[] = {
     "White"
 };
 
-App::App()
+App::App() : mScreenManager( &mEventManager, &mParty )
 {
     camKeyDown[0] = false;
     camKeyDown[1] = false;
@@ -21,7 +21,7 @@ App::App()
 
     collisionMode = false;
     freeLook = true;
-    drawUI = false;
+    drawStats = false;
 
     consoleMode = false;
 
@@ -72,10 +72,8 @@ void App::handleInput( RAWINPUT* input )
 
             if( consoleMode ){
                 freeLook = false;
-                mCheckBox->setChecked(false);
             }else{
                 freeLook = true;
-                mCheckBox->setChecked(true);
             }
         }
 
@@ -98,21 +96,8 @@ void App::handleInput( RAWINPUT* input )
                     break;
                 }
 
-                drawUI = !drawUI;
+                drawStats = !drawStats;
 
-                break;
-            case 'R':
-                {
-                    if( keyUp ){
-                        break;
-                    }
-
-                    mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, time(0), mBlockDimenions );
-                    mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
-                    mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions);
-                    mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * mBlockDimenions;
-                    mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * mBlockDimenions;
-                }
                 break;
             case 'O':
                 if( keyUp ){
@@ -458,141 +443,6 @@ bool App::init( )
         mWorld.getLevel().setFurnitureDimensions( (Level::Furniture::Type)(i), dimensions );
     }
 
-    UIWindow::Text text;
-    text.message = "Window Title";
-    text.offset.x = 0.0f;
-    text.offset.y = 0.0f;
-
-    mUIWindow.setPosition( XMFLOAT2( -0.75f, -0.75f ) );
-    mUIWindow.setDimension( XMFLOAT2( 1.0f, 1.5f ) );
-    mUIWindow.setText( text );
-
-    mUIWindow.setMinDimensions( XMFLOAT2( 1.0f, 1.5f ) );
-
-    mUIWindow.init( 3 );
-    mUIWindow.initTab( 0, "Generator", 2 );
-    mUIWindow.initTab( 1, "Settings", 2 );
-    mUIWindow.initTab( 2, "Fog", 2 );
-
-    UIButton* btn = new UIButton();
-
-    XMFLOAT2 pos(0.1f, mBlockDimenions);
-    XMFLOAT2 dim(mBlockDimenions, 0.1f);
-
-    btn->setPosition( pos );
-    btn->setDimension( dim );
-
-    text.message = "Gen";
-
-    mUIWindow.addElem( btn, 0 );
-
-    btn->setText(text);
-    
-    mUIWindow.setCurrentTab( 0 );
-
-    mSlider = new UISlider();
-    
-    pos.x += 0.2f;
-
-    mSlider->setPosition( pos );
-
-    dim.x += 0.2f;
-
-    mSlider->setDimension( dim );
-
-    text.message = "FOV";
-    text.offset.x = -8.0f * FONTWIDTH;
-    text.offset.y = 0.0f;
-
-    mSlider->setPercent( 0.5f );
-    mSlider->setText( text );
-
-    mUIWindow.addElem( mSlider, 1 );
-
-    mCheckBox = new UICheckbox();
-
-    text.message = "Draw Stats";
-    text.offset.x = -7.0f * FONTWIDTH;
-
-    mCheckBox->setText( text );
-
-    pos.y += 0.15f;
-    pos.x += 0.25f;
-
-    mCheckBox->setPosition( pos );
-
-    dim.x = 0.1f;
-    dim.y = 0.1f;
-
-    mCheckBox->setDimension( dim );
-
-    mUIWindow.addElem( mCheckBox, 1 );
-
-    mCheckBox->setChecked(true);
-
-    mDropBox = new UIDropMenu();
-
-    text.message = "Fog Color";
-    text.offset.x = -10.0f * FONTWIDTH;
-
-    mDropBox->setText( text );
-
-    pos.y = 0.25f;
-    pos.x = 0.5f;
-
-    mDropBox->setPosition( pos );
-
-    dim.x = 0.4f;
-    dim.y = 0.1f;
-
-    mDropBox->setDimension( dim );
-
-    mDropBox->setSelectedOption(0);
-    mDropBox->setOptions( gDropDownOptions, 5 );
-
-    mUIWindow.addElem( mDropBox, 2 );
-
-    mInputBox = new UIInputBox();
-
-    text.message = "Name:";
-    text.offset.x = -7.0f * FONTWIDTH;
-
-    mInputBox->setText( text );
-
-    pos.y = 0.45f;
-    pos.x = mBlockDimenions;
-
-    mInputBox->setPosition( pos );
-
-    dim.x = 0.4f;
-    dim.y = 0.1f;
-
-    mInputBox->setDimension( dim );
-
-    mUIWindow.addElem( mInputBox, 0 );
-
-    mTextBox = new UITextBox();
-
-    pos.y = 0.4f;
-    pos.x = 0.2f;
-
-    mTextBox->setPosition( pos );
-
-    dim.x = 0.7f;
-    dim.y = 1.0f;
-
-    mTextBox->setDimension( dim );
-
-    char* textBoxText = "Now, this is a story all about how "
-                 "my life got flipped-turned upside down "
-                 "and I'd like to take a minute "
-                 "just sit right there "
-                 "I'll tell you how I became the prince of a town called Bel Air";
-
-    mTextBox->setText( textBoxText, (uint)strlen( textBoxText ) );
-
-    mUIWindow.addElem( mTextBox, 2 );
-
     mConsole.init( this );
 
     D3D11_BUFFER_DESC constDesc;
@@ -610,21 +460,32 @@ bool App::init( )
 
 	ltl.loadTheme("content/themes/stone.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
 
-    mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, time(0), mBlockDimenions );
-    mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
-    mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions );
-
     //mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * mBlockDimenions;
     //mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * mBlockDimenions;
     //mCamera.getPosition().y = static_cast<float>(mWorld.getLevel().getHeight() * 3) * mBlockDimenions;
 
 	mEmitterManager.init(mWindow.getDevice(), mLightParticleTech);
 
+    //Set draw ranges
     mWorldDisplay.getLevelDisplay().setDrawRange( 10.0f ); // 10.0f / 0.3f = 90 block range
     mWorldDisplay.getLightDisplay().setDrawRange( 15.0f ); //180 block range
     mWorldDisplay.getPopulationDisplay().setDrawRange( 10.0f ); // 10.0f / 0.3f = 90 block range
 
+    genLevel();
+
     return true;
+}
+
+void App::genLevel()
+{
+    XMFLOAT3 spawn;
+    mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, time(0), mBlockDimenions, spawn );
+    mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
+    mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions );
+    mCamera.getPosition() = XMFLOAT4( spawn.x + (mBlockDimenions / 2.0f), 
+                                      spawn.y + mEntity.getSolidity().height, 
+                                      spawn.z + (mBlockDimenions / 2.0f), 
+                                      1.0f );
 }
 
 bool App::initShaders()
@@ -946,71 +807,8 @@ void App::update( float dt )
     //Print coords
     sprintf(MousePosString, "Mouse: %.2f, %.2f", mousePos.x, mousePos.y);
 
-    //Don't update the UI if we aren't drawing it... duh
-    if( drawUI ){
-        UIWindow::UserChange change = mUIWindow.update( mLeftClick, mousePos, mKeyPress, (byte)mKeyChar );
-
-        //Reset key press if it is true so we don't spam it
-        if( mKeyPress ){
-            mKeyPress = false;
-        }
-
-        if( change.action == UIWindow::UserChange::Action::ClickButton &&
-            change.id == 0 ){
-                mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, time(0), mBlockDimenions );
-            mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions);
-        }else if( change.action == UIWindow::UserChange::Action::MoveSlider &&
-            change.id == 0 ){
-            mCamera.setFOV( 40.0f + ( 20.0f * mSlider->getPercent() ) );
-        }else if(change.action == UIWindow::UserChange::Action::SelectDropOption && change.id == 0 ){
-            Fog fog;
-            fog.start = 0.0f;
-            fog.end = 9.0f;
-            fog.diff = 9.0f;
-            fog.color.w = 1.0f;
-            switch( mDropBox->getSelectedOption() ){
-            case 0:
-                fog.color.x = 1.0f;
-                fog.color.y = 0.0f;
-                fog.color.z = 0.0f;
-                mWorldDisplay.getLevelDisplay().setFog( fog );
-                break;
-            case 1:
-                fog.color.x = 0.0f;
-                fog.color.y = 1.0f;
-                fog.color.z = 0.0f;
-                mWorldDisplay.getLevelDisplay().setFog( fog );
-                break;
-            case 2:
-                fog.color.x = 0.0f;
-                fog.color.y = 0.0f;
-                fog.color.z = 1.0f;
-                mWorldDisplay.getLevelDisplay().setFog( fog );
-                break;
-            case 3:
-                fog.color.x = 0.0f;
-                fog.color.y = 0.0f;
-                fog.color.z = 0.0f;
-                mWorldDisplay.getLevelDisplay().setFog( fog );
-                break;
-            case 4:
-                fog.color.x = 1.0f;
-                fog.color.y = 1.0f;
-                fog.color.z = 1.0f;
-                mWorldDisplay.getLevelDisplay().setFog( fog );
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
 	mEmitterManager.Update(dt);
     mWorldDisplay.getPopulationDisplay().updateBillboards( mWindow.getDeviceContext(), mWorld, mCamera.getPosition() );
-
-    if( drawUI ){
-        mUIDisplay.buildWindowVB( mUIWindow, mWindow.getAspectRatio() );
-    }
 
     if( consoleMode ){
         mConsole.update( dt, mLeftClick, mousePos, mKeyPress, (byte)mKeyChar );
@@ -1147,22 +945,18 @@ void App::draw( )
     //Draw!
     mUIDisplay.drawUI( mWindow.getDeviceContext() );
 
-    if( drawUI ){
-        mUIDisplay.drawWindowText( mWindow.getDeviceContext(), mUIWindow, mTextManager );
-    }
-
     if( consoleMode ){
         mUIDisplay.drawWindowText( mWindow.getDeviceContext(), mConsole.getWindow(), mTextManager );
     }
 
-    if( mCheckBox->isChecked() ){
+    if( drawStats ){
         mTextManager.drawString(mWindow.getDeviceContext(), FPSString, -1.0f, -1.0f);
         mTextManager.drawString(mWindow.getDeviceContext(), CameraPosString, -1.0f, -0.95f);
         mTextManager.drawString(mWindow.getDeviceContext(), MousePosString, -1.0f, -0.9f);
     
         char buffer[128];
 
-        sprintf(buffer, "Toggle UI Drawing: U : %s", drawUI ? "On" : "Off");
+        sprintf(buffer, "Toggle UI Drawing: U : %s", drawStats ? "On" : "Off");
         mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.8f);
 
         sprintf(buffer, "Toggle Free Look: I : %s", freeLook ? "On" : "Off");
@@ -1194,8 +988,6 @@ void App::clear( )
 {
     mWorldDisplay.clear();
     mTextManager.clear();
-
-    mUIWindow.clear();
 
     mUIDisplay.clear();
 

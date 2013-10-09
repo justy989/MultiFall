@@ -1,14 +1,14 @@
-#ifndef MENUSCREEN_H
-#define MENUSCREEN_H
+#ifndef LOBBYSCREEN_H
+#define LOBBYSCREEN_H
 
 #include "UIWindow.h"
 #include "ScreenManager.h"
 
-class MenuScreen : public Screen{
+class LobbyScreen : public Screen{
 public:
 
-    MenuScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party );
-    ~MenuScreen();
+    LobbyScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party );
+    ~LobbyScreen();
 
     //Update screen
     virtual void update( float dt, UIDisplay* uiDisplay, float aspectRatio,
@@ -18,9 +18,10 @@ protected:
 
     UIWindow mWindow;
 
-    UIButton* mHostBtn;
-    UIButton* mJoinBtn;
-    UIButton* mQuitBtn;
+    UIInputBox* mIPBox;
+    UIInputBox* mPortBox;
+    UIButton* mBackBtn;
+    UIButton* mActionBtn;
 };
 
 #endif

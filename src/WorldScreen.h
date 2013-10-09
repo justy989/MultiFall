@@ -1,14 +1,14 @@
-#ifndef MENUSCREEN_H
-#define MENUSCREEN_H
+#ifndef WORLDSCREEN_H
+#define WORLDSCREEN_H
 
 #include "UIWindow.h"
 #include "ScreenManager.h"
 
-class MenuScreen : public Screen{
+class WorldScreen : public Screen{
 public:
 
-    MenuScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party );
-    ~MenuScreen();
+    WorldScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party );
+    ~WorldScreen();
 
     //Update screen
     virtual void update( float dt, UIDisplay* uiDisplay, float aspectRatio,
@@ -18,9 +18,9 @@ protected:
 
     UIWindow mWindow;
 
-    UIButton* mHostBtn;
-    UIButton* mJoinBtn;
-    UIButton* mQuitBtn;
+    UISlider* mHealthBar;
+    UISlider* mMagicBar;
+    UISlider* mStaminaBar;
 };
 
 #endif

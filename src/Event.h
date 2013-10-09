@@ -9,17 +9,18 @@ struct Event{
         GenerateLevel,
 
         //Network Events
-        NetworkTimeout,
+        NetworkTimeout, //User timed out
 
         //Party
-        PartyChat,
-        PartyJoin,
-        PartyLeave,
+        PartyChat,    //Chat messages between party members
+        PartyJoin,    //Someone has joined the party
+        PartyLeave,   //Someone has left the party
+        PartyDisband, //Party no longer exists
 
         //World Events
-        CharacterSpawn,
-        CharacterKill,
-        CharacterWalk,
+        CharacterSpawn, //Spawn a character by id and location
+        CharacterKill, //Kill a character by id
+        CharacterWalk, //move a character in a direction
     };
 
     struct GenerateLevelInfo{

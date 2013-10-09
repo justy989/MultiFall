@@ -3,41 +3,58 @@
 
 #include "EventManager.h"
 #include "UIDisplay.h"
+#include "Party.h"
 #include <stack>
 
 class ScreenManager;
 class MenuScreen;
+class LobbyScreen;
+class WorldScreen;
 
 class Screen{
 public:
 
-    Screen( ScreenManager* screenManager, EventManager* eventManager ) : 
-        mEventManager(eventManager),
-        mScreenManager(screenManager) {}
+    enum Transition{
+        None,
+        In,
+        Running,
+        Out,
+        Done
+    };
 
-    //Init tscreen
-    virtual void init( ) = 0;
+    Screen( ScreenManager* screenManager, EventManager* eventManager, Party* party ) : 
+        mEventManager(eventManager),
+        mScreenManager(screenManager),
+        mParty(party) {}
 
     //Update screen
-    virtual void update( float dt ) = 0;
+    virtual void update( float dt, UIDisplay* uiDisplay, float aspectRatio,
+                         bool mouseClick, XMFLOAT2 mousePos, bool keyPress, byte key ) = 0;
 
-    //Draw the screen
-    virtual void draw( UIDisplay* uiDisplay, TextManager* textManager, ID3D11DeviceContext* device ) = 0;
+    //Transition into the screen
+    void transitionIn( );
 
-    //shutdown screen
-    virtual void shutdown( ) = 0;
+    //Transition out of the screen
+    void transitionOut( );
+
+    inline Transition getTransition();
 
 protected:
 
     EventManager* mEventManager;
     ScreenManager* mScreenManager;
+    Party* mParty;
+
+    Transition mTransition;
 };
+
+inline Screen::Transition Screen::getTransition(){return mTransition;}
 
 class ScreenManager{
 public:
 
     //Init screens
-    ScreenManager( EventManager* eventManager );
+    ScreenManager( EventManager* eventManager, Party* party );
 
     //Type
     enum Type{
@@ -50,10 +67,8 @@ public:
     };
 
     //Update the current state
-    void update( float dt );
-
-    //Draw the current screen
-    void draw( UIDisplay* uiDisplay, TextManager* textManager, ID3D11DeviceContext* device );
+    void update( float dt, UIDisplay* uiDisplay, float aspectRatio,
+                 bool mouseClick, XMFLOAT2 mousePos, bool keyPress, byte key );
 
     //push the selected screen on top
     void pushScreen( Type type );
@@ -66,6 +81,8 @@ protected:
     std::stack< Screen* > mScreens;
 
     MenuScreen* mMenuScreen;
+    LobbyScreen* mLobbyScreen;
+    WorldScreen* mWorldScreen;
 };
 
 #endif

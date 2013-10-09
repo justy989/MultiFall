@@ -1,9 +1,10 @@
 #include "MenuScreen.h"
 
-MenuScreen::MenuScreen( ScreenManager* screenManager, EventManager* eventManager ) :
-    Screen( screenManager, eventManager )
+MenuScreen::MenuScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party ) :
+    Screen( screenManager, eventManager, party )
 {
     mWindow.init(1);
+    mWindow.initTab( 0, "", 3 );
     mWindow.setPosition( XMFLOAT2( -0.3f, -0.5f ) );
     mWindow.setDimension( XMFLOAT2( 0.6f, 1.0f ) );
     mWindow.setText( UIElement::Text( "Main Menu" ) );
@@ -14,12 +15,12 @@ MenuScreen::MenuScreen( ScreenManager* screenManager, EventManager* eventManager
     mHostBtn->setText( UIElement::Text( "Host" ) );
 
     mJoinBtn =  new UIButton();
-    mJoinBtn->setPosition( XMFLOAT2( 0.15f, 0.2f ) );
+    mJoinBtn->setPosition( XMFLOAT2( 0.15f, 0.4f ) );
     mJoinBtn->setDimension( XMFLOAT2( 0.3f, 0.12f ) );
     mJoinBtn->setText( UIElement::Text( "Join" ) );
 
     mQuitBtn =  new UIButton();
-    mQuitBtn->setPosition( XMFLOAT2( 0.15f, 0.2f ) );
+    mQuitBtn->setPosition( XMFLOAT2( 0.15f, 0.6f ) );
     mQuitBtn->setDimension( XMFLOAT2( 0.3f, 0.12f ) );
     mQuitBtn->setText( UIElement::Text( "Quit" ) );
 
@@ -33,22 +34,27 @@ MenuScreen::~MenuScreen()
     mWindow.clear();
 }
 
-void MenuScreen::init( )
+void MenuScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
+                         bool mouseClick, XMFLOAT2 mousePos, bool keyPress, byte key )
 {
+    UIElement::UserChange change = mWindow.update( mouseClick, mousePos, keyPress, key );
 
-}
+    if( change.action == UIElement::UserChange::Action::ClickButton ){
+        switch( change.id ){
+        case 0:
+            mParty->create();
+            mScreenManager->pushScreen( ScreenManager::Type::Lobby );
+            break;
+        case 1:
+            mScreenManager->pushScreen( ScreenManager::Type::Lobby );
+            break;
+        case 2:
+            PostQuitMessage(0);
+            break;
+        default:
+            break;
+        }
+    }
 
-void MenuScreen::update( float dt )
-{
-
-}
-
-void MenuScreen::draw( UIDisplay* uiDisplay, TextManager* textManager, ID3D11DeviceContext* device )
-{
-
-}
-
-void MenuScreen::shutdown( )
-{
-
+    uiDisplay->buildWindowVB( mWindow, aspectRatio );
 }
