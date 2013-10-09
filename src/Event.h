@@ -14,6 +14,7 @@ struct Event{
         //Party
         PartyChat,
         PartyJoin,
+        PartyLeave,
 
         //World Events
         CharacterSpawn,
@@ -28,6 +29,10 @@ struct Event{
     struct PartyJoinInfo{
         uint index;
         char name[32];
+    };
+
+    struct PartyLeaveInfo{
+        uint index;
     };
 
     struct PartyChatInfo{
@@ -54,9 +59,10 @@ struct Event{
     Type type;
 
     union{
-        GenerateLevelInfo generateLevelInfo;
         PartyJoinInfo partyJoinInfo;
+        PartyLeaveInfo partyLeaveInfo;
         PartyChatInfo partyChatInfo;
+        GenerateLevelInfo generateLevelInfo;
         CharacterSpawnInfo characterSpawnInfo;
         CharacterKillInfo characterKillInfo;
         CharacterWalkInfo characterWalkInfo;

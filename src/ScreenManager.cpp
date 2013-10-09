@@ -12,6 +12,13 @@ void ScreenManager::update( float dt )
     }
 }
 
+void ScreenManager::draw( UIDisplay* uiDisplay, TextManager* textManager, ID3D11DeviceContext* device )
+{
+    if( mScreens.size() ){
+        mScreens.top()->draw( uiDisplay, textManager, device );
+    }
+}
+
 void ScreenManager::pushScreen( Type type )
 {
     switch( type ){
@@ -20,6 +27,7 @@ void ScreenManager::pushScreen( Type type )
         //mScreens.top()->init();
         break;
     case Menu:
+
         break;
     case Options:
         break;

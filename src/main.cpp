@@ -18,4 +18,6 @@ int WINAPI WinMain(HINSTANCE hInstance,
     Log::destroyInst();
 
     return rc;
+
+    return 0;
 }

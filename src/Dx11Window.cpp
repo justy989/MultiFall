@@ -448,9 +448,9 @@ LRESULT CALLBACK DX11Window::mainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 	case WM_EXITSIZEMOVE:
 		mIsPaused = false;
 		mIsResizing  = false;
-		if( !onResize() ){
-            PostQuitMessage(1);
-        }
+		//if( !onResize() ){
+            //PostQuitMessage(1);
+        //}
 		return 0;
  
 	// WM_DESTROY is sent when the window is being destroyed.

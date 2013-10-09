@@ -19,8 +19,8 @@ bool NetClient::connect( char* ip, ushort port, char* name )
     if( res ){
         //Format the packet
         NetPacket packet;
-        packet.type = NetPacket::Type::JoinParty;
-        sprintf( packet.joinPartyInfo.name, name);
+        packet.type = NetPacket::Type::PartyJoin;
+        strcpy( packet.partyJoinInfo.name, name);
 
         //Push it to be sent when we update
         mSocket.pushPacket( packet );

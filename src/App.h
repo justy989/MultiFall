@@ -1,6 +1,9 @@
 #ifndef DUNGENAPP_H
 #define DUNGENAPP_H
 
+#include "NetServer.h"
+#include "NetClient.h"
+
 #include "Dx11Window.h"
 #include "Timer.h"
 #include "Camera.h"

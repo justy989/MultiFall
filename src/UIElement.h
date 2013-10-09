@@ -30,6 +30,10 @@ public:
     };
 
     struct Text{
+
+        Text( char* msg = NULL, XMFLOAT2 offSet = XMFLOAT2(0.0f, 0.0f) ) :
+            message(msg), offset(offSet) {}
+
         char* message;
         XMFLOAT2 offset;
     };

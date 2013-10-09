@@ -2,9 +2,11 @@
 #define SCREENMANAGER_H
 
 #include "EventManager.h"
+#include "UIDisplay.h"
 #include <stack>
 
 class ScreenManager;
+class MenuScreen;
 
 class Screen{
 public:
@@ -18,6 +20,9 @@ public:
 
     //Update screen
     virtual void update( float dt ) = 0;
+
+    //Draw the screen
+    virtual void draw( UIDisplay* uiDisplay, TextManager* textManager, ID3D11DeviceContext* device ) = 0;
 
     //shutdown screen
     virtual void shutdown( ) = 0;
@@ -47,6 +52,9 @@ public:
     //Update the current state
     void update( float dt );
 
+    //Draw the current screen
+    void draw( UIDisplay* uiDisplay, TextManager* textManager, ID3D11DeviceContext* device );
+
     //push the selected screen on top
     void pushScreen( Type type );
 
@@ -56,6 +64,8 @@ public:
 protected:
 
     std::stack< Screen* > mScreens;
+
+    MenuScreen* mMenuScreen;
 };
 
 #endif

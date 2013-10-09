@@ -1,6 +1,12 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+// stops windows.h including winsock.h
+#define _WINSOCKAPI_
+
+//Leaves out stuff we don't need
+#define WIN32_LEAN_AND_MEAN
+
 #include <Windows.h>
 #include <xnamath.h>
 

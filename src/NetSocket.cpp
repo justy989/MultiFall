@@ -2,6 +2,8 @@
 
 #include "Log.h"
 
+#include <Windows.h>
+
 uint NetSocket::mNextID = 1;
 
 NetSocket::NetSocket() :

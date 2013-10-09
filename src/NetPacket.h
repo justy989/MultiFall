@@ -1,22 +1,26 @@
-#ifndef NETPACKET_H
-#define NETPACKET_H
+#ifndef NET_PACKET_H
+#define NET_PACKET_H
 
 #include "Event.h"
 #include "Party.h"
 
 struct NetPacket{
     enum Type{
-        JoinParty,
-        LeaveParty,
+        PartyJoin,
+        PartyLeave,
         PartySync,
         WorldSync,
         WorldEvent
     };
 
-    struct JoinPartyInfo{
+    struct PartyJoinInfo{
         char name[32];
 
         //Info about your character
+    };
+
+    struct PartyLeaveInfo{
+        uint index;
     };
 
     struct PartySyncInfo{
@@ -35,7 +39,8 @@ struct NetPacket{
     Type type;
 
     union{
-        JoinPartyInfo joinPartyInfo;
+        PartyJoinInfo partyJoinInfo;
+        PartyLeaveInfo partyLeaveInfo;
         PartySyncInfo partySyncInfo;
         WorldSyncInfo worldSyncInfo;
         Event worldEventInfo;
