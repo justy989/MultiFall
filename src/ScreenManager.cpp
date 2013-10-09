@@ -2,12 +2,12 @@
 #include "MenuScreen.h"
 #include "LobbyScreen.h"
 #include "WorldScreen.h"
+#include "ConnectionScreen.h"
 
 ScreenManager::ScreenManager( EventManager* eventManager, Party* party )
 {
-    mMenuScreen = new MenuScreen( this, eventManager, party );
-    mLobbyScreen = new LobbyScreen( this, eventManager, party );
-    mWorldScreen = new WorldScreen( this, eventManager, party );
+    mEventManager = eventManager;
+    mParty = party;
 }
 
 void ScreenManager::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
@@ -24,15 +24,18 @@ void ScreenManager::pushScreen( Type type )
     case Title:
         break;
     case Menu:
-        mScreens.push( mMenuScreen );
+        mScreens.push( new MenuScreen( this, mEventManager, mParty ) );
         break;
     case Options:
         break;
+    case Connection:
+        mScreens.push( new ConnectionScreen( this, mEventManager, mParty ) );
+        break;
     case Lobby:
-        mScreens.push( mLobbyScreen );
+        mScreens.push( new LobbyScreen( this, mEventManager, mParty ) );
         break;
     case World:
-        mScreens.push( mWorldScreen );
+        mScreens.push( new WorldScreen( this, mEventManager, mParty ) );
         break;
     case Pause:
         break;
@@ -44,6 +47,15 @@ void ScreenManager::pushScreen( Type type )
 void ScreenManager::popScreen()
 {
     if( mScreens.size() ){
+        Screen* screen = mScreens.top();
         mScreens.pop();
+        delete screen;
+    }
+}
+
+void ScreenManager::draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager )
+{
+    if( mScreens.size() ){
+        mScreens.top()->draw( device, uiDisplay, textManager );
     }
 }

@@ -4,9 +4,9 @@ MenuScreen::MenuScreen( ScreenManager* screenManager, EventManager* eventManager
     Screen( screenManager, eventManager, party )
 {
     mWindow.init(1);
-    mWindow.initTab( 0, "", 3 );
+    mWindow.initTab( 0, "", 4 );
     mWindow.setPosition( XMFLOAT2( -0.3f, -0.5f ) );
-    mWindow.setDimension( XMFLOAT2( 0.6f, 1.0f ) );
+    mWindow.setDimension( XMFLOAT2( 0.6f, 1.1f ) );
     mWindow.setText( UIElement::Text( "Main Menu" ) );
 
     mHostBtn =  new UIButton();
@@ -19,13 +19,19 @@ MenuScreen::MenuScreen( ScreenManager* screenManager, EventManager* eventManager
     mJoinBtn->setDimension( XMFLOAT2( 0.3f, 0.12f ) );
     mJoinBtn->setText( UIElement::Text( "Join" ) );
 
+    mOptionsBtn =  new UIButton();
+    mOptionsBtn->setPosition( XMFLOAT2( 0.15f, 0.6f ) );
+    mOptionsBtn->setDimension( XMFLOAT2( 0.3f, 0.12f ) );
+    mOptionsBtn->setText( UIElement::Text( "Join" ) );
+
     mQuitBtn =  new UIButton();
-    mQuitBtn->setPosition( XMFLOAT2( 0.15f, 0.6f ) );
+    mQuitBtn->setPosition( XMFLOAT2( 0.15f, 0.8f ) );
     mQuitBtn->setDimension( XMFLOAT2( 0.3f, 0.12f ) );
     mQuitBtn->setText( UIElement::Text( "Quit" ) );
 
     mWindow.addElem( mHostBtn );
     mWindow.addElem( mJoinBtn );
+    mWindow.addElem( mOptionsBtn );
     mWindow.addElem( mQuitBtn );
 }
 
@@ -43,12 +49,15 @@ void MenuScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
         switch( change.id ){
         case 0:
             mParty->create();
-            mScreenManager->pushScreen( ScreenManager::Type::Lobby );
+            mScreenManager->pushScreen( ScreenManager::Type::Connection );
             break;
         case 1:
-            mScreenManager->pushScreen( ScreenManager::Type::Lobby );
+            mScreenManager->pushScreen( ScreenManager::Type::Connection );
             break;
         case 2:
+            //Nothin yet!
+            break;
+        case 3:
             PostQuitMessage(0);
             break;
         default:
@@ -57,4 +66,9 @@ void MenuScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
     }
 
     uiDisplay->buildWindowVB( mWindow, aspectRatio );
+}
+
+void MenuScreen::draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager )
+{
+    uiDisplay->drawWindowText( device, mWindow, *textManager );
 }

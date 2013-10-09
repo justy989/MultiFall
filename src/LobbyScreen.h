@@ -1,5 +1,5 @@
-#ifndef LOBBYSCREEN_H
-#define LOBBYSCREEN_H
+#ifndef LobbySCREEN_H
+#define LobbySCREEN_H
 
 #include "UIWindow.h"
 #include "ScreenManager.h"
@@ -14,14 +14,14 @@ public:
     virtual void update( float dt, UIDisplay* uiDisplay, float aspectRatio,
                          bool mouseClick, XMFLOAT2 mousePos, bool keyPress, byte key );
 
+    virtual void draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager );
+
 protected:
 
     UIWindow mWindow;
 
-    UIInputBox* mIPBox;
-    UIInputBox* mPortBox;
-    UIButton* mBackBtn;
-    UIButton* mActionBtn;
+    UITextBox* mPartyTextbox;
+    UICheckbox* mReadyCheckbox;
 };
 
 #endif

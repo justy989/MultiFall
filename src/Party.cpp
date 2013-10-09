@@ -17,6 +17,7 @@ void Party::create( )
 
     for(int i = 0; i < PARTY_SIZE; i++){
         mMembers[i].setExist( i == mMyIndex );
+        mMembers[i].setReady( false );
     }
 }
 
@@ -32,6 +33,7 @@ void Party::disband()
 {
     for(int i = 0; i < PARTY_SIZE; i++){
         mMembers[i].setExist( false );
+        mMembers[i].setReady( false );
     }
 
     mIsLeader = false;

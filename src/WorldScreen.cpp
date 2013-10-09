@@ -44,3 +44,8 @@ void WorldScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
 
     uiDisplay->buildWindowVB( mWindow, aspectRatio );
 }
+
+void WorldScreen::draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager )
+{
+    uiDisplay->drawWindowText( device, mWindow, *textManager );
+}

@@ -1,14 +1,14 @@
-#ifndef MENUSCREEN_H
-#define MENUSCREEN_H
+#ifndef CONNECTIONSCREEN_H
+#define CONNECTIONSCREEN_H
 
 #include "UIWindow.h"
 #include "ScreenManager.h"
 
-class MenuScreen : public Screen{
+class ConnectionScreen : public Screen{
 public:
 
-    MenuScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party );
-    ~MenuScreen();
+    ConnectionScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party );
+    ~ConnectionScreen();
 
     //Update screen
     virtual void update( float dt, UIDisplay* uiDisplay, float aspectRatio,
@@ -20,10 +20,10 @@ protected:
 
     UIWindow mWindow;
 
-    UIButton* mHostBtn;
-    UIButton* mJoinBtn;
-    UIButton* mOptionsBtn;
-    UIButton* mQuitBtn;
+    UIInputBox* mIPBox;
+    UIInputBox* mPortBox;
+    UIButton* mBackBtn;
+    UIButton* mActionBtn;
 };
 
 #endif

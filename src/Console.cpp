@@ -252,7 +252,7 @@ void Console::sendCmd( char* cmd )
             LOG_INFO << "Generates the level from scratch given a seed." << LOG_ENDL;
         }else{
             if( argCount == 1 ){
-                mApp->genLevel();
+                mApp->genLevel( atoi( args[0] ) );
             }else{
                 LOG_INFO << "Provide 1 argument for the seed to genlevel" << LOG_ENDL;
             }

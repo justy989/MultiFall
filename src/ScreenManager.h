@@ -7,9 +7,6 @@
 #include <stack>
 
 class ScreenManager;
-class MenuScreen;
-class LobbyScreen;
-class WorldScreen;
 
 class Screen{
 public:
@@ -31,6 +28,8 @@ public:
     virtual void update( float dt, UIDisplay* uiDisplay, float aspectRatio,
                          bool mouseClick, XMFLOAT2 mousePos, bool keyPress, byte key ) = 0;
 
+    virtual void draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager ) = 0;
+
     //Transition into the screen
     void transitionIn( );
 
@@ -50,7 +49,7 @@ protected:
 
 inline Screen::Transition Screen::getTransition(){return mTransition;}
 
-class ScreenManager{
+class ScreenManager : public EventHandler{
 public:
 
     //Init screens
@@ -61,10 +60,13 @@ public:
         Title,
         Menu,
         Options,
+        Connection,
         Lobby,
         World,
         Pause
     };
+
+    virtual void handleEvent( Event& e ) {}
 
     //Update the current state
     void update( float dt, UIDisplay* uiDisplay, float aspectRatio,
@@ -73,6 +75,9 @@ public:
     //push the selected screen on top
     void pushScreen( Type type );
 
+    //draw the top screen
+    void draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager );
+
     //pop the current screen
     void popScreen();
 
@@ -80,9 +85,8 @@ protected:
 
     std::stack< Screen* > mScreens;
 
-    MenuScreen* mMenuScreen;
-    LobbyScreen* mLobbyScreen;
-    WorldScreen* mWorldScreen;
+    EventManager* mEventManager;
+    Party* mParty;
 };
 
 #endif

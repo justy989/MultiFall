@@ -67,7 +67,7 @@ protected:
 
 protected:
 
-    void genLevel();
+    void genLevel( uint seed );
 
 protected:
 

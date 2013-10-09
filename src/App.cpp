@@ -19,7 +19,7 @@ App::App() : mScreenManager( &mEventManager, &mParty )
     camKeyDown[2] = false;
     camKeyDown[3] = false;
 
-    collisionMode = false;
+    collisionMode = true;
     freeLook = true;
     drawStats = false;
 
@@ -91,7 +91,7 @@ void App::handleInput( RAWINPUT* input )
             case 'S':
                 camKeyDown[3] = !keyUp;
                 break;
-            case 'U':
+            case 'P':
                 if( keyUp ){
                     break;
                 }
@@ -460,10 +460,6 @@ bool App::init( )
 
 	ltl.loadTheme("content/themes/stone.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
 
-    //mCamera.getPosition().x = static_cast<float>(mWorld.getLevel().getWidth() / 2) * mBlockDimenions;
-    //mCamera.getPosition().z = static_cast<float>(mWorld.getLevel().getDepth() / 2) * mBlockDimenions;
-    //mCamera.getPosition().y = static_cast<float>(mWorld.getLevel().getHeight() * 3) * mBlockDimenions;
-
 	mEmitterManager.init(mWindow.getDevice(), mLightParticleTech);
 
     //Set draw ranges
@@ -471,21 +467,32 @@ bool App::init( )
     mWorldDisplay.getLightDisplay().setDrawRange( 15.0f ); //180 block range
     mWorldDisplay.getPopulationDisplay().setDrawRange( 10.0f ); // 10.0f / 0.3f = 90 block range
 
-    genLevel();
+    genLevel( time(0) );
+
+    mScreenManager.pushScreen( ScreenManager::Type::Menu );
 
     return true;
 }
 
-void App::genLevel()
+void App::genLevel( uint seed )
 {
     XMFLOAT3 spawn;
-    mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, time(0), mBlockDimenions, spawn );
+
+    //Gen the level
+    mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, seed, mBlockDimenions, spawn );
+
+    //Gen the population
     mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
+
+    //Create a mesh from the level
     mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions );
+
+    //Set the camera and entity to the spawn
     mCamera.getPosition() = XMFLOAT4( spawn.x + (mBlockDimenions / 2.0f), 
                                       spawn.y + mEntity.getSolidity().height, 
                                       spawn.z + (mBlockDimenions / 2.0f), 
                                       1.0f );
+    mEntity.getPosition() = mCamera.getPosition();
 }
 
 bool App::initShaders()
@@ -815,6 +822,8 @@ void App::update( float dt )
         mUIDisplay.buildWindowVB( mConsole.getWindow(), mWindow.getAspectRatio() );
     }
 
+    //mScreenManager.update( dt, &mUIDisplay, mWindow.getAspectRatio(), mLeftClick, mousePos, mKeyPress, (byte)mKeyChar );
+
     mUIDisplay.updateBuffers( mWindow.getDeviceContext() );
 
     mKeyPress = false;
@@ -948,6 +957,8 @@ void App::draw( )
     if( consoleMode ){
         mUIDisplay.drawWindowText( mWindow.getDeviceContext(), mConsole.getWindow(), mTextManager );
     }
+
+    //mScreenManager.draw( mWindow.getDeviceContext(), &mUIDisplay, &mTextManager );
 
     if( drawStats ){
         mTextManager.drawString(mWindow.getDeviceContext(), FPSString, -1.0f, -1.0f);

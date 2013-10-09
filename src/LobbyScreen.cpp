@@ -4,39 +4,19 @@ LobbyScreen::LobbyScreen( ScreenManager* screenManager, EventManager* eventManag
     Screen( screenManager, eventManager, party )
 {
     mWindow.init(1);
-    mWindow.initTab( 0, "", 4 );
+    mWindow.initTab( 0, "", 2 );
     mWindow.setPosition( XMFLOAT2( -0.3f, -0.5f ) );
     mWindow.setDimension( XMFLOAT2( 0.6f, 1.0f ) );
     mWindow.setText( UIElement::Text( "Lobby" ) );
 
-    mBackBtn =  new UIButton();
-    mBackBtn->setPosition( XMFLOAT2( 0.15f, 0.2f ) );
-    mBackBtn->setDimension( XMFLOAT2( 0.3f, 0.12f ) );
-    mBackBtn->setText( UIElement::Text( "Back" ) );
+    char* msg = "Party Status Textbox";
 
-    mActionBtn =  new UIButton();
-    mActionBtn->setPosition( XMFLOAT2( 0.15f, 0.4f ) );
-    mActionBtn->setDimension( XMFLOAT2( 0.3f, 0.12f ) );
-    mActionBtn->setText( UIElement::Text( party->isLeader() ? "Create" : "Connect" ) );
+    mPartyTextbox = new UITextBox();
+    mPartyTextbox->setPosition( XMFLOAT2( -0.3f, -0.5f ) );
+    mPartyTextbox->setDimension( XMFLOAT2( 0.6f, 1.0f ) );
+    mPartyTextbox->setText( msg, strlen( msg ) ); 
 
-    mIPBox = new UIInputBox();
-    mIPBox->setPosition( XMFLOAT2( 0.15f, 0.4f ) );
-    mIPBox->setDimension( XMFLOAT2( 0.3f, 0.12f ) );
-    mIPBox->setText( UIElement::Text( "Host", XMFLOAT2( -0.4f, 0.0f ) ) );
-
-    mPortBox = new UIInputBox();
-    mPortBox->setPosition( XMFLOAT2( 0.15f, 0.4f ) );
-    mPortBox->setDimension( XMFLOAT2( 0.3f, 0.12f ) );
-    mPortBox->setText( UIElement::Text( "Port", XMFLOAT2( -0.4f, 0.0f ) ) );
-
-    mWindow.addElem( mBackBtn );
-    mWindow.addElem( mActionBtn );
-
-    mWindow.addElem( mPortBox );
-
-    if( !party->isLeader() ){
-        mWindow.addElem( mIPBox );
-    }
+    mWindow.addElem( mPartyTextbox );
 }
 
 LobbyScreen::~LobbyScreen()
@@ -52,14 +32,16 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
     if( change.action == UIElement::UserChange::Action::ClickButton ){
         switch( change.id ){
         case 0:
-            mParty->disband();
-            mScreenManager->popScreen();
+            mParty->create();
+            mScreenManager->pushScreen( ScreenManager::Type::Connection );
             break;
         case 1:
-            //Attempt to connect, if we are successful, 
-            mScreenManager->pushScreen( ScreenManager::Type::World );
+            mScreenManager->pushScreen( ScreenManager::Type::Connection );
             break;
         case 2:
+            //Nothin yet!
+            break;
+        case 3:
             PostQuitMessage(0);
             break;
         default:
@@ -68,4 +50,9 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
     }
 
     uiDisplay->buildWindowVB( mWindow, aspectRatio );
+}
+
+void LobbyScreen::draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager )
+{
+    uiDisplay->drawWindowText( device, mWindow, *textManager );
 }
