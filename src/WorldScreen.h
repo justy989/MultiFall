@@ -7,7 +7,7 @@
 class WorldScreen : public Screen{
 public:
 
-    WorldScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party );
+    WorldScreen( ScreenManager* screenManager, World* world, Party* party );
     ~WorldScreen();
 
     //Update screen

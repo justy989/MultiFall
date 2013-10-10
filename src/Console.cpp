@@ -267,7 +267,7 @@ void Console::sendCmd( char* cmd )
                 e.characterSpawnInfo.id = 0;
                 e.characterSpawnInfo.x = atof( args[0] );
                 e.characterSpawnInfo.z = atof( args[1] );
-                mApp->mEventManager.enqueueEvent( e );
+                EVENTMANAGER->queueEvent( e );
             }else{
                 LOG_INFO << "Proved 2 arguments for the x and z positions of the character" << LOG_ENDL;
             }
@@ -280,7 +280,7 @@ void Console::sendCmd( char* cmd )
                 Event e;
                 e.type = Event::Type::CharacterKill;
                 e.characterSpawnInfo.id = atoi( args[0] );
-                mApp->mEventManager.enqueueEvent( e );
+                EVENTMANAGER->queueEvent( e );
             }else{
                 LOG_INFO << "Proved 2 arguments for the x and z positions of the character" << LOG_ENDL;
             }

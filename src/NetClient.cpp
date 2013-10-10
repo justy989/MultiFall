@@ -1,15 +1,10 @@
 #include "NetClient.h"
 #include "Party.h"
 
-NetClient::NetClient() :
-    mEventManager(NULL)
+NetClient::NetClient( Party* party ) :
+    mParty(NULL)
 {
 
-}
-
-void NetClient::init( EventManager* em )
-{
-    mEventManager = em;
 }
 
 bool NetClient::connect( char* ip, ushort port, char* name )
@@ -55,7 +50,7 @@ void NetClient::update( float dt )
                     if( i == packet.partySyncInfo.myIndex ){ continue; }
 
                     sprintf( e.partyJoinInfo.name, packet.partySyncInfo.names[i] );
-                    mEventManager->enqueueEvent( e );
+                    EVENTMANAGER->queueEvent( e );
                 }
             }
             break;
@@ -63,7 +58,7 @@ void NetClient::update( float dt )
             {
                 Event e;
                 e = packet.worldEventInfo;
-                mEventManager->enqueueEvent( e );
+                EVENTMANAGER->queueEvent( e );
             }
             break;
         default:

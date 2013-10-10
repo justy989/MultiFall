@@ -4,9 +4,9 @@
 #include "WorldScreen.h"
 #include "ConnectionScreen.h"
 
-ScreenManager::ScreenManager( EventManager* eventManager, Party* party )
+ScreenManager::ScreenManager( World* world, Party* party )
 {
-    mEventManager = eventManager;
+    mWorld = world;
     mParty = party;
 }
 
@@ -24,18 +24,18 @@ void ScreenManager::pushScreen( Type type )
     case Title:
         break;
     case Menu:
-        mScreens.push( new MenuScreen( this, mEventManager, mParty ) );
+        mScreens.push( new MenuScreen( this, mWorld, mParty ) );
         break;
     case Options:
         break;
     case Connection:
-        mScreens.push( new ConnectionScreen( this, mEventManager, mParty ) );
+        mScreens.push( new ConnectionScreen( this, mWorld, mParty ) );
         break;
     case Lobby:
-        mScreens.push( new LobbyScreen( this, mEventManager, mParty ) );
+        mScreens.push( new LobbyScreen( this, mWorld, mParty ) );
         break;
-    case World:
-        mScreens.push( new WorldScreen( this, mEventManager, mParty ) );
+    case Worldy:
+        mScreens.push( new WorldScreen( this, mWorld, mParty ) );
         break;
     case Pause:
         break;

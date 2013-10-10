@@ -7,7 +7,7 @@
 class MenuScreen : public Screen{
 public:
 
-    MenuScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party );
+    MenuScreen( ScreenManager* screenManager, World* world, Party* party );
     ~MenuScreen();
 
     //Update screen

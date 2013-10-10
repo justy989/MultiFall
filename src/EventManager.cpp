@@ -1,5 +1,22 @@
 #include "EventManager.h"
 
+EventManager* EventManager::mEventManager;
+
+EventManager* EventManager::getEventManager()
+{
+    if( !mEventManager ){
+        mEventManager = new EventManager();
+    }
+
+    return mEventManager;
+}
+
+void EventManager::destroyEventManager()
+{
+    if( mEventManager ){
+        delete mEventManager;
+    }
+}
 
 EventManager::EventManager() :
     mNumHandlers(0)
@@ -14,12 +31,11 @@ bool EventManager::registerHandler( EventHandler* handler )
     }
 
     mHandlers[ mNumHandlers ] = handler;
-    mHandlers[ mNumHandlers ]->setEventManager( this );
     mNumHandlers++;
     return true;
 }
 
-bool EventManager::enqueueEvent( Event& e )
+bool EventManager::queueEvent( Event& e )
 {
     if( mEventQueue.size() >= EVENTMANAGER_MAX_QUEUE_EVENTS ){
         return false;

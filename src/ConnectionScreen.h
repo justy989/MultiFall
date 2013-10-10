@@ -7,7 +7,7 @@
 class ConnectionScreen : public Screen{
 public:
 
-    ConnectionScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party );
+    ConnectionScreen( ScreenManager* screenManager, World* world, Party* party );
     ~ConnectionScreen();
 
     //Update screen

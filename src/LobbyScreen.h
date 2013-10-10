@@ -7,7 +7,7 @@
 class LobbyScreen : public Screen{
 public:
 
-    LobbyScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party );
+    LobbyScreen( ScreenManager* screenManager, World* world, Party* party );
     ~LobbyScreen();
 
     //Update screen
@@ -22,6 +22,7 @@ protected:
 
     UITextBox* mPartyTextbox;
     UICheckbox* mReadyCheckbox;
+    UIButton* mBackBtn;
 };
 
 #endif

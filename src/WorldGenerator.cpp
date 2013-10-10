@@ -26,11 +26,11 @@ void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges, uint
 
     mLevelRanges = &ranges;
 
-    //Set the first room to empty
-    rooms[0].type = Room::Type::Empty;
-
     //Gen the rooms that make up the level
     genLevelBlueprint( level, rooms, (short)(roomCount) );
+
+    //Set the first room to empty
+    rooms[0].type = Room::Type::Empty;
     
     //For each room, do a pass generating the heights, furniture, containers, and walls
     for(int i = 0; i < roomCount; i++){

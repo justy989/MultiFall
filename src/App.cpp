@@ -12,7 +12,7 @@ char* gDropDownOptions[] = {
     "White"
 };
 
-App::App() : mScreenManager( &mEventManager, &mParty )
+App::App() : mScreenManager( &mWorld, &mParty )
 {
     camKeyDown[0] = false;
     camKeyDown[1] = false;
@@ -219,7 +219,7 @@ bool App::init( )
 
 	mTextManager.init(mWindow.getDevice());
 
-    mEventManager.registerHandler( &mWorld );
+    EVENTMANAGER->registerHandler( &mWorld );
 
     //Level Generation Data
     mLevelGenRanges.roomCount.set( 8, 16 );
@@ -820,15 +820,15 @@ void App::update( float dt )
     if( consoleMode ){
         mConsole.update( dt, mLeftClick, mousePos, mKeyPress, (byte)mKeyChar );
         mUIDisplay.buildWindowVB( mConsole.getWindow(), mWindow.getAspectRatio() );
+    }else{
+        mScreenManager.update( dt, &mUIDisplay, mWindow.getAspectRatio(), mLeftClick, mousePos, mKeyPress, (byte)mKeyChar );
     }
-
-    //mScreenManager.update( dt, &mUIDisplay, mWindow.getAspectRatio(), mLeftClick, mousePos, mKeyPress, (byte)mKeyChar );
 
     mUIDisplay.updateBuffers( mWindow.getDeviceContext() );
 
     mKeyPress = false;
 
-    mEventManager.process();
+    EVENTMANAGER->process();
 }
 
 void App::draw( )
@@ -956,9 +956,9 @@ void App::draw( )
 
     if( consoleMode ){
         mUIDisplay.drawWindowText( mWindow.getDeviceContext(), mConsole.getWindow(), mTextManager );
+    }else{
+        mScreenManager.draw( mWindow.getDeviceContext(), &mUIDisplay, &mTextManager );
     }
-
-    //mScreenManager.draw( mWindow.getDeviceContext(), &mUIDisplay, &mTextManager );
 
     if( drawStats ){
         mTextManager.drawString(mWindow.getDeviceContext(), FPSString, -1.0f, -1.0f);
@@ -967,7 +967,7 @@ void App::draw( )
     
         char buffer[128];
 
-        sprintf(buffer, "Toggle UI Drawing: U : %s", drawStats ? "On" : "Off");
+        sprintf(buffer, "Toggle UI Stats: P : %s", drawStats ? "On" : "Off");
         mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.8f);
 
         sprintf(buffer, "Toggle Free Look: I : %s", freeLook ? "On" : "Off");
@@ -975,10 +975,6 @@ void App::draw( )
 
         sprintf(buffer, "Toggle Collision: O : %s", collisionMode ? "On" : "Off");
         mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.9f);
-
-        sprintf(buffer, "Generate New Dungeon: R");
-        mTextManager.drawString(mWindow.getDeviceContext(), buffer, -1.0f, 0.95f);
-
     }
 
     mWindow.getSwapChain()->Present(0, 0);

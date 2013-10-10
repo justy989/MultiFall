@@ -9,10 +9,7 @@ class NetServer : public EventHandler{
 public:
 
     //Constr
-    NetServer();
-
-    //init
-    void init( EventManager* em, char* name );
+    NetServer( Party* party );
 
     //Handle event
     virtual void handleEvent( Event& e );
@@ -36,9 +33,7 @@ protected:
 
     NetSocket mClientSockets[ PARTY_SIZE ];
 
-    EventManager* mEventManager;
-
-    char* mName;
+    Party* mParty;
 };
 
 #endif

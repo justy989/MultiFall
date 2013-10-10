@@ -93,8 +93,6 @@ protected:
 
     Console mConsole;
 
-    EventManager mEventManager;
-
     ScreenManager mScreenManager;
 
     UIDisplay mUIDisplay;

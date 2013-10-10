@@ -3,6 +3,7 @@
 
 #include "EventManager.h"
 #include "UIDisplay.h"
+#include "World.h"
 #include "Party.h"
 #include <stack>
 
@@ -19,8 +20,7 @@ public:
         Done
     };
 
-    Screen( ScreenManager* screenManager, EventManager* eventManager, Party* party ) : 
-        mEventManager(eventManager),
+    Screen( ScreenManager* screenManager, World* world, Party* party ) : 
         mScreenManager(screenManager),
         mParty(party) {}
 
@@ -53,7 +53,7 @@ class ScreenManager : public EventHandler{
 public:
 
     //Init screens
-    ScreenManager( EventManager* eventManager, Party* party );
+    ScreenManager( World* world, Party* party );
 
     //Type
     enum Type{
@@ -62,7 +62,7 @@ public:
         Options,
         Connection,
         Lobby,
-        World,
+        Worldy, //added a y at the end so it won't collide with World
         Pause
     };
 
@@ -85,7 +85,7 @@ protected:
 
     std::stack< Screen* > mScreens;
 
-    EventManager* mEventManager;
+    World* mWorld;
     Party* mParty;
 };
 

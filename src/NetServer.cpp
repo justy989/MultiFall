@@ -1,16 +1,9 @@
 #include "NetServer.h"
 
-NetServer::NetServer() :
-    mEventManager(NULL),
-    mName(NULL)
+NetServer::NetServer( Party* party ) :
+    mParty(party)
 {
 
-}
-
-void NetServer::init( EventManager* em, char* name )
-{
-    mEventManager = em;
-    mName = name;
 }
 
 bool NetServer::listen( ushort port )
@@ -71,7 +64,7 @@ void NetServer::update( float dt )
                         e.type = Event::Type::PartyJoin;
                         strcpy( e.partyJoinInfo.name, packet.partyJoinInfo.name );
                         e.partyJoinInfo.index = i;
-                        mEventManager->enqueueEvent( e );
+                        EVENTMANAGER->queueEvent( e );
 
                         //If someone joined we need to send a sync packet
                         NetPacket syncPacket;
@@ -91,14 +84,14 @@ void NetServer::update( float dt )
                         Event e;
                         e.type = Event::Type::PartyLeave;
                         e.partyLeaveInfo.index = i;
-                        mEventManager->enqueueEvent( e );
+                        EVENTMANAGER->queueEvent( e );
                     }
                     break;
                 case NetPacket::Type::WorldEvent:
                     {
                         Event e;
                         e = packet.worldEventInfo;
-                        mEventManager->enqueueEvent( e );
+                        EVENTMANAGER->queueEvent( e );
                     }
                     break;
                 default:

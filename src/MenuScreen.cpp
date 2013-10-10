@@ -1,7 +1,7 @@
 #include "MenuScreen.h"
 
-MenuScreen::MenuScreen( ScreenManager* screenManager, EventManager* eventManager, Party* party ) :
-    Screen( screenManager, eventManager, party )
+MenuScreen::MenuScreen( ScreenManager* screenManager, World* world, Party* party ) :
+    Screen( screenManager, world, party )
 {
     mWindow.init(1);
     mWindow.initTab( 0, "", 4 );
@@ -22,7 +22,7 @@ MenuScreen::MenuScreen( ScreenManager* screenManager, EventManager* eventManager
     mOptionsBtn =  new UIButton();
     mOptionsBtn->setPosition( XMFLOAT2( 0.15f, 0.6f ) );
     mOptionsBtn->setDimension( XMFLOAT2( 0.3f, 0.12f ) );
-    mOptionsBtn->setText( UIElement::Text( "Join" ) );
+    mOptionsBtn->setText( UIElement::Text( "Options" ) );
 
     mQuitBtn =  new UIButton();
     mQuitBtn->setPosition( XMFLOAT2( 0.15f, 0.8f ) );
@@ -50,10 +50,10 @@ void MenuScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
         case 0:
             mParty->create();
             mScreenManager->pushScreen( ScreenManager::Type::Connection );
-            break;
+            return;
         case 1:
             mScreenManager->pushScreen( ScreenManager::Type::Connection );
-            break;
+            return;
         case 2:
             //Nothin yet!
             break;

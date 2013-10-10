@@ -8,10 +8,7 @@ class NetClient : public EventHandler{
 public:
 
     //Constr
-    NetClient();
-
-    //init
-    void init( EventManager* em );
+    NetClient( Party* party );
 
     //Handle event
     virtual void handleEvent( Event& e );
@@ -26,9 +23,10 @@ public:
     void update( float dt );
 
 protected:
-    EventManager* mEventManager;
 
     NetSocket mSocket;
+
+    Party* mParty;
 };
 
 #endif
