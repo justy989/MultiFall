@@ -42,6 +42,9 @@ void NetClient::update( float dt )
     while( mSocket.hasReceivedPackets() ){
         NetPacket packet = mSocket.popReceivedPacket();
 
+        //Safe guard against incoming packets
+        packet.clientGenerated = false;
+
         //If it is non-network specific packet, send it to the event manager
         if( packet.type >= Event::Type::PartyChat ){
             EVENTMANAGER->queueEvent( packet );
@@ -60,11 +63,11 @@ void NetClient::handleEvent( Event& e )
 {
     //If it is truly a world event, push the event to the socket
     if( e.type >= Event::Type::PartyChat ){
-        if( mSocket.isConnected() ){
+        if( mSocket.isConnected() && e.clientGenerated ){
+            //Turn off this flag since it is outgoing now, other clients need not know
+            e.clientGenerated = false; 
             mSocket.pushPacket( e );
         }
-
-        return;
     }
 
     //Attempt to connect

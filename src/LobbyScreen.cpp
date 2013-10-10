@@ -48,6 +48,7 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
                 Event e;
                 e.type = Event::Type::PartyMemberReady;
                 e.partyMemberReadyInfo.userIndex = mParty->getMyIndex();
+                e.clientGenerated = true;
                 EVENTMANAGER->queueEvent( e );
             }
             break;

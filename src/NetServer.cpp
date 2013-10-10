@@ -105,6 +105,7 @@ void NetServer::handleEvent( Event& e )
     if( e.type >= Event::Type::CharacterSpawn ){
         for(int i = 1; i < PARTY_SIZE; i++){
             if( mClientSockets[i].isConnected() ){
+                e.clientGenerated = false;
                 mClientSockets[i].pushPacket( e );
             }
         }
