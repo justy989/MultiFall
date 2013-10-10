@@ -5,7 +5,7 @@
 bool NetListenSocket::listenOn( ushort port )
 {
     //Create the socket
-    mSocket = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP ); 
+    mSocket = socket( PF_INET, SOCK_STREAM, 0 ); 
 
     if( mSocket == INVALID_SOCKET ){
         LOG_ERRO << "Unable to create socket" << LOG_ENDL;
@@ -23,12 +23,12 @@ bool NetListenSocket::listenOn( ushort port )
 
     //Create the address to localhost:port
     struct sockaddr_in addr;
+    ZeroMemory( &addr, sizeof addr );
     addr.sin_family = AF_INET;
-    addr.sin_port = port;
-    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    addr.sin_port = htons( port );
 
     //Bind the socket to the port
-    if( bind( mSocket, (struct sockaddr*)(&addr), sizeof addr ) ){
+    if( bind( mSocket, (struct sockaddr*)(&addr), sizeof addr ) == SOCKET_ERROR ){
         LOG_ERRO << "Failed to bind() socket to port: " << port << LOG_ENDL;        
         disconnect();
         return false;
@@ -50,20 +50,22 @@ bool NetListenSocket::listenOn( ushort port )
 
 bool NetListenSocket::acceptSocket( NetSocket* acceptedSocket )
 {
-    //Set the socket to check
-    fd_set socksToCheck;
-    socksToCheck.fd_count = 1;
-    socksToCheck.fd_array[0] = mSocket;
-
+    /*
     //Set the timeout to 1000us
     timeval timeout;
     timeout.tv_sec = 0;
     timeout.tv_usec = 1000;
+    
+    fd_set fd;
+
+    FD_ZERO( &fd );
+    FD_SET( mSocket, &fd );
 
     //Check to see if the socket has a connection waiting
-    if( select( 0, &socksToCheck, NULL, NULL, &timeout ) != 1 ){
+    if( select( mSocket + 1, &fd, NULL, NULL, &timeout ) != 1 ){
+        //This should fail regularly if there is no data on the socket
         return false;
-    }
+    }*/
 
     struct sockaddr_in addr;
     int addrLen = sizeof addr;
@@ -72,16 +74,20 @@ bool NetListenSocket::acceptSocket( NetSocket* acceptedSocket )
     SOCKET sock = accept( mSocket, (struct sockaddr*)(&addr), &addrLen );
 
     if( sock == INVALID_SOCKET ){
+        //mSocket is non-blocking, so this should happen frequently
         return false;
     }
 
     if( getpeername( sock, (struct sockaddr*)(&addr), &addrLen ) == SOCKET_ERROR ){
+        LOG_INFO << "Unable to obtain address from accepted socket." << LOG_ENDL;
         return false;
     }
 
     //Convert address to human readable
-    //uint ip = ntohl( addr.sin_addr.s_addr );
+    uint ip = ntohl( addr.sin_addr.s_addr );
     char* host = inet_ntoa( addr.sin_addr );
+
+    LOG_INFO << "Accepted connection from: " << host << LOG_ENDL;
 
     //create a NetSocket from a SOCKET that we have accepted
     acceptedSocket->createFromConnectedSocket( sock, host, addr.sin_port );

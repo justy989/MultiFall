@@ -63,6 +63,9 @@ public:
     //Consumes a packet from the recevied packet queue
     NetPacket popReceivedPacket();
 
+    static bool initSocketAPI();
+    static void clearSocketAPI();
+
 protected:
 
     void setSocketOptions();
