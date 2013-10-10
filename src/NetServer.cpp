@@ -1,5 +1,7 @@
 #include "NetServer.h"
 
+#include "Log.h"
+
 NetServer::NetServer( Party* party ) :
     mParty(party)
 {
@@ -29,6 +31,7 @@ void NetServer::acceptConnections( )
     for(int i = 1; i < PARTY_SIZE; i++){
         if( !mClientSockets[i].isConnected() ){
             sock = mClientSockets + i;
+            break;
         }
     }
 
@@ -49,7 +52,7 @@ void NetServer::update( float dt )
 
     //For now, just pass everyone's packets to everyone else
     for(int i = 1; i < PARTY_SIZE; i++){
-        if( !mClientSockets[i].isConnected() ){
+        if( mClientSockets[i].isConnected() ){
             mClientSockets[i].process();
 
             //While there are packets to process
@@ -64,24 +67,29 @@ void NetServer::update( float dt )
                     mClientSockets[i].pushPacket( newPacket );
 
                     //Format member join packet
-                    newPacket.type = NetPacket::Type::PartyMemberJoin;
-                    newPacket.partyMemberJoinInfo.userIndex = i;
-                    strcpy( newPacket.partyMemberJoinInfo.name, packet.partyJoinRequestInfo.name );
+                    NetPacket toMembers;
+                    toMembers.type = NetPacket::Type::PartyMemberJoin;
+                    toMembers.partyMemberJoinInfo.userIndex = i;
+                    strcpy( toMembers.partyMemberJoinInfo.name, packet.partyJoinRequestInfo.name );
 
                     //Send packets to the rest of the members that this member has joined
                     for(int p = 1; p < PARTY_SIZE; p++){
                         if( p == i ){continue;}
-                        mClientSockets[p].pushPacket( newPacket );
+                        if( mClientSockets[p].isConnected() ){
+                            mClientSockets[p].pushPacket( toMembers );
+                        }
                     }
 
                     //Send the event, so the server knows they have joined
-                    EVENTMANAGER->queueEvent( newPacket );
+                    EVENTMANAGER->queueEvent( toMembers );
 
                 //Else if the packet is of another type
                 }else if( packet.type >= NetPacket::Type::PartyChat ){
                     for(int p = 1; p < PARTY_SIZE; p++){
                         if( p == i ){continue;}
-                        mClientSockets[p].pushPacket( packet );
+                        if( mClientSockets[p].isConnected() ){
+                            mClientSockets[p].pushPacket( packet );
+                        }
                     }
                 }else{
                     //Check if client has disconnected
@@ -93,7 +101,7 @@ void NetServer::update( float dt )
 
             //Check if client has timed out
             if( mClientSockets[i].getStatus() == NetSocket::Status::Timed_Out ){
-                
+                LOG_INFO << mParty->getMember(i).getName() << " timed out." << LOG_ENDL;
             }
         }
     }

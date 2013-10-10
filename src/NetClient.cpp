@@ -1,27 +1,17 @@
 #include "NetClient.h"
 #include "Party.h"
 
+#include "Log.h"
+
 NetClient::NetClient( Party* party ) :
     mParty(NULL)
 {
 
 }
 
-bool NetClient::connect( char* ip, ushort port, char* name )
+bool NetClient::connect( char* ip, ushort port )
 {
-    bool res = mSocket.connectTo( ip, port );
-
-    if( res ){
-        //Format the packet
-        NetPacket packet;
-        packet.type = NetPacket::Type::PartyJoinRequest;
-        strcpy( packet.partyJoinRequestInfo.name, name);
-
-        //Push it to be sent when we update
-        mSocket.pushPacket( packet );
-    }
-
-    return res;
+    return mSocket.connectTo( ip, port );
 }
 
 void NetClient::disconnect()
@@ -56,6 +46,7 @@ void NetClient::update( float dt )
         Event e;
         e.type = Event::Type::NetworkTimeout;
         EVENTMANAGER->queueEvent( e );
+        LOG_INFO << "Connection Timed out" << LOG_ENDL;
     }
 }
 

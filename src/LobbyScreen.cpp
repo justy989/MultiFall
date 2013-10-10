@@ -46,8 +46,14 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
         case 1:
             {
                 Event e;
-                e.type = Event::Type::PartyMemberReady;
-                e.partyMemberReadyInfo.userIndex = mParty->getMyIndex();
+                if( mReadyCheckbox->isChecked() ){
+                    e.type = Event::Type::PartyMemberReady;
+                    e.partyMemberReadyInfo.userIndex = mParty->getMyIndex();
+                }else{
+                    e.type = Event::Type::PartyMemberUnReady;
+                    e.partyMemberUnReadyInfo.userIndex = mParty->getMyIndex();
+                }
+
                 e.clientGenerated = true;
                 EVENTMANAGER->queueEvent( e );
             }
@@ -94,6 +100,18 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
             EVENTMANAGER->queueEvent( e );
         }
     }
+
+    char buffer[ 1024 ];
+    buffer[ 0 ] = '\0';
+
+    //Lets build the party Textbox
+    for(int i = 0; i < PARTY_SIZE; i++){
+        if( mParty->getMember(i).doesExist() ){
+            sprintf(buffer, "%s\n%d: %s : %s", buffer, i, mParty->getMember(i).getName(), mParty->getMember(i).isReady() ? "Ready" : "Not Ready" );
+        }
+    }
+
+    mPartyTextbox->setText( buffer, strlen( buffer ) );
 
     uiDisplay->buildWindowVB( mWindow, aspectRatio );
 }

@@ -68,6 +68,7 @@ bool NetSocket::connectTo( char* host, ushort port, uint timeout )
 
     //Set time
     mReceivedTimeStamp = timeGetTime();
+    mTimeout = mReceivedTimeStamp + NET_DEFAULT_TIMEOUT;
 
     //Success!
     return true;
@@ -89,6 +90,7 @@ void NetSocket::createFromConnectedSocket( SOCKET socket, char* ip, ushort port,
 
     //Set time
     mReceivedTimeStamp = timeGetTime();
+    mTimeout = mReceivedTimeStamp + NET_DEFAULT_TIMEOUT;
 }
 
 void NetSocket::disconnect( )
@@ -138,9 +140,11 @@ uint NetSocket::getConnectedPort()
 
 bool NetSocket::pushPacket( NetPacket& packet )
 {
-    if( mSendingPackets.size() < NET_MAX_PACKET_COUNT ){
+    if( mSendingPackets.size() >= NET_MAX_PACKET_COUNT ){
         return false;
     }
+
+    LOG_INFO << "Pushed Pkt: " << packet.type << LOG_ENDL;
 
     mSendingPackets.push( packet );
     return true;
@@ -154,6 +158,8 @@ void NetSocket::process()
     while( mSendingPackets.size() ){
         //Get the front packet
         packet = mSendingPackets.front();
+
+        LOG_INFO << "Sent Pkt: " << packet.type << LOG_ENDL;
 
         //Send it
         send( mSocket, (char*)(&packet), sizeof( packet ), 0 );
@@ -173,8 +179,11 @@ void NetSocket::process()
         //If we consumed bytes add the packet to the queue
         if( byteCount > 0 ){
 
+            LOG_INFO << "Recv Pkt: " << packet.type << LOG_ENDL;
+
             //Set the timestamp of the last received packet
             mReceivedTimeStamp = timeGetTime();
+            mTimeout = mReceivedTimeStamp + NET_DEFAULT_TIMEOUT;
 
             if( mReceivedPackets.size() < NET_MAX_PACKET_COUNT ){
                 mReceivedPackets.push( packet );

@@ -47,6 +47,15 @@ ConnectionScreen::ConnectionScreen( ScreenManager* screenManager, World* world, 
     }else{
         delete mIPBox;
     }
+
+    if( mParty->isLeader() ){
+        mPortBox->setInput( "1990" );
+        mNameBox->setInput( "Leader" );
+    }else{
+        mIPBox->setInput( "localhost" );
+        mPortBox->setInput( "1990" );
+        mNameBox->setInput( "Member" );
+    }
 }
 
 ConnectionScreen::~ConnectionScreen()
@@ -104,7 +113,6 @@ void ConnectionScreen::handleEvent( Event& e )
     case Event::Type::NetworkIsConnected:
         {
             LOG_INFO << "Connected to host: " << mIPBox->getInput() << " : " << mPortBox->getInput() << LOG_ENDL;
-            //We have connected, lets try to join the party
 
             Event newEvent;
             newEvent.type = Event::Type::PartyJoinRequest;

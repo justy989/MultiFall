@@ -15,7 +15,7 @@ public:
     virtual void handleEvent( Event& e );
 
     //connect to a host:ip
-    bool connect( char* ip, ushort port, char* name );
+    bool connect( char* ip, ushort port );
 
     //disconnect
     void disconnect();

@@ -182,8 +182,8 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 		// Otherwise, do animation/game stuff.
 		else
         {
-            if( !mWindow.isPaused() /*&& mTimer.getTimeElapsed() > LIMIT_60_FPS*/ )
-			{
+            //if( !mWindow.isPaused() /*&& mTimer.getTimeElapsed() > LIMIT_60_FPS*/ )
+			//{
                 mTimer.start();
 
                 mCamera.update( mWindow.getAspectRatio() );
@@ -199,9 +199,9 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 
 				update( d );
                 draw();
-			}/*else{
-				Sleep(100);
-			}*/
+			//}/*else{
+				//Sleep(100);
+			//}*/
 
             mTimer.stop();
 
