@@ -52,8 +52,15 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
     }else if( change.action == UIElement::UserChange::Action::ClickButton ){
         switch( change.id ){
         case 2:
-            //Go back 2 states!
-            mScreenManager->popScreen();
+            {
+                mParty->disband();
+
+                Event e;
+                e.type = Event::Type::NetworkDisconnect;
+                EVENTMANAGER->queueEvent( e );
+
+                mScreenManager->popScreen();
+            }
             return;
         default:
             break;

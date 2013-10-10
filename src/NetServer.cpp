@@ -44,6 +44,9 @@ void NetServer::acceptConnections( )
 
 void NetServer::update( float dt )
 {
+    //Attempt to accept connections
+    acceptConnections();
+
     //For now, just pass everyone's packets to everyone else
     for(int i = 1; i < PARTY_SIZE; i++){
         if( !mClientSockets[i].isConnected() ){
@@ -104,13 +107,37 @@ void NetServer::update( float dt )
 
 void NetServer::handleEvent( Event& e )
 {
-    NetPacket packet;
-    packet.type = NetPacket::Type::WorldEvent;
-    packet.worldEventInfo = e;
+    if( e.type >= Event::Type::CharacterSpawn ){
+        NetPacket packet;
+        packet.type = NetPacket::Type::WorldEvent;
+        packet.worldEventInfo = e;
 
-    for(int i = 1; i < PARTY_SIZE; i++){
-        if( mClientSockets[i].isConnected() ){
-            mClientSockets[i].pushPacket( packet );
+        for(int i = 1; i < PARTY_SIZE; i++){
+            if( mClientSockets[i].isConnected() ){
+                mClientSockets[i].pushPacket( packet );
+            }
         }
+    }
+
+    switch( e.type ){
+    case Event::Type::NetworkListen:
+        {
+            bool success = mSocket.listenOn( e.networkListenInfo.port );
+            Event toSend;
+
+            if( success ){
+                toSend.type = Event::Type::NetworkIsListening;
+            }else{
+                toSend.type = Event::Type::NetworkDisconnect;
+            }
+
+            EVENTMANAGER->queueEvent( toSend );
+        }
+        break;
+    case Event::Type::NetworkDisconnect:
+        disconnect();
+        break;
+    default:
+        break;
     }
 }

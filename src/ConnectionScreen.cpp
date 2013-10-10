@@ -1,5 +1,7 @@
 #include "ConnectionScreen.h"
 
+#include "Log.h"
+
 ConnectionScreen::ConnectionScreen( ScreenManager* screenManager, World* world, Party* party ) :
     Screen( screenManager, world, party )
 {
@@ -58,8 +60,19 @@ void ConnectionScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio
             mScreenManager->popScreen();
             return;
         case 1:
-            //Attempt to connect, if we are successful, 
-            mScreenManager->pushScreen( ScreenManager::Type::Lobby );
+            {
+                Event e;
+                if( mParty->isLeader() ){
+                    e.type = Event::Type::NetworkListen;
+                    e.networkListenInfo.port = atoi( mPortBox->getInput() );
+                }else{
+                    e.type = Event::Type::NetworkConnect;
+                    e.networkConnectInfo.host = mIPBox->getInput();
+                    e.networkConnectInfo.port = atoi( mPortBox->getInput() );
+                }
+
+                EVENTMANAGER->queueEvent( e );
+            }
             return;
         case 2:
             PostQuitMessage(0);
@@ -75,4 +88,26 @@ void ConnectionScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio
 void ConnectionScreen::draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager )
 {
     uiDisplay->drawWindowText( device, mWindow, *textManager );
+}
+
+void ConnectionScreen::handleEvent( Event& e )
+{
+    switch( e.type ){
+    case Event::Type::NetworkTimeout:
+        LOG_INFO << "Failed to connect to specified host: " << mIPBox->getInput() << " : " << mPortBox->getInput() << LOG_ENDL;
+        break;
+    case Event::Type::NetworkIsConnected:
+        LOG_INFO << "Connected to host: " << mIPBox->getInput() << " : " << mPortBox->getInput() << LOG_ENDL;
+        mScreenManager->pushScreen( ScreenManager::Type::Lobby );
+        break;
+    case Event::Type::NetworkIsListening:
+        LOG_INFO << "Listening on port: " << mPortBox->getInput() << LOG_ENDL;
+        mScreenManager->pushScreen( ScreenManager::Type::Lobby );
+        break;
+    case Event::Type::NetworkDisconnect:
+        LOG_INFO << "Failed to listen on specified port: " << mPortBox->getInput() << LOG_ENDL;
+        break;
+    default:
+        break;
+    }
 }

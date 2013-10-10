@@ -5,11 +5,13 @@
 
 struct Event{
     enum Type{
-        //Game Events
-        GenerateLevel,
-
         //Network Events
+        NetworkListen,
+        NetworkIsListening,
+        NetworkConnect,
+        NetworkIsConnected,
         NetworkTimeout, //User timed out
+        NetworkDisconnect,
 
         //Party
         PartyChat,    //Chat messages between party members
@@ -23,8 +25,13 @@ struct Event{
         CharacterWalk, //move a character in a direction
     };
 
-    struct GenerateLevelInfo{
-        uint seed;
+    struct NetworkListenInfo{
+        ushort port;
+    };
+
+    struct NetworkConnectInfo{
+        char* host;
+        ushort port;
     };
 
     struct PartyJoinInfo{
@@ -60,10 +67,13 @@ struct Event{
     Type type;
 
     union{
+        NetworkListenInfo networkListenInfo;
+        NetworkConnectInfo networkConnectInfo;
+
         PartyJoinInfo partyJoinInfo;
         PartyLeaveInfo partyLeaveInfo;
         PartyChatInfo partyChatInfo;
-        GenerateLevelInfo generateLevelInfo;
+
         CharacterSpawnInfo characterSpawnInfo;
         CharacterKillInfo characterKillInfo;
         CharacterWalkInfo characterWalkInfo;

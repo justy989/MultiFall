@@ -12,7 +12,8 @@ char* gDropDownOptions[] = {
     "White"
 };
 
-App::App() : mScreenManager( &mWorld, &mParty )
+App::App() : mScreenManager( &mWorld, &mParty ),
+    mNetClient( &mParty ), mNetServer( &mParty )
 {
     camKeyDown[0] = false;
     camKeyDown[1] = false;
@@ -132,6 +133,8 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
     MSG msg = {0};
     float fpsDelay = 0.0f;	
 
+    NetSocket::initSocketAPI();
+
     //Load the configuration
     if( !mConfig.load( "content/multifall.cfg" ) ){
         return 1;
@@ -196,9 +199,9 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
 
 				update( d );
                 draw();
-			}else{
+			}/*else{
 				Sleep(100);
-			}
+			}*/
 
             mTimer.stop();
 
@@ -220,6 +223,10 @@ bool App::init( )
 	mTextManager.init(mWindow.getDevice());
 
     EVENTMANAGER->registerHandler( &mWorld );
+    EVENTMANAGER->registerHandler( &mParty );
+    EVENTMANAGER->registerHandler( &mNetClient );
+    EVENTMANAGER->registerHandler( &mNetServer );
+    EVENTMANAGER->registerHandler( &mScreenManager );
 
     //Level Generation Data
     mLevelGenRanges.roomCount.set( 8, 16 );
@@ -829,6 +836,12 @@ void App::update( float dt )
     mKeyPress = false;
 
     EVENTMANAGER->process();
+
+    if( mParty.isLeader() ){
+        mNetServer.update( dt );
+    }else{
+        mNetClient.update( dt );
+    }
 }
 
 void App::draw( )
@@ -999,4 +1012,8 @@ void App::clear( )
     mUIDisplay.clear();
 
     mWindow.clear();
+
+    NetSocket::clearSocketAPI();
+
+    EventManager::destroyEventManager();
 }

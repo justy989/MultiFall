@@ -69,8 +69,34 @@ void NetClient::update( float dt )
 
 void NetClient::handleEvent( Event& e )
 {
-    NetPacket packet;
-    packet.type = NetPacket::Type::WorldEvent;
-    packet.worldEventInfo = e;
-    mSocket.pushPacket( packet );
+    if( e.type >= Event::Type::CharacterSpawn ){
+        NetPacket packet;
+        packet.type = NetPacket::Type::WorldEvent;
+        packet.worldEventInfo = e;
+
+        if( mSocket.isConnected() ){
+            mSocket.pushPacket( packet );
+        }
+
+        return;
+    }
+
+    switch( e.type ){
+    case Event::Type::NetworkConnect:
+        {
+            bool success = mSocket.connectTo( e.networkConnectInfo.host, e.networkConnectInfo.port );
+            Event toSend;
+
+            if( success ){
+                toSend.type = Event::Type::NetworkIsConnected;
+            }else{
+                toSend.type = Event::Type::NetworkTimeout;
+            }
+
+            EVENTMANAGER->queueEvent( toSend );
+        }
+        break;
+    default:
+        break;
+    }
 }

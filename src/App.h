@@ -33,6 +33,9 @@
 
 #include "ScreenManager.h"
 
+#include "NetClient.h"
+#include "NetServer.h"
+
 #include <d3dx11effect.h>
 
 class App : public WMInputHandler{
@@ -81,21 +84,21 @@ protected:
 
     Timer mTimer;
 
-    Camera mCamera;
 
     WorldDisplay mWorldDisplay;
-
-    World mWorld;
-
-    Party mParty;
-
 	TextManager mTextManager;
 
-    Console mConsole;
+    Camera mCamera;
+
+    World mWorld;
+    Party mParty;
 
     ScreenManager mScreenManager;
-
+    Console mConsole;
     UIDisplay mUIDisplay;
+
+    NetClient mNetClient;
+    NetServer mNetServer;
 
     //Tmp
     bool camKeyDown[4];

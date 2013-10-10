@@ -28,7 +28,11 @@ public:
     virtual void update( float dt, UIDisplay* uiDisplay, float aspectRatio,
                          bool mouseClick, XMFLOAT2 mousePos, bool keyPress, byte key ) = 0;
 
+    //draw the window text most likely
     virtual void draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager ) = 0;
+
+    //handle the event
+    virtual void handleEvent( Event& e ){}
 
     //Transition into the screen
     void transitionIn( );
@@ -66,7 +70,7 @@ public:
         Pause
     };
 
-    virtual void handleEvent( Event& e ) {}
+    virtual void handleEvent( Event& e ){ if( mScreens.size() ){ mScreens.top()->handleEvent( e ); }}
 
     //Update the current state
     void update( float dt, UIDisplay* uiDisplay, float aspectRatio,

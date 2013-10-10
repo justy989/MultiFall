@@ -33,7 +33,7 @@ bool NetSocket::connectTo( char* host, ushort port, uint timeout )
     }
 
     //Create the socket
-    mSocket = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP ); 
+    mSocket = socket( PF_INET, SOCK_STREAM, IPPROTO_TCP ); 
 
     if( mSocket == INVALID_SOCKET ){
         LOG_ERRO << "Unable to create socket" << LOG_ENDL;
@@ -47,9 +47,9 @@ bool NetSocket::connectTo( char* host, ushort port, uint timeout )
     char* remoteHost = inet_ntoa (*(struct in_addr *)*pHostAddr->h_addr_list);
 
     struct sockaddr_in addr;
-    addr.sin_port = AF_INET;
+    addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr(remoteHost);
-    addr.sin_port = port;
+    addr.sin_port = htons( port );
 
     //Attempt to connect
     if( connect( mSocket, (struct sockaddr*)(&addr), sizeof addr ) ){
@@ -171,7 +171,7 @@ void NetSocket::process()
         byteCount = recv( mSocket, (char*)(&packet), sizeof( packet ), 0 );
 
         //If we consumed bytes add the packet to the queue
-        if( byteCount ){
+        if( byteCount > 0 ){
 
             //Set the timestamp of the last received packet
             mReceivedTimeStamp = timeGetTime();
@@ -180,7 +180,7 @@ void NetSocket::process()
                 mReceivedPackets.push( packet );
             }
         }
-    } while( byteCount );
+    } while( byteCount > 0 );
 
     //If we haven't received packets in a while, time out
     if( mReceivedTimeStamp > mTimeout ){
@@ -199,4 +199,18 @@ NetPacket NetSocket::popReceivedPacket()
     NetPacket p = mReceivedPackets.front();
     mReceivedPackets.pop();
     return p;
+}
+
+bool NetSocket::initSocketAPI()
+{
+    WORD socketStartupVersion = MAKEWORD(2, 2);
+    WSADATA wsaData;
+
+    //Start up the socket API
+    return WSAStartup( socketStartupVersion, &wsaData ) == 0;
+}
+
+void NetSocket::clearSocketAPI()
+{
+    WSACleanup();
 }
