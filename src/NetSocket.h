@@ -4,7 +4,8 @@
 #include <WinSock2.h>
 #include <queue>
 
-#include "NetPacket.h"
+//#include "NetPacket.h"
+#include "Event.h"
 #include "Utils.h"
 
 #define NET_MAX_PACKET_SIZE 256
@@ -15,6 +16,8 @@
 #define SOCKET_MAX_RECV_BUFFER ( NET_MAX_PACKET_SIZE * NET_MAX_PACKET_COUNT )
 
 #define SOCKET_NONBLOCKING 1
+
+typedef Event NetPacket;
 
 class NetSocket{
 public:

@@ -1,7 +1,7 @@
 #ifndef PARTY_MEMBER_H
 #define PARTY_MEMBER_H
 
-#define MEMBER_NAME_LEN 32
+#include "Utils.h"
 
 class Member{
 public:
@@ -22,10 +22,10 @@ protected:
     bool mExists;
     bool mIsReady;
 
-    char mName[ MEMBER_NAME_LEN ];
+    char mName[ NAME_LEN ];
 };
 
-inline void Member::setName( char* name ){strncpy(mName, name, MEMBER_NAME_LEN);}
+inline void Member::setName( char* name ){strncpy(mName, name, NAME_LEN);}
 inline char* Member::getName(){return mName;}
 
 inline void Member::setExist( bool val ){mExists = val;}

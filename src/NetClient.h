@@ -3,6 +3,7 @@
 
 #include "NetSocket.h"
 #include "EventManager.h"
+#include "Party.h"
 
 class NetClient : public EventHandler{
 public:

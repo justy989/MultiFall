@@ -14,8 +14,8 @@ bool NetClient::connect( char* ip, ushort port, char* name )
     if( res ){
         //Format the packet
         NetPacket packet;
-        packet.type = NetPacket::Type::PartyJoin;
-        strcpy( packet.partyJoinInfo.name, name);
+        packet.type = NetPacket::Type::PartyJoinRequest;
+        strcpy( packet.partyJoinRequestInfo.name, name);
 
         //Push it to be sent when we update
         mSocket.pushPacket( packet );
@@ -31,56 +31,43 @@ void NetClient::disconnect()
 
 void NetClient::update( float dt )
 {
+    //Break early if we are not connected
+    if( !mSocket.isConnected() ){
+        return;
+    }
+
     //Have the socket process packets
     mSocket.process();
 
     while( mSocket.hasReceivedPackets() ){
         NetPacket packet = mSocket.popReceivedPacket();
 
-        switch( packet.type ){
-        case NetPacket::Type::PartySync:
-            {
-                packet.partySyncInfo.myIndex; //My Index 
-
-                Event e;
-                e.type = Event::Type::PartyJoin;
-
-                for(int i = 0; i < PARTY_SIZE; i++){
-                    //Skip my index
-                    if( i == packet.partySyncInfo.myIndex ){ continue; }
-
-                    sprintf( e.partyJoinInfo.name, packet.partySyncInfo.names[i] );
-                    EVENTMANAGER->queueEvent( e );
-                }
-            }
-            break;
-        case NetPacket::Type::WorldEvent:
-            {
-                Event e;
-                e = packet.worldEventInfo;
-                EVENTMANAGER->queueEvent( e );
-            }
-            break;
-        default:
-            break;
+        //If it is non-network specific packet, send it to the event manager
+        if( packet.type >= Event::Type::PartyChat ){
+            EVENTMANAGER->queueEvent( packet );
         }
+    }
+
+    //Send an event if we determined we have timed out
+    if( mSocket.getStatus() == NetSocket::Status::Timed_Out ){
+        Event e;
+        e.type = Event::Type::NetworkTimeout;
+        EVENTMANAGER->queueEvent( e );
     }
 }
 
 void NetClient::handleEvent( Event& e )
 {
-    if( e.type >= Event::Type::CharacterSpawn ){
-        NetPacket packet;
-        packet.type = NetPacket::Type::WorldEvent;
-        packet.worldEventInfo = e;
-
+    //If it is truly a world event, push the event to the socket
+    if( e.type >= Event::Type::PartyChat ){
         if( mSocket.isConnected() ){
-            mSocket.pushPacket( packet );
+            mSocket.pushPacket( e );
         }
 
         return;
     }
 
+    //Attempt to connect
     switch( e.type ){
     case Event::Type::NetworkConnect:
         {
@@ -95,6 +82,9 @@ void NetClient::handleEvent( Event& e )
 
             EVENTMANAGER->queueEvent( toSend );
         }
+        break;
+    case Event::Type::NetworkDisconnect:
+        mSocket.disconnect();
         break;
     default:
         break;

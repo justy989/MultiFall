@@ -44,7 +44,12 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
     if( change.action == UIElement::UserChange::Action::CheckBox ){
         switch( change.id ){
         case 1:
-            mScreenManager->pushScreen( ScreenManager::Type::Worldy );
+            {
+                Event e;
+                e.type = Event::Type::PartyMemberReady;
+                e.partyMemberReadyInfo.userIndex = mParty->getMyIndex();
+                EVENTMANAGER->queueEvent( e );
+            }
             break;
         default:
             break;
@@ -67,10 +72,43 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
         }
     }
 
+    //If we are the party leader, check to see if everyone is ready!
+    if( mParty->isLeader() ){
+        int exists = 0;
+        int ready = 0;
+        for(int i = 0; i < PARTY_SIZE; i++){
+            if( mParty->getMember(i).doesExist() ){
+                exists++;
+            }
+
+            if( mParty->getMember(i).isReady() ){
+                ready++;
+            }
+        }
+
+        //Is everyone ready? Lets do this!
+        if( exists == ready ){
+            Event e;
+            e.type = Event::Type::SessionStart;
+            EVENTMANAGER->queueEvent( e );
+        }
+    }
+
     uiDisplay->buildWindowVB( mWindow, aspectRatio );
 }
 
 void LobbyScreen::draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager )
 {
     uiDisplay->drawWindowText( device, mWindow, *textManager );
+}
+
+void LobbyScreen::handleEvent( Event& e )
+{
+    switch( e.type ){
+    case Event::Type::SessionStart:
+        mScreenManager->pushScreen( ScreenManager::Type::Worldy );
+        break;
+    default:
+        break;
+    }
 }

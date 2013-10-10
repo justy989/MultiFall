@@ -57,23 +57,34 @@ void Party::memberLeave( uint index )
 void Party::handleEvent( Event& e )
 {
     switch( e.type ){
-    case Event::Type::PartyJoin:
-        memberJoin( e.partyJoinInfo.name, e.partyJoinInfo.index );
-        LOG_INFO << mMembers[ e.partyJoinInfo.index ].getName() << " joined the party." << LOG_ENDL;
+    case Event::Type::PartyJoinAccept:
+        join( e.partyJoinAcceptInfo.userIndex );
         break;
-    case Event::Type::PartyLeave:
-        memberLeave( e.partyLeaveInfo.index );
-        LOG_INFO << mMembers[ e.partyChatInfo.index ].getName() << " left the party." << LOG_ENDL;
+    case Event::Type::PartyMemberReady:
+        assert( e.partyMemberReadyInfo.userIndex < PARTY_SIZE );
+        mMembers[ e.partyMemberReadyInfo.userIndex ].setReady( true );
+        break;
+    case Event::Type::PartyMemberUnReady:
+        assert( e.partyMemberReadyInfo.userIndex < PARTY_SIZE );
+        mMembers[ e.partyMemberReadyInfo.userIndex ].setReady( false );
+        break;
+    case Event::Type::PartyMemberJoin:
+        memberJoin( e.partyMemberJoinInfo.name, e.partyMemberJoinInfo.userIndex );
+        LOG_INFO << mMembers[ e.partyMemberJoinInfo.userIndex ].getName() << " joined the party." << LOG_ENDL;
+        break;
+    case Event::Type::PartyMemberLeave:
+        memberLeave( e.partyMemberLeaveInfo.userIndex );
+        LOG_INFO << mMembers[ e.partyMemberLeaveInfo.userIndex ].getName() << " left the party." << LOG_ENDL;
         break;
     case Event::Type::PartyDisband:
         disband();
         LOG_INFO << "Party Disbanded." << LOG_ENDL;
         break;
     case Event::Type::PartyChat:
-        if( e.partyChatInfo.index == PARTY_LEADER_INDEX ){
-            LOG_INFO << "[L] " << mMembers[ e.partyChatInfo.index ].getName() << " : " << LOG_ENDL;
+        if( e.partyChatInfo.userIndex == PARTY_LEADER_INDEX ){
+            LOG_INFO << "[L] " << mMembers[ e.partyChatInfo.userIndex ].getName() << " : " << LOG_ENDL;
         }else{
-            LOG_INFO << mMembers[ e.partyChatInfo.index ].getName() << " : " << LOG_ENDL;
+            LOG_INFO << mMembers[ e.partyChatInfo.userIndex ].getName() << " : " << LOG_ENDL;
         }
         break;
     default:

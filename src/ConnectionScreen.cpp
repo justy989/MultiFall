@@ -6,7 +6,7 @@ ConnectionScreen::ConnectionScreen( ScreenManager* screenManager, World* world, 
     Screen( screenManager, world, party )
 {
     mWindow.init(1);
-    mWindow.initTab( 0, "", 4 );
+    mWindow.initTab( 0, "", 5 );
     mWindow.setPosition( XMFLOAT2( -0.5f, -0.5f ) );
     mWindow.setDimension( XMFLOAT2( 1.0f, 1.0f ) );
     mWindow.setText( UIElement::Text( "Connection" ) );
@@ -31,10 +31,16 @@ ConnectionScreen::ConnectionScreen( ScreenManager* screenManager, World* world, 
     mPortBox->setDimension( XMFLOAT2( 0.3f, 0.12f ) );
     mPortBox->setText( UIElement::Text( "Port", XMFLOAT2( -0.25f, 0.0f ) ) );
 
+    mNameBox = new UIInputBox();
+    mNameBox->setPosition( XMFLOAT2( 0.225f, 0.6f ) );
+    mNameBox->setDimension( XMFLOAT2( 0.5f, 0.12f ) );
+    mNameBox->setText( UIElement::Text( "Name", XMFLOAT2( -0.3f, 0.0f ) ) );
+
     mWindow.addElem( mBackBtn );
     mWindow.addElem( mActionBtn );
 
     mWindow.addElem( mPortBox );
+    mWindow.addElem( mNameBox );
 
     if( !party->isLeader() ){
         mWindow.addElem( mIPBox );
@@ -62,12 +68,14 @@ void ConnectionScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio
         case 1:
             {
                 Event e;
+
                 if( mParty->isLeader() ){
                     e.type = Event::Type::NetworkListen;
                     e.networkListenInfo.port = atoi( mPortBox->getInput() );
+                    mParty->getMember(PARTY_LEADER_INDEX).setName( mNameBox->getInput() );
                 }else{
                     e.type = Event::Type::NetworkConnect;
-                    e.networkConnectInfo.host = mIPBox->getInput();
+                    strcpy( e.networkConnectInfo.host, mIPBox->getInput() );
                     e.networkConnectInfo.port = atoi( mPortBox->getInput() );
                 }
 
@@ -93,12 +101,16 @@ void ConnectionScreen::draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, 
 void ConnectionScreen::handleEvent( Event& e )
 {
     switch( e.type ){
-    case Event::Type::NetworkTimeout:
-        LOG_INFO << "Failed to connect to specified host: " << mIPBox->getInput() << " : " << mPortBox->getInput() << LOG_ENDL;
-        break;
     case Event::Type::NetworkIsConnected:
-        LOG_INFO << "Connected to host: " << mIPBox->getInput() << " : " << mPortBox->getInput() << LOG_ENDL;
-        mScreenManager->pushScreen( ScreenManager::Type::Lobby );
+        {
+            LOG_INFO << "Connected to host: " << mIPBox->getInput() << " : " << mPortBox->getInput() << LOG_ENDL;
+            //We have connected, lets try to join the party
+
+            Event newEvent;
+            newEvent.type = Event::Type::PartyJoinRequest;
+            strcpy( newEvent.partyJoinRequestInfo.name, mNameBox->getInput() );
+            EVENTMANAGER->queueEvent( newEvent );
+        }
         break;
     case Event::Type::NetworkIsListening:
         LOG_INFO << "Listening on port: " << mPortBox->getInput() << LOG_ENDL;
@@ -106,6 +118,11 @@ void ConnectionScreen::handleEvent( Event& e )
         break;
     case Event::Type::NetworkDisconnect:
         LOG_INFO << "Failed to listen on specified port: " << mPortBox->getInput() << LOG_ENDL;
+        break;
+    case Event::Type::PartyJoinAccept:
+        LOG_INFO << "Joined the party with the member index: " << e.partyJoinAcceptInfo.userIndex << LOG_ENDL;
+        mParty->getMember( e.partyJoinAcceptInfo.userIndex ).setName( mNameBox->getInput() );
+        mScreenManager->pushScreen( ScreenManager::Type::Lobby );
         break;
     default:
         break;

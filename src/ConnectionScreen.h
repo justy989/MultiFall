@@ -24,6 +24,7 @@ protected:
 
     UIInputBox* mIPBox;
     UIInputBox* mPortBox;
+    UIInputBox* mNameBox;
     UIButton* mBackBtn;
     UIButton* mActionBtn;
 };

@@ -1,5 +1,7 @@
 #include "Population.h"
 
+#include "Party.h"
+
 #include <assert.h>
 
 Population::Population()
@@ -18,7 +20,8 @@ void Population::update( float dt )
 
 ushort Population::spawn( ushort id, XMFLOAT4 position )
 {
-    for(int i = 0; i < POPULATION_MAX_CHARACTERS; i++){
+    //Start at party size, in order to leave room for the party
+    for(int i = PARTY_SIZE; i < POPULATION_MAX_CHARACTERS; i++){
         if( mCharacters[i].getExistence() == WorldEntity::Existence::Dead ){
             mCharacters[i].setExistence( WorldEntity::Existence::Alive );
             mCharacters[i].getPosition() = position;

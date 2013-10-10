@@ -6,6 +6,14 @@
 class Character : public WorldEntity{
 public:
 
+    enum Action{
+        Idle,
+        Melee,
+        Cast,
+        Use,
+        Activate
+    };
+
     Character();
 
     virtual void update( float dt );
@@ -15,11 +23,16 @@ public:
     inline void setID( ushort id );
     inline ushort getID();
 
+    void walk();
+
+
 protected:
 
     XMFLOAT4 mFacingDirection;
 
     ushort mID;
+
+    Action mCurrentAction;
 
     //Stats
 
