@@ -1,5 +1,7 @@
 #include "LobbyScreen.h"
 
+#include <time.h>
+
 LobbyScreen::LobbyScreen( ScreenManager* screenManager, World* world, Party* party ) :
     Screen( screenManager, world, party )
 {
@@ -98,6 +100,7 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
         if( exists == ready ){
             Event e;
             e.type = Event::Type::SessionStart;
+            e.sessionStartInfo.levelSeed = time(0);
             EVENTMANAGER->queueEvent( e );
         }
     }

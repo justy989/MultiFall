@@ -32,7 +32,6 @@ struct Event{
         PartyDisband,        //Party has disbanded
 
         //Session Packets
-        SessionGenLevel, //Generate the level, place the players
         SessionStart,    //Start the session
         SessionPause,    //Pause session for all players
         SessionComplete, //Session is complete, back to lobby
@@ -65,6 +64,7 @@ struct Event{
     struct PartyMemberJoinInfo{
         char name[ NAME_LEN ];
         uint userIndex;
+        bool ready;
     };
 
     struct PartyMemberLeaveInfo{
@@ -91,7 +91,7 @@ struct Event{
         uint userIndex;
     };
 
-    struct SessionGenLevelInfo{
+    struct SessionStartInfo{
         uint levelSeed;
         //float pX[ PARTY_SIZE ];
         //float pZ[ PARTY_SIZE ];
@@ -130,7 +130,7 @@ struct Event{
         PartyJoinRequestInfo partyJoinRequestInfo;
         PartyJoinAcceptInfo partyJoinAcceptInfo;
 
-        SessionGenLevelInfo sessionGenLevelInfo;
+        SessionStartInfo sessionStartInfo;
 
         CharacterSpawnInfo characterSpawnInfo;
         CharacterKillInfo characterKillInfo;

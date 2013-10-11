@@ -227,6 +227,7 @@ bool App::init( )
     EVENTMANAGER->registerHandler( &mNetClient );
     EVENTMANAGER->registerHandler( &mNetServer );
     EVENTMANAGER->registerHandler( &mScreenManager );
+    EVENTMANAGER->registerHandler( this );
 
     //Level Generation Data
     mLevelGenRanges.roomCount.set( 8, 16 );
@@ -1016,4 +1017,15 @@ void App::clear( )
     NetSocket::clearSocketAPI();
 
     EventManager::destroyEventManager();
+}
+
+void App::handleEvent( Event& e )
+{
+    switch( e.type ){
+    case Event::Type::SessionStart:
+        genLevel( e.sessionStartInfo.levelSeed );
+        break;
+    default:
+        break;
+    }
 }

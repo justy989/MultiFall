@@ -20,7 +20,7 @@ public:
     void join( uint myIndex );
     void disband();
 
-    void memberJoin( char* name, uint index );
+    void memberJoin( char* name, uint index, bool ready );
     void memberLeave( uint index );
 
     inline bool isLeader();

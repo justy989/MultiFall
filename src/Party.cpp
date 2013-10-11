@@ -40,12 +40,13 @@ void Party::disband()
     mIsLeader = false;
 }
 
-void Party::memberJoin( char* name, uint index )
+void Party::memberJoin( char* name, uint index, bool ready )
 {
     assert( index < PARTY_SIZE );
 
     mMembers[ index ].setName( name );
     mMembers[ index ].setExist( true );
+    mMembers[ index ].setReady( ready );
 }
 
 void Party::memberLeave( uint index )
@@ -70,7 +71,7 @@ void Party::handleEvent( Event& e )
         mMembers[ e.partyMemberReadyInfo.userIndex ].setReady( false );
         break;
     case Event::Type::PartyMemberJoin:
-        memberJoin( e.partyMemberJoinInfo.name, e.partyMemberJoinInfo.userIndex );
+        memberJoin( e.partyMemberJoinInfo.name, e.partyMemberJoinInfo.userIndex, e.partyMemberJoinInfo.ready );
         LOG_INFO << mMembers[ e.partyMemberJoinInfo.userIndex ].getName() << " joined the party." << LOG_ENDL;
         break;
     case Event::Type::PartyMemberLeave:

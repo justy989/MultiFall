@@ -70,6 +70,7 @@ void NetServer::update( float dt )
                     NetPacket partySync;
                     partySync.type = NetPacket::Type::PartyMemberJoin;
                     partySync.partyMemberJoinInfo.userIndex = 0;
+                    partySync.partyMemberJoinInfo.ready = mParty->getMember(0).isReady();
                     strcpy( partySync.partyMemberJoinInfo.name, mParty->getMember(0).getName() );
 
                     mClientSockets[i].pushPacket( partySync );
@@ -78,6 +79,7 @@ void NetServer::update( float dt )
                     NetPacket toMembers;
                     toMembers.type = NetPacket::Type::PartyMemberJoin;
                     toMembers.partyMemberJoinInfo.userIndex = i;
+                    toMembers.partyMemberJoinInfo.ready = false;
                     strcpy( toMembers.partyMemberJoinInfo.name, packet.partyJoinRequestInfo.name );
 
                     //Send packets to the rest of the members that this member has joined
@@ -90,6 +92,7 @@ void NetServer::update( float dt )
                             NetPacket partySync;
                             partySync.type = NetPacket::Type::PartyMemberJoin;
                             partySync.partyMemberJoinInfo.userIndex = p;
+                            partySync.partyMemberJoinInfo.ready = mParty->getMember(p).isReady();
                             strcpy( partySync.partyMemberJoinInfo.name, mParty->getMember(p).getName() );
 
                             mClientSockets[i].pushPacket( partySync );
@@ -128,7 +131,7 @@ void NetServer::update( float dt )
 void NetServer::handleEvent( Event& e )
 {
     //Pass on world events to all clients
-    if( e.type >= Event::Type::CharacterSpawn && e.clientGenerated ){
+    if( e.type >= Event::Type::SessionStart && e.clientGenerated ){
         for(int i = 1; i < PARTY_SIZE; i++){
             if( mClientSockets[i].isConnected() ){
                 e.clientGenerated = false;

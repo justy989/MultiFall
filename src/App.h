@@ -38,13 +38,15 @@
 
 #include <d3dx11effect.h>
 
-class App : public WMInputHandler{
+class App : public WMInputHandler, public EventHandler{
 public:
 
     App();
 
     //handle input from the dx11 window
     virtual void handleInput( RAWINPUT* input );
+
+    virtual void handleEvent( Event& e );
 
     //run the application
     int run( HINSTANCE hInstance, int nCmdShow );
