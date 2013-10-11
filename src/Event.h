@@ -30,6 +30,7 @@ struct Event{
         PartyJoinRejectFull, //Rejected due to the party being full
         PartyJoinRejectInSession, //Rejected due to the party being in a session already
         PartyDisband,        //Party has disbanded
+        PartyMemberCharacterUpdate, //Update of the character info for a party member, such as pos, facingDirection, current action
 
         //Session Packets
         SessionStart,    //Start the session
@@ -57,30 +58,30 @@ struct Event{
     };
 
     struct PartyChatInfo{
-        uint userIndex;
+        uint memberIndex;
         char message[ CHAT_MESSAGE_LEN ];
     };
 
     struct PartyMemberJoinInfo{
         char name[ NAME_LEN ];
-        uint userIndex;
+        uint memberIndex;
         bool ready;
     };
 
     struct PartyMemberLeaveInfo{
-        uint userIndex;
+        uint memberIndex;
     };
 
     struct PartyMemberReadyInfo{
-        uint userIndex;
+        uint memberIndex;
     };
 
     struct PartyMemberUnReadyInfo{
-        uint userIndex;
+        uint memberIndex;
     };
 
     struct PartyMemberKickInfo{
-        uint userIndex;
+        uint memberIndex;
     };
 
     struct PartyJoinRequestInfo{
@@ -88,7 +89,15 @@ struct Event{
     };
 
     struct PartyJoinAcceptInfo{
-        uint userIndex;
+        uint memberIndex;
+    };
+
+    struct PartyMemberCharacterUpdateInfo{
+        float x; //X position 
+        float z; //Y position
+        float fx; //facing X position
+        float fz; //facing Y position
+        uint memberIndex; //index of the member
     };
 
     struct SessionStartInfo{
@@ -129,6 +138,7 @@ struct Event{
         PartyMemberKickInfo partyMemberKickInfo;
         PartyJoinRequestInfo partyJoinRequestInfo;
         PartyJoinAcceptInfo partyJoinAcceptInfo;
+        PartyMemberCharacterUpdateInfo partyMemberCharacterUpdateInfo;
 
         SessionStartInfo sessionStartInfo;
 

@@ -3,6 +3,8 @@
 
 #include "WorldEntity.h"
 
+#define CHARACTER_MOVE_SPEED 1.25f
+
 class Character : public WorldEntity{
 public:
 
@@ -19,16 +21,19 @@ public:
     virtual void update( float dt );
 
     inline XMFLOAT4& getFacingDirection();
+    inline XMFLOAT4& getWalkingDirection();
 
     inline void setID( ushort id );
     inline ushort getID();
 
-    void walk();
+    void walk( XMFLOAT4& direction );
+    void stop();
 
 
 protected:
 
     XMFLOAT4 mFacingDirection;
+    XMFLOAT4 mWalkingDirection;
 
     ushort mID;
 
@@ -42,6 +47,7 @@ protected:
 };
 
 inline XMFLOAT4& Character::getFacingDirection(){return mFacingDirection;}
+inline XMFLOAT4& Character::getWalkingDirection(){return mWalkingDirection;}
 
 inline void Character::setID( ushort id ){mID = id;}
 

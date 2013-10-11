@@ -51,10 +51,10 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
 
                 if( mReadyCheckbox->isChecked() ){
                     e.type = Event::Type::PartyMemberReady;
-                    e.partyMemberReadyInfo.userIndex = mParty->getMyIndex();
+                    e.partyMemberReadyInfo.memberIndex = mParty->getMyIndex();
                 }else{
                     e.type = Event::Type::PartyMemberUnReady;
-                    e.partyMemberUnReadyInfo.userIndex = mParty->getMyIndex();
+                    e.partyMemberUnReadyInfo.memberIndex = mParty->getMyIndex();
                 }
 
                 EVENTMANAGER->queueEvent( e );
@@ -67,12 +67,12 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
         switch( change.id ){
         case 2:
             {
-                mParty->disband();
-
                 Event e;
                 e.type = Event::Type::PartyMemberLeave;
-                e.partyMemberLeaveInfo.userIndex;
+                e.partyMemberLeaveInfo.memberIndex = mParty->getMyIndex();
                 EVENTMANAGER->queueEvent( e );
+
+                mParty->disband();
 
                 mScreenManager->popScreen();
             }

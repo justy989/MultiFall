@@ -20,8 +20,11 @@ public:
     void join( uint myIndex );
     void disband();
 
+    void update( float dt );
+
     void memberJoin( char* name, uint index, bool ready );
     void memberLeave( uint index );
+    void memberUpdateSnapshot( uint index, XMFLOAT2& snapshotPos );
 
     inline bool isLeader();
 

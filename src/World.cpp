@@ -7,7 +7,78 @@ World::World()
 
 void World::update( float dt )
 {
+    //Update the population, mostly does AI decisions
     mPop.update( dt );
+
+    float mBlockDimensions = 0.3f;
+
+    //Do collision for moving characters
+    for( int i = 0; i < POPULATION_MAX_CHARACTERS; i++){
+        Character& character = mPop.getCharacter(i);
+
+        if( character.getExistence() > Character::Existence::Dead ){
+            XMFLOAT4& dir = mPop.getCharacter(i).getWalkingDirection();
+
+            //Skip collision early if the entity isn't moving
+            if( dir.x > 0.0f || dir.y > 0.0f || dir.z > 0.0f ){
+            }else{
+                continue;
+            }
+
+            //TEMPORARY WAY OF SOLVING THIS!
+            //As long as we are not on a ramp, bring us to the floor
+            int bx = static_cast<int>( character.getPosition().x / mBlockDimensions );
+            int bz = static_cast<int>( character.getPosition().z / mBlockDimensions );
+
+            CLAMP( bx, 0, getLevel().getWidth() - 1 );
+            CLAMP( bz, 0, getLevel().getDepth() - 1 );
+
+            if( getLevel().getBlock(bx, bz).getCollidableType() == Level::Block::Collidable::None ){
+                //Make sure we are on the floor, otherwise bring us down through gravity
+                float distFromGround = ( character.getPosition().y - character.getSolidity().height ) - static_cast<float>(getLevel().getBlock(bx, bz).getHeight()) * mBlockDimensions;
+
+                if( distFromGround > 0.05f ){
+                    dir.y = 1.0f;
+                }else if(distFromGround < -0.05f ){
+                    dir.y = 1.0f;
+                }
+            }else if( getLevel().getBlock(bx, bz).getCollidableType() == Level::Block::Collidable::Ramp ){
+                if( getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Front ){
+                    float blockHeight = static_cast<float>(getLevel().getBlock(bx, bz).getHeight()) * mBlockDimensions;
+                    float rampUp = fmod(character.getPosition().z, mBlockDimensions);
+                    rampUp *= 1.25f;
+                    character.getPosition().y = blockHeight + rampUp + character.getSolidity().height;
+                }else if( getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Back ){
+                    float blockHeight = static_cast<float>(getLevel().getBlock(bx, bz).getHeight()) * mBlockDimensions;
+                    float rampUp = fmod(character.getPosition().z, mBlockDimensions);
+                    rampUp = (mBlockDimensions - rampUp) * 1.25f;
+                    character.getPosition().y = blockHeight + rampUp + character.getSolidity().height;
+                }else if( getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Left ){
+                    float blockHeight = static_cast<float>(getLevel().getBlock(bx, bz).getHeight()) * mBlockDimensions;
+                    float rampUp = fmod(character.getPosition().x, mBlockDimensions);
+                    rampUp *= 1.25f;
+                    character.getPosition().y = blockHeight + rampUp + character.getSolidity().height;
+                }else if( getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Right ){
+                    float blockHeight = static_cast<float>(getLevel().getBlock(bx, bz).getHeight()) * mBlockDimensions;
+                    float rampUp = fmod(character.getPosition().x, mBlockDimensions);
+                    rampUp = (mBlockDimensions - rampUp) * 1.25f;
+                    character.getPosition().y = blockHeight + rampUp + character.getSolidity().height;
+                }
+            }
+
+            XMVECTOR moveVec = XMLoadFloat4( &dir );
+
+            moveVec = XMVector3Normalize( moveVec );
+            moveVec = XMVectorSetW( moveVec, 1.0f );
+
+            moveEntity( &character, moveVec, dt * CHARACTER_MOVE_SPEED );
+
+            //Reset the direction back to 0
+            dir.x = 0.0f;
+            dir.y = 0.0f;
+            dir.z = 0.0f;
+        }
+    }
 }
 
 void World::handleEvent( Event& e )

@@ -63,13 +63,13 @@ void NetServer::update( float dt )
                 if( packet.type == NetPacket::Type::PartyJoinRequest ){
                     NetPacket newPacket;
                     newPacket.type = NetPacket::Type::PartyJoinAccept;
-                    newPacket.partyJoinAcceptInfo.userIndex = i;
+                    newPacket.partyJoinAcceptInfo.memberIndex = i;
                     mClientSockets[i].pushPacket( newPacket );
 
                     //Send info about the leader to the client
                     NetPacket partySync;
                     partySync.type = NetPacket::Type::PartyMemberJoin;
-                    partySync.partyMemberJoinInfo.userIndex = 0;
+                    partySync.partyMemberJoinInfo.memberIndex = 0;
                     partySync.partyMemberJoinInfo.ready = mParty->getMember(0).isReady();
                     strcpy( partySync.partyMemberJoinInfo.name, mParty->getMember(0).getName() );
 
@@ -78,7 +78,7 @@ void NetServer::update( float dt )
                     //Format member join packet
                     NetPacket toMembers;
                     toMembers.type = NetPacket::Type::PartyMemberJoin;
-                    toMembers.partyMemberJoinInfo.userIndex = i;
+                    toMembers.partyMemberJoinInfo.memberIndex = i;
                     toMembers.partyMemberJoinInfo.ready = false;
                     strcpy( toMembers.partyMemberJoinInfo.name, packet.partyJoinRequestInfo.name );
 
@@ -91,7 +91,7 @@ void NetServer::update( float dt )
                             //Send info about each connected client to the client
                             NetPacket partySync;
                             partySync.type = NetPacket::Type::PartyMemberJoin;
-                            partySync.partyMemberJoinInfo.userIndex = p;
+                            partySync.partyMemberJoinInfo.memberIndex = p;
                             partySync.partyMemberJoinInfo.ready = mParty->getMember(p).isReady();
                             strcpy( partySync.partyMemberJoinInfo.name, mParty->getMember(p).getName() );
 
@@ -130,16 +130,6 @@ void NetServer::update( float dt )
 
 void NetServer::handleEvent( Event& e )
 {
-    //Pass on world events to all clients
-    if( e.type >= Event::Type::SessionStart && e.clientGenerated ){
-        for(int i = 1; i < PARTY_SIZE; i++){
-            if( mClientSockets[i].isConnected() ){
-                e.clientGenerated = false;
-                mClientSockets[i].pushPacket( e );
-            }
-        }
-    }
-
     switch( e.type ){
     case Event::Type::NetworkListen:
         {
@@ -161,5 +151,19 @@ void NetServer::handleEvent( Event& e )
         break;
     default:
         break;
+    }
+
+    if( !mSocket.isConnected() ){
+        return;
+    }
+
+    //Pass on world events to all clients
+    if( e.type >= Event::Type::SessionStart && e.clientGenerated ){
+        for(int i = 1; i < PARTY_SIZE; i++){
+            if( mClientSockets[i].isConnected() ){
+                e.clientGenerated = false;
+                mClientSockets[i].pushPacket( e );
+            }
+        }
     }
 }

@@ -17,6 +17,9 @@ public:
     //Spawn an entity, return index 
     ushort spawn( ushort id, XMFLOAT4 position );
 
+    //Spawn a party member in one of the first indices
+    ushort spawnMember( ushort id, XMFLOAT4 position );
+
     //Kill a character
     void kill( ushort id );
 

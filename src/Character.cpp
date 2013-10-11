@@ -12,3 +12,8 @@ void Character::update( float dt )
 {
 
 }
+
+void Character::walk( XMFLOAT4& direction )
+{
+    mWalkingDirection = direction;
+}

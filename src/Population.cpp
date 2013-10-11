@@ -33,6 +33,20 @@ ushort Population::spawn( ushort id, XMFLOAT4 position )
     return POPULATION_MAX_CHARACTERS;
 }
 
+ushort Population::spawnMember( ushort id, XMFLOAT4 position )
+{
+    for(int i = 0; i < PARTY_SIZE; i++){
+         if( mCharacters[i].getExistence() == WorldEntity::Existence::Dead ){
+            mCharacters[i].setExistence( WorldEntity::Existence::Alive );
+            mCharacters[i].getPosition() = position;
+            mCharacters[i].setID( id );
+            return i;
+        }
+    }
+
+    return PARTY_SIZE;
+}
+
 void Population::kill( ushort id )
 {
     if( id < POPULATION_MAX_CHARACTERS ){

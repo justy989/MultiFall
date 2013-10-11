@@ -128,8 +128,8 @@ void ConnectionScreen::handleEvent( Event& e )
         LOG_INFO << "Failed to listen on specified port: " << mPortBox->getInput() << LOG_ENDL;
         break;
     case Event::Type::PartyJoinAccept:
-        LOG_INFO << "Joined the party with the member index: " << e.partyJoinAcceptInfo.userIndex << LOG_ENDL;
-        mParty->getMember( e.partyJoinAcceptInfo.userIndex ).setName( mNameBox->getInput() );
+        LOG_INFO << "Joined the party with the member index: " << e.partyJoinAcceptInfo.memberIndex << LOG_ENDL;
+        mParty->getMember( e.partyJoinAcceptInfo.memberIndex ).setName( mNameBox->getInput() );
         mScreenManager->pushScreen( ScreenManager::Type::Lobby );
         break;
     default:

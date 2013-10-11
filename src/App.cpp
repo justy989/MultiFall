@@ -35,6 +35,7 @@ App::App() : mScreenManager( &mWorld, &mParty ),
     mKeyChar = 0;
 
     mBlockDimenions = 0.3f;
+    mNetworkTimer = 0.0f;
 }
 
 void App::handleInput( RAWINPUT* input )
@@ -106,10 +107,6 @@ void App::handleInput( RAWINPUT* input )
                 }
 
                 collisionMode = !collisionMode;
-
-                if( collisionMode ){
-                    mEntity.getPosition() = mCamera.getPosition();
-                }
                 break;
             case 'I':
                 if( keyUp ){
@@ -424,10 +421,6 @@ bool App::init( )
     mPopGenRanges.density.set( 0.01f, 0.03f );
     mPopGenRanges.enemyIDChance[ 0 ] = 1.0f;
 
-    mEntity.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
-    mEntity.getSolidity().radius = 0.15f;
-    mEntity.getSolidity().height = 0.32f;
-
     if( !mUIDisplay.init( mWindow.getDevice(), L"content/textures/multifall_ui.png", L"content/shaders/ui.fx" ) ){
         return false;
     }
@@ -489,18 +482,30 @@ void App::genLevel( uint seed )
     //Gen the level
     mWorldGen.genLevel( mWorld.getLevel(), mLevelGenRanges, seed, mBlockDimenions, spawn );
 
-    //Gen the population
-    mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
+    if( mParty.getMember(0).doesExist() ){
+        //Gen the population
+        mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
+    }
 
     //Create a mesh from the level
     mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions );
 
+    //For the party size
+    for(int i = 0; i < PARTY_SIZE; i++){
+        if( mParty.getMember(i).doesExist() ){
+            ushort id = mWorld.getPopulation().spawnMember( 0, mCamera.getPosition() );
+            Character& character = mWorld.getPopulation().getCharacter(id);
+            character.getSolidity().type = WorldEntity::Solidity::BodyType::Cylinder;
+            character.getSolidity().radius = 0.15f;
+            character.getSolidity().height = 0.32f;
+        }
+    }
+
     //Set the camera and entity to the spawn
     mCamera.getPosition() = XMFLOAT4( spawn.x + (mBlockDimenions / 2.0f), 
-                                      spawn.y + mEntity.getSolidity().height, 
+                                      spawn.y + 0.32f, 
                                       spawn.z + (mBlockDimenions / 2.0f), 
                                       1.0f );
-    mEntity.getPosition() = mCamera.getPosition();
 }
 
 bool App::initShaders()
@@ -741,53 +746,17 @@ void App::update( float dt )
              moveVec += rotVec;
         }
 
-        //TEMPORARY WAY OF SOLVING THIS!
-        //As long as we are not on a ramp, bring us to the floor
-        int bx = static_cast<int>( mEntity.getPosition().x / mBlockDimenions);
-        int bz = static_cast<int>( mEntity.getPosition().z / mBlockDimenions);
+        //If myIndex is valid
+        if( mParty.getMyIndex() < PARTY_SIZE ){
+            //Store the movement vector
+            XMStoreFloat4( &mWorld.getPopulation().getCharacter( mParty.getMyIndex() ).getWalkingDirection(), moveVec );
 
-        CLAMP( bx, 0, mWorld.getLevel().getWidth() - 1 );
-        CLAMP( bz, 0, mWorld.getLevel().getDepth() - 1 );
+            //Update the world
+            mWorld.update( dt );
 
-        if( mWorld.getLevel().getBlock(bx, bz).getCollidableType() == Level::Block::Collidable::None ){
-            //Make sure we are on the floor, otherwise bring us down through gravity
-            float distFromGround = ( mEntity.getPosition().y - mEntity.getSolidity().height ) - static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * mBlockDimenions;
-
-            if( distFromGround > 0.05f ){
-                moveVec -= XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-            }else if(distFromGround < -0.05f ){
-                moveVec += XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-            }
-        }else if( mWorld.getLevel().getBlock(bx, bz).getCollidableType() == Level::Block::Collidable::Ramp ){
-            if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Front ){
-                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * mBlockDimenions;
-                float rampUp = fmod(mEntity.getPosition().z, mBlockDimenions);
-                rampUp *= 1.25f;
-                mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
-            }else if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Back ){
-                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * mBlockDimenions;
-                float rampUp = fmod(mEntity.getPosition().z, mBlockDimenions);
-                rampUp = (mBlockDimenions - rampUp) * 1.25f;
-                mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
-            }else if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Left ){
-                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * mBlockDimenions;
-                float rampUp = fmod(mEntity.getPosition().x, mBlockDimenions);
-                rampUp *= 1.25f;
-                mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
-            }else if( mWorld.getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Right ){
-                float blockHeight = static_cast<float>(mWorld.getLevel().getBlock(bx, bz).getHeight()) * mBlockDimenions;
-                float rampUp = fmod(mEntity.getPosition().x, mBlockDimenions);
-                rampUp = (mBlockDimenions - rampUp) * 1.25f;
-                mEntity.getPosition().y = blockHeight + rampUp + mEntity.getSolidity().height;
-            }
+            //Set the camera to that position
+            mCamera.getPosition() = mWorld.getPopulation().getCharacter( mParty.getMyIndex() ).getPosition();
         }
-
-        moveVec = XMVector3Normalize( moveVec );
-        moveVec = XMVectorSetW( moveVec, 1.0f );
-
-        mWorld.moveEntity( &mEntity, moveVec, 2.0f * dt );
-
-        mCamera.getPosition() = mEntity.getPosition();
     }else{
         if( camKeyDown[0] ){
             mCamera.moveForwardBack( 2.0f * dt ); 
@@ -804,6 +773,9 @@ void App::update( float dt )
         if( camKeyDown[3] ){
             mCamera.moveLeftRight( -2.0f * dt ); 
         }
+
+        //Update the world
+        mWorld.update( dt );
     }
 
     //Get the Cursor position on the window 
@@ -835,13 +807,31 @@ void App::update( float dt )
     mUIDisplay.updateBuffers( mWindow.getDeviceContext() );
 
     mKeyPress = false;
-
+    
     EVENTMANAGER->process();
 
-    if( mParty.isLeader() ){
-        mNetServer.update( dt );
-    }else{
-        mNetClient.update( dt );
+    mNetworkTimer += dt;
+
+    if( mNetworkTimer > NETWORK_COMMUNICATION_INTERVAL ){
+        if( mParty.getMyIndex() < PARTY_SIZE ){
+            Character& character = mWorld.getPopulation().getCharacter( mParty.getMyIndex() );
+            if( character.getExistence() == Character::Existence::Alive ){
+                Event e;
+                e.type = Event::Type::PartyMemberCharacterUpdate;
+                e.partyMemberCharacterUpdateInfo.memberIndex = mParty.getMyIndex();
+                e.partyMemberCharacterUpdateInfo.x = character.getPosition().x;
+                e.partyMemberCharacterUpdateInfo.z = character.getPosition().z;
+                EVENTMANAGER->queueEvent( e );
+            }
+        }
+
+        if( mParty.isLeader() ){
+            mNetServer.update( dt );
+        }else{
+            mNetClient.update( dt );
+        }
+
+        mNetworkTimer = 0.0f;
     }
 }
 

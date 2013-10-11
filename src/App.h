@@ -38,6 +38,9 @@
 
 #include <d3dx11effect.h>
 
+//How often to send updates to and from the server
+#define NETWORK_COMMUNICATION_INTERVAL 0.3f
+
 class App : public WMInputHandler, public EventHandler{
 public:
 
@@ -102,6 +105,8 @@ protected:
     NetClient mNetClient;
     NetServer mNetServer;
 
+    float mNetworkTimer;
+
     //Tmp
     bool camKeyDown[4];
 
@@ -113,8 +118,6 @@ protected:
     char FPSString[128];
     char CameraPosString[128];
     char MousePosString[128];
-
-    WorldEntity mEntity;
 
     WorldGenerator::LevelGenerationRanges mLevelGenRanges;
     WorldGenerator::PopulationGenerationRanges mPopGenRanges;
