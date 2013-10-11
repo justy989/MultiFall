@@ -27,6 +27,7 @@ void Party::join( uint myIndex )
 
     mMyIndex = myIndex;
     mIsLeader = false;
+    mMembers[ mMyIndex ].setExist( true );
 }
 
 void Party::disband()

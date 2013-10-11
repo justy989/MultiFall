@@ -46,6 +46,7 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
         case 1:
             {
                 Event e;
+
                 if( mReadyCheckbox->isChecked() ){
                     e.type = Event::Type::PartyMemberReady;
                     e.partyMemberReadyInfo.userIndex = mParty->getMyIndex();
@@ -54,7 +55,6 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
                     e.partyMemberUnReadyInfo.userIndex = mParty->getMyIndex();
                 }
 
-                e.clientGenerated = true;
                 EVENTMANAGER->queueEvent( e );
             }
             break;
@@ -68,7 +68,8 @@ void LobbyScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
                 mParty->disband();
 
                 Event e;
-                e.type = Event::Type::NetworkDisconnect;
+                e.type = Event::Type::PartyMemberLeave;
+                e.partyMemberLeaveInfo.userIndex;
                 EVENTMANAGER->queueEvent( e );
 
                 mScreenManager->popScreen();

@@ -66,6 +66,14 @@ void NetServer::update( float dt )
                     newPacket.partyJoinAcceptInfo.userIndex = i;
                     mClientSockets[i].pushPacket( newPacket );
 
+                    //Send info about the leader to the client
+                    NetPacket partySync;
+                    partySync.type = NetPacket::Type::PartyMemberJoin;
+                    partySync.partyMemberJoinInfo.userIndex = 0;
+                    strcpy( partySync.partyMemberJoinInfo.name, mParty->getMember(0).getName() );
+
+                    mClientSockets[i].pushPacket( partySync );
+
                     //Format member join packet
                     NetPacket toMembers;
                     toMembers.type = NetPacket::Type::PartyMemberJoin;
@@ -77,6 +85,14 @@ void NetServer::update( float dt )
                         if( p == i ){continue;}
                         if( mClientSockets[p].isConnected() ){
                             mClientSockets[p].pushPacket( toMembers );
+
+                            //Send info about each connected client to the client
+                            NetPacket partySync;
+                            partySync.type = NetPacket::Type::PartyMemberJoin;
+                            partySync.partyMemberJoinInfo.userIndex = p;
+                            strcpy( partySync.partyMemberJoinInfo.name, mParty->getMember(p).getName() );
+
+                            mClientSockets[i].pushPacket( partySync );
                         }
                     }
 
@@ -91,6 +107,8 @@ void NetServer::update( float dt )
                             mClientSockets[p].pushPacket( packet );
                         }
                     }
+
+                    EVENTMANAGER->queueEvent( packet );
                 }else{
                     //Check if client has disconnected
                     if( packet.type == NetPacket::Type::NetworkDisconnect ){
@@ -110,7 +128,7 @@ void NetServer::update( float dt )
 void NetServer::handleEvent( Event& e )
 {
     //Pass on world events to all clients
-    if( e.type >= Event::Type::CharacterSpawn ){
+    if( e.type >= Event::Type::CharacterSpawn && e.clientGenerated ){
         for(int i = 1; i < PARTY_SIZE; i++){
             if( mClientSockets[i].isConnected() ){
                 e.clientGenerated = false;
