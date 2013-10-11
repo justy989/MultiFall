@@ -25,6 +25,10 @@ public:
 
     void update( float dt );
 
+    void interpPosition( XMFLOAT2& pos );
+
+protected:
+
     float getTimeStepScale();
 
 protected:

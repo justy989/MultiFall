@@ -120,7 +120,7 @@ void NetSocket::setSocketNonBlocking()
 
 bool NetSocket::isConnected()
 {
-    return mStatus == Status::Connected;
+    return mStatus == Status::Connected || mStatus == Status::Listening;
 }
 
 NetSocket::Status NetSocket::getStatus()

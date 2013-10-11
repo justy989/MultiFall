@@ -158,7 +158,7 @@ void NetServer::handleEvent( Event& e )
     }
 
     //Pass on world events to all clients
-    if( e.type >= Event::Type::SessionStart && e.clientGenerated ){
+    if( e.type >= Event::Type::PartyMemberCharacterUpdate && e.clientGenerated ){
         for(int i = 1; i < PARTY_SIZE; i++){
             if( mClientSockets[i].isConnected() ){
                 e.clientGenerated = false;

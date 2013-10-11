@@ -19,9 +19,9 @@ void World::update( float dt )
         if( character.getExistence() > Character::Existence::Dead ){
             XMFLOAT4& dir = mPop.getCharacter(i).getWalkingDirection();
 
-            //Skip collision early if the entity isn't moving
-            if( dir.x > 0.0f || dir.y > 0.0f || dir.z > 0.0f ){
-            }else{
+            //Make sure we are at least moving when checking collision
+            float dist = fabs( dir.x ) + fabs( dir.z );
+            if( dist < 0.1f ){
                 continue;
             }
 

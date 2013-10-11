@@ -45,6 +45,8 @@ bool NetListenSocket::listenOn( ushort port )
         return false;
     }
 
+    mStatus = Status::Listening;
+
     return true;
 }
 

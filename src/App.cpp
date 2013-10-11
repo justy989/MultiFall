@@ -490,6 +490,12 @@ void App::genLevel( uint seed )
     //Create a mesh from the level
     mWorldDisplay.getLevelDisplay().createMeshFromLevel( mWindow.getDevice(), mWorld.getLevel(), mBlockDimenions, mBlockDimenions );
 
+    //Set the camera and entity to the spawn
+    mCamera.getPosition() = XMFLOAT4( spawn.x + (mBlockDimenions / 2.0f), 
+                                      spawn.y + 0.32f, 
+                                      spawn.z + (mBlockDimenions / 2.0f), 
+                                      1.0f );
+
     //For the party size
     for(int i = 0; i < PARTY_SIZE; i++){
         if( mParty.getMember(i).doesExist() ){
@@ -500,12 +506,6 @@ void App::genLevel( uint seed )
             character.getSolidity().height = 0.32f;
         }
     }
-
-    //Set the camera and entity to the spawn
-    mCamera.getPosition() = XMFLOAT4( spawn.x + (mBlockDimenions / 2.0f), 
-                                      spawn.y + 0.32f, 
-                                      spawn.z + (mBlockDimenions / 2.0f), 
-                                      1.0f );
 }
 
 bool App::initShaders()
@@ -713,6 +713,22 @@ bool App::initRTVs()
 
 void App::update( float dt )
 {
+    mParty.update( dt );
+
+    //Update party snapshots
+    for( uint i = 0; i < PARTY_SIZE; i++){
+        if( mParty.getMyIndex() != i &&
+            mParty.getMember(i).doesExist() &&
+            mWorld.getPopulation().getCharacter(i).getExistence() == Character::Existence::Alive ){
+            XMFLOAT2 interpPos;
+            mParty.getMember(i).interpPosition( interpPos );
+
+            mWorld.getPopulation().getCharacter(i).getPosition().x = interpPos.x;
+            mWorld.getPopulation().getCharacter(i).getPosition().y = 0.0f;
+            mWorld.getPopulation().getCharacter(i).getPosition().z = interpPos.y;
+        }
+    }
+
     if( collisionMode ){
 
         XMVECTOR rotVec;

@@ -26,3 +26,11 @@ float Member::getTimeStepScale()
 {
     return mTimeSinceSnapshot / mPrevSnapshotLenth;
 }
+
+void Member::interpPosition( XMFLOAT2& pos )
+{
+    float timeStep = getTimeStepScale();
+
+    pos.x = ( ( mCurPos.x - mPrevPos.x ) * timeStep ) + mCurPos.x;
+    pos.y = ( ( mCurPos.y - mPrevPos.y ) * timeStep ) + mCurPos.y;
+}
