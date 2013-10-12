@@ -29,7 +29,7 @@ float Member::getTimeStepScale()
 
 void Member::interpPosition( XMFLOAT2& pos )
 {
-    float timeStep = getTimeStepScale();
+    float timeStep = getTimeStepScale() * 0.9f;
 
     pos.x = ( ( mCurPos.x - mPrevPos.x ) * timeStep ) + mCurPos.x;
     pos.y = ( ( mCurPos.y - mPrevPos.y ) * timeStep ) + mCurPos.y;

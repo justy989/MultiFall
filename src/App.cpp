@@ -724,7 +724,7 @@ void App::update( float dt )
             mParty.getMember(i).interpPosition( interpPos );
 
             mWorld.getPopulation().getCharacter(i).getPosition().x = interpPos.x;
-            mWorld.getPopulation().getCharacter(i).getPosition().y = 0.0f;
+            mWorld.getPopulation().getCharacter(i).getPosition().y = 0.16f;
             mWorld.getPopulation().getCharacter(i).getPosition().z = interpPos.y;
         }
     }

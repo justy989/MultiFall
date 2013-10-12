@@ -269,6 +269,10 @@ UIElement::UserChange UIInputBox::update( bool mouseClick, XMFLOAT2 mousePositio
                     mCursor--;
                     mInput[ mCursor ] = '\0';
                 }
+            }else if( key == VK_OEM_PERIOD ){
+                    mInput[ mCursor ] = '.'; 
+                    mCursor++;
+                    mInput[ mCursor ] = '\0';
             }else{
                 if( mCursor < (INPUTBOX_MAX_INPUT_LEN - 1) ){
 
