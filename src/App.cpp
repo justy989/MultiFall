@@ -232,14 +232,14 @@ bool App::init( )
     //mLevelGenRanges.roomCount.set( 6, 6 );
     mLevelGenRanges.doorScrubChance.set( 0.0f, 0.0f );
 
-    //Chances for each room type
-    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Empty ] = 0.1f;
-    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Labyrinth ] = 0.25f;
-    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::BedRoom ] = 0.4f;
-    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Study ] = 0.5f;
-    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Library ] = 0.6f;
-    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Storage ] = 0.8f;
-    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::DiningRoom ] = 0.9f;
+    //Chances for each room type, for now have them all equal
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Empty ] = 0.14f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Labyrinth ] = 0.28f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::BedRoom ] = 0.42f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Study ] = 0.56f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Library ] = 0.7f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Storage ] = 0.84f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::DiningRoom ] = 1.0f;
     mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::BallRoom ] = 1.0f;
 
     //Empty Room
@@ -263,6 +263,9 @@ bool App::init( )
     emptyRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     emptyRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     emptyRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
+    emptyRanges.containerDensity.set( 0.0f, 0.0f );
+    emptyRanges.containerChances[ WorldContainer::Type::Crate ] = 0.0f;
+    emptyRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.0f;
 
     //Labyrinth Room
     WorldGenerator::RoomGenerationRanges& labyrinthRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Labyrinth ];
@@ -285,6 +288,9 @@ bool App::init( )
     labyrinthRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     labyrinthRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     labyrinthRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
+    labyrinthRanges.containerDensity.set( 0.0f, 0.1f );
+    labyrinthRanges.containerChances[ WorldContainer::Type::Crate ] = 0.5f;
+    labyrinthRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.5f;
 
     //Bed Room
     WorldGenerator::RoomGenerationRanges& bedroomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::BedRoom ];
@@ -307,6 +313,9 @@ bool App::init( )
     bedroomRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     bedroomRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     bedroomRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
+    bedroomRanges.containerDensity.set( 0.0f, 0.1f );
+    bedroomRanges.containerChances[ WorldContainer::Type::Crate ] = 1.0f;
+    bedroomRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.0f;
 
     //Study Room
     WorldGenerator::RoomGenerationRanges& studyRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Study ];
@@ -324,11 +333,14 @@ bool App::init( )
     studyRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.2f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    studyRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = mBlockDimenions;
-    studyRanges.lightDensity.set( mBlockDimenions, 0.5f );
+    studyRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.3f;
+    studyRanges.lightDensity.set( 0.3f, 0.5f );
     studyRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     studyRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     studyRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
+    studyRanges.containerDensity.set( 0.0f, 0.1f );
+    studyRanges.containerChances[ WorldContainer::Type::Crate ] = 0.0f;
+    studyRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.0f;
 
     //Library
     WorldGenerator::RoomGenerationRanges& libraryRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Library ];
@@ -339,7 +351,7 @@ bool App::init( )
     libraryRanges.rampDensity.set( 0.0f, 0.0f );
     libraryRanges.wallDensity.set( 0.0f, 0.15f );
     libraryRanges.wallLength.set( 10, 20 );
-    libraryRanges.furnitureDensity.set( mBlockDimenions, 0.5f );
+    libraryRanges.furnitureDensity.set( 0.3f, 0.5f );
     libraryRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.75f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
@@ -351,6 +363,9 @@ bool App::init( )
     libraryRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     libraryRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     libraryRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
+    libraryRanges.containerDensity.set( 0.0f, 0.05f );
+    libraryRanges.containerChances[ WorldContainer::Type::Crate ] = 1.0f;
+    libraryRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.0f;
 
     //Storage
     WorldGenerator::RoomGenerationRanges& storageRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Storage ];
@@ -359,20 +374,23 @@ bool App::init( )
     storageRanges.floorHeight.set( 0, 0 );
     storageRanges.floorSectionArea.set( 0, 0 );
     storageRanges.rampDensity.set( 0.0f, 0.0f );
-    storageRanges.wallDensity.set( 0.0f, 0.25f );
-    storageRanges.wallLength.set( 1, 8 );
-    storageRanges.furnitureDensity.set( 0.0f, 0.1f );
+    storageRanges.wallDensity.set( 0.0f, 0.0f );
+    storageRanges.wallLength.set( 0, 0 );
+    storageRanges.furnitureDensity.set( 0.0f, 0.0f );
     storageRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     storageRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
     storageRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
-    storageRanges.furnitureChances[ Level::Furniture::Type::Table ] = 1.0f;
+    storageRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
     storageRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
     storageRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
     storageRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-    storageRanges.lightDensity.set( 0.1f, mBlockDimenions );
+    storageRanges.lightDensity.set( 0.1f, 0.3f );
     storageRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     storageRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     storageRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
+    storageRanges.containerDensity.set( 0.2f, 0.5f );
+    storageRanges.containerChances[ WorldContainer::Type::Crate ] = 0.5f;
+    storageRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.5f;
 
     //Dining Room
     WorldGenerator::RoomGenerationRanges& diningRoomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::DiningRoom ];
@@ -395,6 +413,9 @@ bool App::init( )
     diningRoomRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     diningRoomRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     diningRoomRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
+    diningRoomRanges.containerDensity.set( 0.0f, 0.2f );
+    diningRoomRanges.containerChances[ WorldContainer::Type::Crate ] = 0.0f;
+    diningRoomRanges.containerChances[ WorldContainer::Type::Barrel ] = 1.0f;
 
     //BallRoom
     WorldGenerator::RoomGenerationRanges& ballRoomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::BallRoom ];
@@ -417,6 +438,9 @@ bool App::init( )
     ballRoomRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     ballRoomRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     ballRoomRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
+    ballRoomRanges.containerDensity.set( 0.0f, 0.0f );
+    ballRoomRanges.containerChances[ WorldContainer::Type::Crate ] = 0.0f;
+    ballRoomRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.0f;
 
     mPopGenRanges.density.set( 0.01f, 0.03f );
     mPopGenRanges.enemyIDChance[ 0 ] = 1.0f;
@@ -442,6 +466,25 @@ bool App::init( )
         dimensions.z *= mWorldDisplay.getLevelDisplay().getFurnitureScale( (Level::Furniture::Type)(i) );
 
         mWorld.getLevel().setFurnitureDimensions( (Level::Furniture::Type)(i), dimensions );
+    }
+
+    //Set container dimensions based on bounding boxes 
+    for(int i = 1; i < WORLD_CONTAINER_TYPE_COUNT; i++){
+        XMFLOAT3 dimensions;
+
+        dimensions.x = mWorldDisplay.getLevelDisplay().getContainerMesh( (Level::Container::Type)(i) ).getBoundingBoxMax().x - 
+                       mWorldDisplay.getLevelDisplay().getContainerMesh( (Level::Container::Type)(i) ).getBoundingBoxMin().x;
+        dimensions.y = mWorldDisplay.getLevelDisplay().getContainerMesh( (Level::Container::Type)(i) ).getBoundingBoxMax().y - 
+                       mWorldDisplay.getLevelDisplay().getContainerMesh( (Level::Container::Type)(i) ).getBoundingBoxMin().y;
+        dimensions.z = mWorldDisplay.getLevelDisplay().getContainerMesh( (Level::Container::Type)(i) ).getBoundingBoxMax().z - 
+                       mWorldDisplay.getLevelDisplay().getContainerMesh( (Level::Container::Type)(i) ).getBoundingBoxMin().z;
+
+        //Scale the dimensions
+        dimensions.x *= mWorldDisplay.getLevelDisplay().getContainerScale( (Level::Container::Type)(i) );
+        dimensions.y *= mWorldDisplay.getLevelDisplay().getContainerScale( (Level::Container::Type)(i) );
+        dimensions.z *= mWorldDisplay.getLevelDisplay().getContainerScale( (Level::Container::Type)(i) );
+
+        mWorld.getLevel().setContainerDimensions( (Level::Container::Type)(i), dimensions );
     }
 
     mConsole.init( this );
@@ -698,7 +741,6 @@ bool App::initRTVs()
         LOG_ERRO << "Failed to CreateDepthStencilView from device" << LOG_ENDL;
         return false;
     }
-
 
 	shaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
 	// Create the shader resource view.

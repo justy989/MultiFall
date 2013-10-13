@@ -144,8 +144,6 @@ bool NetSocket::pushPacket( NetPacket& packet )
         return false;
     }
 
-    LOG_INFO << "Pushed Pkt: " << packet.type << LOG_ENDL;
-
     mSendingPackets.push( packet );
     return true;
 }
@@ -158,8 +156,6 @@ void NetSocket::process()
     while( mSendingPackets.size() ){
         //Get the front packet
         packet = mSendingPackets.front();
-
-        LOG_INFO << "Sent Pkt: " << packet.type << LOG_ENDL;
 
         //Send it
         send( mSocket, (char*)(&packet), sizeof( packet ), 0 );
@@ -178,8 +174,6 @@ void NetSocket::process()
 
         //If we consumed bytes add the packet to the queue
         if( byteCount > 0 ){
-
-            LOG_INFO << "Recv Pkt: " << packet.type << LOG_ENDL;
 
             //Set the timestamp of the last received packet
             mReceivedTimeStamp = timeGetTime();

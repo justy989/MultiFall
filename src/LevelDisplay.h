@@ -57,6 +57,10 @@ public:
     inline StaticMesh& getFurnitureMesh( Level::Furniture::Type type );
     inline float getFurnitureScale( Level::Furniture::Type type );
 
+    //Get the Container meshes
+    inline StaticMesh& getContainerMesh( Level::Container::Type type );
+    inline float getContainerScale( Level::Container::Type type );
+
 protected:
 
     bool createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval );
@@ -111,9 +115,11 @@ protected:
 
     StaticMesh mLights[ LEVEL_LIGHT_TYPE_COUNT - 1];
     StaticMesh mFurniture[ LEVEL_FURNITURE_TYPE_COUNT - 1 ];
-
-    float mFurnitureScale[ LEVEL_FURNITURE_TYPE_COUNT ];
+    StaticMesh mContainers[ WORLD_CONTAINER_TYPE_COUNT - 1 ];
+    
     float mLightScale[ LEVEL_LIGHT_TYPE_COUNT ];
+    float mFurnitureScale[ LEVEL_FURNITURE_TYPE_COUNT ];
+    float mContainerScale[ WORLD_CONTAINER_TYPE_COUNT ];
 
     //Draw Range
     float mDrawRange;
@@ -127,6 +133,16 @@ inline StaticMesh& LevelDisplay::getFurnitureMesh( Level::Furniture::Type type )
 inline float LevelDisplay::getFurnitureScale( Level::Furniture::Type type )
 {
     return mFurnitureScale[ type ];
+}
+
+inline StaticMesh& LevelDisplay::getContainerMesh( Level::Container::Type type )
+{
+    return mContainers[ type - 1 ];
+}
+
+inline float LevelDisplay::getContainerScale( Level::Container::Type type )
+{
+    return mContainerScale[ type ];
 }
 
 inline void LevelDisplay::setDrawRange( float drawRange )

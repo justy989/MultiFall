@@ -38,9 +38,9 @@ void WorldGenerator::genLevel( Level& level, LevelGenerationRanges& ranges, uint
     }
 
     for(int i = 0; i < roomCount; i++){    
-        genLevelRoomFurniture( level, rooms[i], blockDimension );
-        //genLevelRoomContainers( level, rooms[i] );
         genLevelRoomWalls( level, rooms[i] );
+        genLevelRoomFurniture( level, rooms[i], blockDimension );
+        genLevelRoomContainers( level, rooms[i], blockDimension );
         genLevelRoomLights( level, rooms[i] );
     }
 
@@ -739,8 +739,7 @@ bool WorldGenerator::pathExistsToDoors( Level& level, Room& room )
     for(ushort i = 0; i < width; i++){
         for(ushort j = 0; j < depth; j++){
             blocks[i][j].setHeight( level.getBlock( room.left + i, room.top + j ).getHeight() );
-            switch( level.getBlock( room.left + i, room.top + j ).getCollidableType() )
-            {
+            switch( level.getBlock( room.left + i, room.top + j ).getCollidableType() ){
             case Level::Block::Collidable::Wall:
             case Level::Block::Collidable::Furniture:
             case Level::Block::Collidable::Container:
@@ -1142,7 +1141,7 @@ void WorldGenerator::genLevelRoomHeights( Level& level, Room& room )
 
         //Clamp it so we don't go outside the array
         CLAMP( endI, room.left, room.right );
-        CLAMP( endJ, room.left, room.bottom );
+        CLAMP( endJ, room.top, room.bottom );
 
         //Loop over rect and set at genned height
         for(short i = startI ;i <= endI; i++){
@@ -1380,6 +1379,115 @@ void WorldGenerator::genLevelRoomLights( Level& level, Room& room )
 
     delete[] wallIndices;
     delete[] furnitureSurfaces;
+}
+
+void WorldGenerator::genLevelRoomContainers( Level& level, Room& room, float blockDimension  )
+{
+    float genContainerDensity = mLevelRanges->rooms[ room.type ].containerDensity.gen( mRand );
+    int containerCount = static_cast<int>(static_cast<float>((room.right - room.left) * (room.bottom - room.top)) * genContainerDensity);
+    int gennedContainerBlocks = 0;
+
+    int attempts = 0;
+    
+    while( gennedContainerBlocks < containerCount ){
+        Level::Container container;
+
+        float containerRoll = mRand.genNorm();
+        float check = 0.0f;
+
+        attempts++;
+
+        if( attempts > WORLD_GEN_ATTEMPTS ){
+            break;
+        }
+
+        //Generate the type of furniture
+        for(int i = Level::Container::Type::Crate; i < Level::Container::Type::Chest; i++){
+            check += mLevelRanges->rooms[ room.type ].containerChances[ i ];
+
+            if( containerRoll < check ){
+                container.setCType( (Level::Container::Type)(i) );
+                break;
+            }
+        }
+
+        if( container.getCType() == Level::Container::TNone ){
+            attempts++;
+            continue;
+        }
+
+        //Gen position
+        int gX = mRand.gen( room.left, room.right + 1 );
+        int gZ = mRand.gen( room.top, room.bottom + 1 );
+
+        //Try to swindle values closer to the walls
+        int swindle = mRand.gen( 0, 2 );
+        int dX = room.right - gX;
+        int dZ = room.bottom - gZ;
+
+        if( swindle ){
+            gX -= ( dX / 2 );
+            gZ -= ( dZ / 2 );
+        }else{
+            gX += ( dX / 2 );
+            gZ += ( dZ / 2 );
+        }
+
+        CLAMP( gX, room.left, room.right );
+        CLAMP( gZ, room.top, room.bottom );
+
+        //Gen rotation
+        int yRot = mRand.gen( 0, 4 );
+
+        //Position the furniture
+        container.getPosition().x = ( static_cast<float>( gX ) * blockDimension ) + blockDimension / 2.0f;
+        container.getPosition().z = ( static_cast<float>( gZ ) * blockDimension ) + blockDimension / 2.0f;
+        container.getPosition().y = ( level.getBlock( gX, gZ ).getHeight() * blockDimension );
+
+        //Rotate the furniture
+        container.setYRotation( static_cast<float>( yRot ) * ( 3.14159f / 2.0f ) );
+
+        float left, front, right, back;
+        
+        //Calculate bounding box
+        level.getContainerAABoundingSquare( container, left, front, right, back );
+
+        //Convert to indices touched
+        short iLeft = static_cast<short>( left / blockDimension );
+        short iFront = static_cast<short>( front / blockDimension );
+        short iRight = static_cast<short>( right / blockDimension );
+        short iBack = static_cast<short>( back / blockDimension );
+
+        //Make sure the area we want to set to furniture is clear
+        if( !level.isRectOfBlocksLevelAndOpen(iLeft, iRight, iFront, iBack) ){
+            continue;
+        }
+
+        ushort addedContainerIndex = level.addContainer( container );
+        Level::Container* addedContainer = &level.getContainer( addedContainerIndex );
+
+        //Set the blocks in the touched indicies to be furniture blocks
+        for(int i = iLeft; i <= iRight; i++){
+            for(int j = iFront; j <= iBack; j++){
+                level.getBlock( i, j ).setContainer( addedContainer );
+            }
+        }
+
+        //If there isn't a path, undo what we added
+        if( !pathExistsToDoors( level, room ) ){
+            for(int i = iLeft; i <= iRight; i++){
+                for(int j = iFront; j <= iBack; j++){
+                    level.getBlock( i, j ).setOpen();
+                }
+            }
+
+            level.removeContainer( addedContainerIndex );
+            continue;
+        }
+
+        //Increment by furniture width * height
+        gennedContainerBlocks += ( ( iRight - iLeft ) + 1 ) * ( ( iBack - iFront ) + 1);
+    }
 }
 
 void WorldGenerator::genPopulation( Population& population, Level& level, PopulationGenerationRanges& ranges, float blockDimension )

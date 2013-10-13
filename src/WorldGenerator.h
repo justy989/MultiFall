@@ -61,6 +61,9 @@ public:
 
         FRange furnitureDensity; //Percent of the room taken up by furniture
         float furnitureChances[ LEVEL_FURNITURE_TYPE_COUNT ]; //Chances for the different furniture to be generated
+
+        FRange containerDensity; //Percent of the room taken up by containers
+        float containerChances[ WORLD_CONTAINER_TYPE_COUNT ]; //Chances for different containers
     };
 
     //Level Options
@@ -150,6 +153,9 @@ protected:
 
     //Do a pass generating the furniture of each room
     void genLevelRoomFurniture( Level& level, Room& room, float blockDimension );
+
+    //Do a pass generating room containers and items
+    void genLevelRoomContainers( Level& level, Room& room, float blockDimension  );
 
     //Do a pass generating the lights of each room
     void genLevelRoomLights( Level& level, Room& room );

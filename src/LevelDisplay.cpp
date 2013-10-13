@@ -101,6 +101,18 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
         return false;
     }
 
+    if( !mContainers[0].loadFromObj(device, "content/meshes/crate.obj", L"content/textures/furniture_wood.png") ){
+        return false;
+    }
+
+    if( !mContainers[1].loadFromObj(device, "content/meshes/barrel.obj", L"content/textures/furniture_wood.png") ){
+        return false;
+    }
+
+    mLightScale[ Level::Light::Candle ] = 0.025f;
+    mLightScale[ Level::Light::Torch ] = 0.075f;
+    mLightScale[ Level::Light::Chandelier ] = 0.5f;
+
     mFurnitureScale[ Level::Furniture::Chair ] = 0.065f;
     mFurnitureScale[ Level::Furniture::Desk ] = 0.1f;
     mFurnitureScale[ Level::Furniture::Table ] = 0.08f;
@@ -108,9 +120,8 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
     mFurnitureScale[ Level::Furniture::Bed_Frame ] = 0.1f;
     mFurnitureScale[ Level::Furniture::Book_Case ] = 0.1f;
 
-    mLightScale[ Level::Light::Candle ] = 0.025f;
-    mLightScale[ Level::Light::Torch ] = 0.075f;
-    mLightScale[ Level::Light::Chandelier ] = 0.5f;
+    mContainerScale[ Level::Container::Type::Barrel ] = 0.14f;
+    mContainerScale[ Level::Container::Type::Crate ] = 0.13f;
 
     LOG_INFO << "Created Input Description and Texture Sampler for Level" << LOG_ENDL;
     return true;
@@ -183,6 +194,10 @@ void LevelDisplay::clear()
 
     for(uint i = 1; i < LEVEL_FURNITURE_TYPE_COUNT; i++){
         mFurniture[i-1].clear();
+    }
+
+    for(uint i = 1; i < WORLD_CONTAINER_TYPE_COUNT; i++){
+        mContainers[i-1].clear();
     }
 
     LOG_INFO << "Released Level Display Assets and buffers" << LOG_ENDL;
@@ -333,6 +348,35 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
 		device->VSSetConstantBuffers( 1, 1, &mWorldCB );
 
         mFurniture[ f.getType() - 1 ].draw(device);
+	}
+
+    //Draw Containers
+    for(uint i = 0; i < level.getNumContainer(); i++)
+	{
+        Level::Container& f = level.getContainer(i);
+
+        float dx = (cameraPos.x - f.getPosition().x);
+        float dz = (cameraPos.z - f.getPosition().z);
+
+        float d = sqrt( (dx * dx) + (dz * dz) );
+
+        //If we are outside the draw range, skip drawing this one
+        if( d > mDrawRange ){
+            continue;
+        }
+
+        worldm = XMMatrixScaling( mContainerScale[ f.getCType() ], 
+                                  mContainerScale[ f.getCType() ], 
+                                  mContainerScale[ f.getCType() ]) * 
+                 XMMatrixRotationY( f.getYRotation() ) * 
+                 XMMatrixTranslation( f.getPosition().x, f.getPosition().y, f.getPosition().z );
+
+		worldm = XMMatrixTranspose( worldm );
+
+		device->UpdateSubresource( mWorldCB, 0, 0, &worldm, 0, 0 ); 
+		device->VSSetConstantBuffers( 1, 1, &mWorldCB );
+
+        mContainers[ f.getCType() - 1 ].draw(device);
 	}
 }
 

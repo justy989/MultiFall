@@ -18,7 +18,8 @@ Level::Level() :
     mDepth(0),
     mBlocks(0),
     mNumLights(0),
-    mNumFurniture(0)
+    mNumFurniture(0),
+    mNumContainers(0)
 {
 
 }
@@ -101,6 +102,34 @@ bool Level::removeFurniture( ushort index )
     return true;
 }
 
+ushort Level::addContainer( Level::Container& container )
+{
+    if( mNumContainers >= LEVEL_MAX_CONTAINERS ){
+        return false;
+    }
+
+    mContainers[ mNumContainers ] = container;
+
+    mNumContainers++;
+    
+    return mNumContainers - 1;
+}
+
+bool Level::removeContainer( ushort index )
+{
+    if( index >= mNumContainers ){
+        return false;
+    }
+
+    mNumContainers--;
+
+    for(ushort i = index; i < mNumContainers; i++){
+        mContainers[i] = mContainers[i+1];
+    }
+
+    return true;
+}
+
 void Level::clear()
 {
     if( mBlocks ){
@@ -115,6 +144,7 @@ void Level::clear()
 
     mNumLights = 0;
     mNumFurniture = 0;
+    mNumContainers = 0;
 }
 
 Level::Block& Level::getBlock( ushort i, ushort j )
@@ -171,6 +201,101 @@ void Level::getFurnitureAABoundingSquare( Furniture& furniture , float& left, fl
                          XMMatrixTranslation( furniture.getPosition().x, 
                                               furniture.getPosition().y, 
                                               furniture.getPosition().z );
+
+    //perform each transformation
+    XMVECTOR transFrontLeft = XMVector4Transform( frontLeft, transform );
+    XMVECTOR transFrontRight = XMVector4Transform( frontRight, transform );
+    XMVECTOR transBackLeft = XMVector4Transform( backLeft, transform );
+    XMVECTOR transBackRight = XMVector4Transform( backRight, transform );
+
+    transFrontLeft += pos;
+    transFrontRight += pos;
+    transBackLeft += pos;
+    transBackRight += pos;
+
+    //Find the min and max boundries
+    XMFLOAT4 frontLeftF4; XMStoreFloat4( &frontLeftF4, transFrontLeft );
+    XMFLOAT4 frontRightF4; XMStoreFloat4( &frontRightF4, transFrontRight );
+    XMFLOAT4 backLeftF4; XMStoreFloat4( &backLeftF4, transBackLeft );
+    XMFLOAT4 backRightF4; XMStoreFloat4( &backRightF4, transBackRight );
+
+    //Init, then check each float for the lowest x and lowest z as well as highest x and highest z
+    left = frontLeftF4.x;
+    right = frontLeftF4.x;
+    front = frontLeftF4.z;
+    back = frontLeftF4.z;
+
+    //Check front right
+    if( frontRightF4.x < left ){
+        left = frontRightF4.x;
+    }
+
+    if( frontRightF4.x > right ){
+        right = frontRightF4.x;
+    }
+
+    if( frontRightF4.z < front ){
+        front = frontRightF4.z;
+    }
+
+    if( frontRightF4.z > back ){
+        back = frontRightF4.z;
+    }
+
+    //check back left
+    if( backLeftF4.x < left ){
+        left = backLeftF4.x;
+    }
+
+    if( backLeftF4.x > right ){
+        right = backLeftF4.x;
+    }
+
+    if( backLeftF4.z < front ){
+        front = backLeftF4.z;
+    }
+
+    if( backLeftF4.z > back ){
+        back = backLeftF4.z;
+    }
+
+    //check back right
+    if( backRightF4.x < left ){
+        left = backRightF4.x;
+    }
+
+    if( backRightF4.x > right ){
+        right = backRightF4.x;
+    }
+
+    if( backRightF4.z < front ){
+        front = backRightF4.z;
+    }
+
+    if( backRightF4.z > back ){
+        back = backRightF4.z;
+    }
+}
+
+void Level::getContainerAABoundingSquare( Container& container , float& left, float& front, float& right, float& back )
+{
+    XMVECTOR pos = XMLoadFloat4( &container.getPosition() );
+
+    //Set the dimensions vectors
+    XMVECTOR xDim = XMVectorSet( mContainerDimensions[ container.getCType() ].x / 2.0f, 0.0f, 0.0f, 0.0f );
+    XMVECTOR zDim = XMVectorSet( 0.0f, 0.0f, mContainerDimensions[ container.getCType() ].z / 2.0f, 0.0f );
+
+    //Calculate each corner from the origin
+    XMVECTOR frontLeft = (-xDim - zDim);
+    XMVECTOR frontRight = (xDim - zDim);
+    XMVECTOR backLeft = (-xDim + zDim);
+    XMVECTOR backRight = (xDim + zDim);
+
+    //Rotate and translate
+    XMMATRIX transform = XMMatrixRotationY( container.getYRotation() ) *
+                         XMMatrixTranslation( container.getPosition().x, 
+                                              container.getPosition().y, 
+                                              container.getPosition().z );
 
     //perform each transformation
     XMVECTOR transFrontLeft = XMVector4Transform( frontLeft, transform );

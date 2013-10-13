@@ -4,9 +4,11 @@
 #include "Utils.h"
 #include "Light.h"
 #include "StaticMesh.h"
+#include "WorldContainer.h"
 
 #define LEVEL_MAX_LIGHTS 128
-#define LEVEL_MAX_FURNITURE 1024
+#define LEVEL_MAX_FURNITURE 512
+#define LEVEL_MAX_CONTAINERS 512
 #define LEVEL_FURNITURE_TYPE_COUNT 7
 #define LEVEL_LIGHT_TYPE_COUNT 4
 
@@ -16,6 +18,13 @@ public:
 
     Level();
     ~Level();
+
+    enum Direction{
+        D_Front,
+        D_Left,
+        D_Back,
+        D_Right
+    };
 
     //Direction ramp is pointing and the height is the bottom of the ramp, is none if not a ramp
     enum Ramp{
@@ -63,6 +72,11 @@ public:
         Type mType;
     };
 
+    //Doesn't need anything special, just these two plopped together
+    class Container : public WorldContainer, public SolidObject{
+
+    };
+
     //Transition between rooms
     class Door : public SolidObject{
     public:
@@ -74,27 +88,8 @@ public:
         };
 
         State state;
-    };
-
-    //Container holding items
-    class Container : public SolidObject{
-    public:
-
-        enum State{
-            Closed,
-            Opening,
-            Opened
-        };
-
-        enum Type{
-            None,
-            Crate,
-            Barrel,
-            Chest,
-        };
-
-        State state;
-        Type type;
+        float openInterval;
+        Direction facing;
     };
 
     //Holds a block of floor in the level
@@ -216,6 +211,12 @@ public:
     //Remove furniture
     bool removeFurniture( ushort index );
 
+    //Add a container
+    ushort addContainer( Level::Container& container );
+
+    //Remove a container
+    bool removeContainer( ushort index );
+
     //clear the room's allocated memory
     void clear();
 
@@ -228,6 +229,9 @@ public:
     //From furniture passed in, get a bounding box
     void getFurnitureAABoundingSquare( Furniture& furniture , float& left, float& front, float& right, float& back );
 
+    //From container passed in, get a bounding box
+    void getContainerAABoundingSquare( Container& container , float& left, float& front, float& right, float& back );
+
     inline ushort getWidth();
     inline ushort getDepth();
     inline byte getHeight();
@@ -238,8 +242,14 @@ public:
     inline ushort getNumFurniture();
 	inline Furniture& getFurniture( ushort index );
 
+    inline ushort getNumContainer();
+	inline Container& getContainer( ushort index );
+
     inline XMFLOAT3& getFurnitureDimensions( Furniture::Type type );
     inline void setFurnitureDimensions( Furniture::Type type, XMFLOAT3 dimensions );
+
+    inline XMFLOAT3& getContainerDimensions( Container::Type type );
+    inline void setContainerDimensions( Container::Type type, XMFLOAT3 dimensions );
 
 protected:
 
@@ -259,9 +269,12 @@ protected:
     Furniture mFurniture[ LEVEL_MAX_FURNITURE ];
 
     //Containers
+    ushort mNumContainers;
+    Level::Container mContainers[ LEVEL_MAX_CONTAINERS ];
 
     //Dimensions of furniture by type
     XMFLOAT3 mFurnitureDimensions[ LEVEL_FURNITURE_TYPE_COUNT ];
+    XMFLOAT3 mContainerDimensions[ WORLD_CONTAINER_TYPE_COUNT ];
 };
 
 //Block Inline Functions
@@ -327,8 +340,14 @@ inline Level::Light& Level::getLight( ushort index ){return mLights[ index ];}
 inline ushort Level::getNumFurniture(){return mNumFurniture;}
 inline Level::Furniture& Level::getFurniture( ushort index ){return mFurniture[ index ];}
 
+inline ushort Level::getNumContainer(){return mNumContainers;}
+inline Level::Container& Level::getContainer( ushort index ){return mContainers[ index ];}
+
 inline XMFLOAT3& Level::getFurnitureDimensions( Level::Furniture::Type type ){return mFurnitureDimensions[type];}
 inline void Level::setFurnitureDimensions( Level::Furniture::Type type, XMFLOAT3 dimensions ){mFurnitureDimensions[type] = dimensions;}
+
+inline XMFLOAT3& Level::getContainerDimensions( Level::Container::Type type ){return mContainerDimensions[type];}
+inline void Level::setContainerDimensions( Level::Container::Type type, XMFLOAT3 dimensions ){mContainerDimensions[type] = dimensions;}
 
 //Furniture inline functiosn
 inline void Level::Furniture::setType( Type type ){mType = type;}
