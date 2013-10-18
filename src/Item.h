@@ -2,12 +2,14 @@
 #define ITEM_H
 
 #include "Utils.h"
+#include "Stats.h"
 
 #define ITEM_NAME_LEN 32
 #define ITEM_MAX_TIERS 8
 #define ITEM_MAX_MAGIC_PROPERTIES 8
 #define ITEM_USAGE_TYPE_COUNT 5
 #define ITEM_EQUIPMENT_TYPE_COUNT 9
+#define ITEM_MAX_STAT_EFFECTS 8
 
 struct ItemDefinition{
     enum Usage{
@@ -89,6 +91,7 @@ struct Item{
     uint tier; //tier representing which stats are used
 
     //Unique Magic properties
+    Stats::Effect mEffects[ ITEM_MAX_STAT_EFFECTS ];
 };
 
 #endif

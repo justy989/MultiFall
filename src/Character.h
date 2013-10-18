@@ -2,18 +2,47 @@
 #define CHARACTER_H
 
 #include "WorldEntity.h"
+#include "Item.h"
 
 #define CHARACTER_MOVE_SPEED 1.25f
+
+#define CHAR_AI_FLAG_USES_RANGED 1
+#define CHAR_AI_FLAG_USES_SPELLS 2
+#define CHAR_AI_FLAG_HEALS_OTHERS 4
+#define CHAR_AI_FLAG_RUN_AWAY_ON_LOW_HEALTH 8
+#define CHAR_AI_FLAG_SPRINT_TO_TARGET 16
 
 class Character : public WorldEntity{
 public:
 
-    enum Action{
+    //Action
+    struct Action{
+        enum Type{
+            TIdle,
+            Activate,
+            Melee,
+            Ranged,
+            Cast,
+            Consume,
+        };
+
+        enum State{
+            SIdle,
+            WarmUp,
+            Climax,
+            CoolDown
+        };
+
+        Type type;
+        State state;
+    };
+
+    //Move state
+    enum MoveState{
         Idle,
-        Melee,
-        Cast,
-        Use,
-        Activate
+        Crouch,
+        Walk,
+        Run
     };
 
     Character();
@@ -26,9 +55,8 @@ public:
     inline void setID( ushort id );
     inline ushort getID();
 
-    void walk( XMFLOAT4& direction );
-    void stop();
-
+    bool move( MoveState state );
+    bool action( Action::Type type );
 
 protected:
 
@@ -39,9 +67,13 @@ protected:
 
     Action mCurrentAction;
 
+    MoveState mCurrentMoveState;
+
     //Stats
+    Stats mStats;
 
     //Inventory
+
 
     //AI 
 };
