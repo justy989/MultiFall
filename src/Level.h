@@ -85,12 +85,18 @@ public:
         enum State{
             Closed,
             Opening,
-            Opened
+            Opened,
+            Closing
         };
+
+        void open();
+        void close();
 
         State state;
         float openInterval;
         Direction facing;
+
+        float startAngle;
     };
 
     //Holds a block of floor in the level

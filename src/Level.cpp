@@ -401,3 +401,19 @@ void Level::getContainerAABoundingSquare( Container& container , float& left, fl
         back = backRightF4.z;
     }
 }
+
+void Level::Door::open()
+{
+    if( state == Door::Closed ){
+        state = Door::Opening;
+        startAngle = mYRotation;
+    }
+}
+
+void Level::Door::close()
+{
+    if( state == Door::Opened ){
+        state = Door::Closing;
+        startAngle = mYRotation;
+    }
+}

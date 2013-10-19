@@ -22,7 +22,7 @@ Configuration::Configuration()
     mBindNames[5] = "PlayerCrouch";
     mBindNames[6] = "PlayerAttack";
     mBindNames[7] = "PlayerCast";
-    mBindNames[8] = "PlayerActivate";
+    mBindNames[8] = "PlayerActivate"; mBinds[ 8 ] = 'E';
 
     mBindNames[9] = "MenuPause";
     mBindNames[10] = "MenuSelect";
@@ -142,7 +142,6 @@ bool Configuration::load( char* configPath )
                             mBinds[i] = value[0];
                         }
 
-                        
                         LOG_INFO << "Configured User Bind: " << mBindNames[i] << " : " << mBinds[i] << LOG_ENDL;
 
                         foundBind = true;

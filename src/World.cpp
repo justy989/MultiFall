@@ -79,6 +79,26 @@ void World::update( float dt )
             dir.z = 0.0f;
         }
     }
+
+    for(ushort i = 0; i < mLevel.getNumDoors(); i++){
+        Level::Door& door = mLevel.getDoor(i);
+
+        if( door.state == Level::Door::Opening ){
+            door.setYRotation( door.getYRotation() + 0.02f );
+
+            if( door.getYRotation() > ( door.startAngle + ( 3.14159f * 0.5f ) ) ){
+                door.state = Level::Door::Opened;
+                door.setYRotation( door.startAngle + ( 3.14159f * 0.5f ) );
+            }
+        }else if( door.state == Level::Door::Closing ){
+            door.setYRotation( door.getYRotation() - 0.02f );
+
+            if( door.getYRotation() < ( door.startAngle - ( 3.14159f * 0.5f ) ) ){
+                door.state = Level::Door::Closed;
+                door.setYRotation( door.startAngle - ( 3.14159f * 0.5f ) );
+            }
+        }
+    }
 }
 
 void World::handleEvent( Event& e )
@@ -109,6 +129,12 @@ void World::handleEvent( Event& e )
         mPop.kill( e.characterKillInfo.id );
         break;
     case Event::Type::CharacterWalk:
+        break;
+    case Event::Type::DoorOpen:
+        mLevel.getDoor( e.doorOpenInfo.id ).open();
+        break;
+    case Event::Type::DoorClose:
+        mLevel.getDoor( e.doorCloseInfo.id ).close();
         break;
     default:
         break;
@@ -185,6 +211,11 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     XMVECTOR wallX = XMVectorZero();
     XMVECTOR wallZ = XMVectorZero();
 
+    float bLeft;
+    float bRight;
+    float bFront;
+    float bBack;
+
     bool collided = false;
 
     if( px - entity->getSolidity().radius < 0.0f ){
@@ -203,14 +234,68 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
         collided = true;
     }
 
+    Level::Door* centerDoor = NULL;
+
+    //Check for doors in the current block
+    if( mLevel.getBlock(bX,bZ).getCollidableType() == Level::Block::Collidable::Door ){
+        centerDoor = mLevel.getBlock(bX, bZ).getDoor();
+        
+        if( centerDoor->state == Level::Door::Closed ){
+            bFront = static_cast<float>(bZ) * 0.3f;
+            bLeft = static_cast<float>(bX) * 0.3f;
+            bRight = bLeft + 0.3f;
+            bBack = bFront + 0.3f;
+
+            switch( centerDoor->facing ){
+            case 0:
+                if( WorldEntity::circleAALineIntersect(
+                                XMVectorSet(bLeft, 0.0f, bFront, 1.0f),
+                                XMVectorSet(bRight, 0.0f, bFront, 1.0f),
+                                XMVectorSet(px, 0.0f, pz, 1.0f),
+                                entity->getSolidity().radius ) ){
+                    wallZ = XMVectorSet(0.0f, 0.0f, -1.0f, 1.0f );
+                    collided = true;
+                }
+                break;
+            case 1:
+                if( WorldEntity::circleAALineIntersect(
+                                XMVectorSet(bLeft, 0.0f, bFront, 1.0f),
+                                XMVectorSet(bLeft, 0.0f, bBack, 1.0f),
+                                XMVectorSet(px, 0.0f, pz, 1.0f),
+                                entity->getSolidity().radius ) ){
+                    wallX = XMVectorSet(-1.0f, 0.0f, 0.0f, 1.0f );
+                    collided = true;
+                }
+                break;
+            case 2:
+                if( WorldEntity::circleAALineIntersect(
+                                XMVectorSet(bLeft, 0.0f, bBack, 1.0f),
+                                XMVectorSet(bRight, 0.0f, bBack, 1.0f),
+                                XMVectorSet(px, 0.0f, pz, 1.0f),
+                                entity->getSolidity().radius ) ){
+                    wallZ = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f );
+                    collided = true;
+                }
+                break;
+            case 3:
+                if( WorldEntity::circleAALineIntersect(
+                                XMVectorSet(bRight, 0.0f, bFront, 1.0f),
+                                XMVectorSet(bRight, 0.0f, bBack, 1.0f),
+                                XMVectorSet(px, 0.0f, pz, 1.0f),
+                                entity->getSolidity().radius ) ){
+                    wallX = XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f );
+                    collided = true;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
     //Check the left Block's right side
     i = bX - 1;
     j = bZ;
-
-    float bLeft;
-    float bRight;
-    float bFront;
-    float bBack;
 
     if( i >= 0 && i < mLevel.getWidth() &&
         j >= 0 && j < mLevel.getDepth() ){
@@ -218,7 +303,10 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
         blockHeight = static_cast<float>( mLevel.getBlock(i, j).getHeight() ) * 0.3f;
 
         //Check wall
-        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ){
+        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ||
+            ( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Door &&
+              mLevel.getBlock(i,j).getDoor()->state == Level::Door::Closed &&
+              mLevel.getBlock(i,j).getDoor()->facing == 3 ) ){
             bLeft = static_cast<float>(i) * 0.3f;
             bFront = static_cast<float>(j) * 0.3f;
             bRight = bLeft + 0.3f;
@@ -245,15 +333,6 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
                 bRight = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
                 bBack = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
                 so = f;
-            }
-            break;
-        case Level::Block::Collidable::Door:
-            if( Level::Door* f = mLevel.getBlock(i, j).getDoor() ){
-                bFront = -mLevel.getDoorDimensions( ).z / 2.0f;
-                bLeft = -mLevel.getDoorDimensions( ).x / 2.0f;
-                bRight = mLevel.getDoorDimensions( ).x / 2.0f;
-                bBack = mLevel.getDoorDimensions(  ).z / 2.0f;
-                //so = f;
             }
             break;
         case Level::Block::Collidable::Container:
@@ -308,7 +387,10 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
         blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight() ) * 0.3f;
 
-        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ){
+        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ||
+            ( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Door &&
+              mLevel.getBlock(i,j).getDoor()->state == Level::Door::Closed &&
+              mLevel.getBlock(i,j).getDoor()->facing == 1 ) ){
             bLeft = static_cast<float>(i) * 0.3f;
             bFront = static_cast<float>(j) * 0.3f;
             bRight = bLeft + 0.3f;
@@ -335,15 +417,6 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
                 bRight = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
                 bBack = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
                 so = f;
-            }
-            break;
-        case Level::Block::Collidable::Door:
-            if( Level::Door* f = mLevel.getBlock(i, j).getDoor() ){
-                bFront = -mLevel.getDoorDimensions( ).z / 2.0f;
-                bLeft = -mLevel.getDoorDimensions( ).x / 2.0f;
-                bRight = mLevel.getDoorDimensions( ).x / 2.0f;
-                bBack = mLevel.getDoorDimensions(  ).z / 2.0f;
-                //so = f;
             }
             break;
         case Level::Block::Collidable::Container:
@@ -397,7 +470,10 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
         blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight()) * 0.3f;
 
-        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ){
+        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ||
+            ( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Door &&
+              mLevel.getBlock(i,j).getDoor()->state == Level::Door::Closed &&
+              mLevel.getBlock(i,j).getDoor()->facing == 2 ) ){
             bLeft = static_cast<float>(i) * 0.3f;
             bFront = static_cast<float>(j) * 0.3f;
             bRight = bLeft + 0.3f;
@@ -424,15 +500,6 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
                 bRight = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
                 bBack = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
                 so = f;
-            }
-            break;
-        case Level::Block::Collidable::Door:
-            if( Level::Door* f = mLevel.getBlock(i, j).getDoor() ){
-                bFront = -mLevel.getDoorDimensions( ).z / 2.0f;
-                bLeft = -mLevel.getDoorDimensions( ).x / 2.0f;
-                bRight = mLevel.getDoorDimensions( ).x / 2.0f;
-                bBack = mLevel.getDoorDimensions(  ).z / 2.0f;
-                //so = f;
             }
             break;
         case Level::Block::Collidable::Container:
@@ -487,7 +554,10 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
         blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight()) * 0.3f;
 
-        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ){
+        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ||
+            ( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Door &&
+              mLevel.getBlock(i,j).getDoor()->state == Level::Door::Closed &&
+              mLevel.getBlock(i,j).getDoor()->facing == 0 ) ){
             bLeft = static_cast<float>(i) * 0.3f;
             bFront = static_cast<float>(j) * 0.3f;
             bRight = bLeft + 0.3f;
@@ -514,15 +584,6 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
                 bRight = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
                 bBack = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
                 so = f;
-            }
-            break;
-        case Level::Block::Collidable::Door:
-            if( Level::Door* f = mLevel.getBlock(i, j).getDoor() ){
-                bFront = -mLevel.getDoorDimensions( ).z / 2.0f;
-                bLeft = -mLevel.getDoorDimensions( ).x / 2.0f;
-                bRight = mLevel.getDoorDimensions( ).x / 2.0f;
-                bBack = mLevel.getDoorDimensions(  ).z / 2.0f;
-                //so = f;
             }
             break;
         case Level::Block::Collidable::Container:

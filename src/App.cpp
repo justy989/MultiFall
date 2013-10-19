@@ -138,7 +138,7 @@ int App::run( HINSTANCE hInstance, int nCmdShow )
     }
 
     //Set the binds for movement for now
-    for(int i = UserBinds::Action::Player_Move_Forward; i <= UserBinds::Action::Player_Move_Right; i++){
+    for(int i = UserBinds::Action::Player_Move_Forward; i <= UserBinds::Action::Player_Activate; i++){
         mBinds.bindKey( (UserBinds::Action)(i), 
                         mConfig.getBinds()[ i ] );
     }
@@ -270,11 +270,11 @@ bool App::init( )
     //Labyrinth Room
     WorldGenerator::RoomGenerationRanges& labyrinthRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Labyrinth ];
 
-    labyrinthRanges.dimensions.set( 3, 8 );
+    labyrinthRanges.dimensions.set( 5, 10 );
     labyrinthRanges.floorHeight.set( 0, 0 );
     labyrinthRanges.floorSectionArea.set( 200, 300 );
     labyrinthRanges.rampDensity.set( 0.0f, 0.0f );
-    labyrinthRanges.wallDensity.set( 0.4f, 0.7f );
+    labyrinthRanges.wallDensity.set( 0.3f, 0.5f );
     labyrinthRanges.wallLength.set( 3, 8 );
     labyrinthRanges.furnitureDensity.set( 0.0f, 0.0f );
     labyrinthRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
@@ -295,13 +295,13 @@ bool App::init( )
     //Bed Room
     WorldGenerator::RoomGenerationRanges& bedroomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::BedRoom ];
 
-    bedroomRanges.dimensions.set( 1, 2 );
+    bedroomRanges.dimensions.set( 2, 4 );
     bedroomRanges.floorHeight.set( 0, 0 );
     bedroomRanges.floorSectionArea.set( 200, 300 );
     bedroomRanges.rampDensity.set( 0.0f, 0.0f );
     bedroomRanges.wallDensity.set( 0.0f, 0.2f );
     bedroomRanges.wallLength.set( 1, 4 );
-    bedroomRanges.furnitureDensity.set( 0.1f, mBlockDimenions );
+    bedroomRanges.furnitureDensity.set( 0.05f, 0.2 );
     bedroomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.7f;
     bedroomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.05f;
@@ -320,13 +320,13 @@ bool App::init( )
     //Study Room
     WorldGenerator::RoomGenerationRanges& studyRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Study ];
 
-    studyRanges.dimensions.set( 1, 2 );
+    studyRanges.dimensions.set( 2, 4 );
     studyRanges.floorHeight.set( 0, 0 );
     studyRanges.floorSectionArea.set( 0, 0 );
     studyRanges.rampDensity.set( 0.0f, 0.0f );
     studyRanges.wallDensity.set( 0.0f, 0.0f );
     studyRanges.wallLength.set( 0, 0 );
-    studyRanges.furnitureDensity.set( 0.1f, 0.35f );
+    studyRanges.furnitureDensity.set( 0.05f, 0.25f );
     studyRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.5f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.5f;
@@ -345,13 +345,13 @@ bool App::init( )
     //Library
     WorldGenerator::RoomGenerationRanges& libraryRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Library ];
 
-    libraryRanges.dimensions.set( 4, 8 );
+    libraryRanges.dimensions.set( 5, 8 );
     libraryRanges.floorHeight.set( 0, 0 );
     libraryRanges.floorSectionArea.set( 0, 0 );
     libraryRanges.rampDensity.set( 0.0f, 0.0f );
     libraryRanges.wallDensity.set( 0.0f, 0.15f );
     libraryRanges.wallLength.set( 10, 20 );
-    libraryRanges.furnitureDensity.set( 0.3f, 0.5f );
+    libraryRanges.furnitureDensity.set( 0.15f, 0.35f );
     libraryRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.75f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
@@ -370,7 +370,7 @@ bool App::init( )
     //Storage
     WorldGenerator::RoomGenerationRanges& storageRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Storage ];
 
-    storageRanges.dimensions.set( 2, 3 );
+    storageRanges.dimensions.set( 4, 5 );
     storageRanges.floorHeight.set( 0, 0 );
     storageRanges.floorSectionArea.set( 0, 0 );
     storageRanges.rampDensity.set( 0.0f, 0.0f );
@@ -388,20 +388,20 @@ bool App::init( )
     storageRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     storageRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     storageRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
-    storageRanges.containerDensity.set( 0.2f, 0.5f );
+    storageRanges.containerDensity.set( 0.15f, 0.25f );
     storageRanges.containerChances[ WorldContainer::Type::Crate ] = 0.5f;
     storageRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.5f;
 
     //Dining Room
     WorldGenerator::RoomGenerationRanges& diningRoomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::DiningRoom ];
 
-    diningRoomRanges.dimensions.set( 3, 7 );
+    diningRoomRanges.dimensions.set( 5, 10 );
     diningRoomRanges.floorHeight.set( 0, 0 );
     diningRoomRanges.floorSectionArea.set( 0, 0 );
     diningRoomRanges.rampDensity.set( 0.0f, 0.0f );
     diningRoomRanges.wallDensity.set( 0.1f, 0.25f );
     diningRoomRanges.wallLength.set( 1, 8 );
-    diningRoomRanges.furnitureDensity.set( 0.35f, 0.5f );
+    diningRoomRanges.furnitureDensity.set( 0.2f, 0.3f );
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 1.0f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
@@ -819,6 +819,42 @@ void App::update( float dt )
              rotVec = XMVectorSet( -1.0f, 0.0f, 0.0f, 0.0f );
              rotVec = XMVector4Transform( rotVec, rotMat );
              moveVec += rotVec;
+        }
+
+        if( mBinds.isBindDown( UserBinds::Action::Player_Activate ) ){
+            //Get the player position
+            XMFLOAT4& playerPos = mWorld.getPopulation().getCharacter( mParty.getMyIndex() ).getPosition();
+
+            Level& level = mWorld.getLevel();
+
+            //See if there are any doors withing a radius
+            for(ushort i = 0; i < level.getNumDoors(); i++){
+                Level::Door& d = level.getDoor( i );
+
+                float dx = ( d.getPosition().x - playerPos.x );
+                float dz = ( d.getPosition().z - playerPos.z );
+
+                float dist = sqrt( ( dx * dx ) + ( dz * dz ) );
+
+                if( dist < 0.35f ){
+                    //Send an even to open it
+                    Event e;
+                    
+                    if( d.state == Level::Door::Opened ){
+                        e.type = Event::DoorClose;
+                        e.doorCloseInfo.id = i;
+                    }else if( d.state == Level::Door::Closed ){
+                        e.type = Event::DoorOpen;
+                        e.doorOpenInfo.id = i;
+                    }else{ //It is in the process of opening, do not send any event
+                        continue;
+                    }
+
+                    EVENTMANAGER->queueEvent( e );
+                }
+            }
+
+            //See if there are any containers
         }
 
         //If myIndex is valid

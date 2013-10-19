@@ -355,9 +355,9 @@ void WorldGenerator::genLevelBlueprint( Level& level, Room* rooms, short roomCou
 
                 //Create and add door
                 Level::Door door;
-                door.getPosition().x = ( static_cast<float>( rooms[i].doors[d].x ) * 0.3f ) + 0.15f;
+                door.getPosition().x = ( static_cast<float>( rooms[i].doors[d].x ) * 0.3f );
                 door.getPosition().y = 0.0f;
-                door.getPosition().z = ( static_cast<float>( rooms[i].doors[d].y ) * 0.3f ) + 0.15f;
+                door.getPosition().z = ( static_cast<float>( rooms[i].doors[d].y ) * 0.3f );
                 door.setYRotation( static_cast<float>( rooms[i].doors[d].side ) * 3.14159f * 0.5f );
                 door.state = Level::Door::State::Closed;
                 door.facing = (Level::Direction)( rooms[i].doors[d].side );
@@ -365,16 +365,16 @@ void WorldGenerator::genLevelBlueprint( Level& level, Room* rooms, short roomCou
                 //Offset position by side
                 switch( rooms[i].doors[d].side ){
                 case 0:
-                    door.getPosition().z -= 0.15f;
+                    door.getPosition().x += 0.3f;
                     break;
                 case 1:
-                    door.getPosition().x -= 0.15f;
                     break;
                 case 2:
-                    door.getPosition().z += 0.15f;
+                    door.getPosition().z += 0.3f;
                     break;
                 case 3:
-                    door.getPosition().x += 0.15f;
+                    door.getPosition().z += 0.3f;
+                    door.getPosition().x += 0.3f;
                     break;
                 default:
                     break;
