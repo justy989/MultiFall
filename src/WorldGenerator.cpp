@@ -66,16 +66,37 @@ void WorldGenerator::genRoom( WallSide attachSide, int attachX, int attachY, Roo
     float roomTypeRoll = mRand.genNorm();
 
     //Generate the type of room based on the roll
-    for(int i = 0; i <= Room::Type::BallRoom; i++){
+    for(int i = 0; i < Room::Type::Hallway; i++){
         if( roomTypeRoll < mLevelRanges->roomChances[ i ] ){
             room.type = (Room::Type)(i);
             break;
         }
     }
 
+    //Hallway Roll - Override current room if we pass it
+    float hallwayRoll = mRand.genNorm();
+
+    if( hallwayRoll < mLevelRanges->roomChances[ Room::Type::Hallway ] ){
+        room.type = Room::Type::Hallway;
+    }
+
     //Based on type, generate width and height
     int genWidth = mLevelRanges->rooms[ room.type ].dimensions.gen( mRand );
     int genHeight = mLevelRanges->rooms[ room.type ].dimensions.gen( mRand );
+
+    //Set one of the dimensions to 1 based on which side we are attached to
+    if( room.type == Room::Type::Hallway ){
+        switch( attachSide ){
+        case WallSide::Left:
+        case WallSide::Right:
+            genHeight = 1;
+            break;
+        case WallSide::Front:
+        case WallSide::Back:
+            genWidth = 1;
+            break;
+        }
+    }
 
     //Generate the direction the room is extended based on which side it is attached from
     switch( attachSide ){
@@ -224,9 +245,13 @@ void WorldGenerator::genLevelBlueprint( Level& level, Room* rooms, short roomCou
         prevWallSide = (WallSide)((wallSide + 2) % 4);
         wallSide = prevWallSide;
 
-        //Make sure the gen them differently
-        while( prevWallSide == wallSide ){
-            wallSide = (WallSide)mRand.gen(0, WallSide::Right + 1 );
+        if( rooms[ i ].type == Room::Hallway ){
+            wallSide = (WallSide)((prevWallSide + 2) % 4);
+        }else{
+            //Make sure the gen them differently
+            while( prevWallSide == wallSide ){
+                wallSide = (WallSide)mRand.gen(0, WallSide::Right + 1 );
+            }
         }
 
         switch( wallSide ){
@@ -1039,7 +1064,7 @@ void WorldGenerator::genLevelRoomHeights( Level& level, Room& room )
         room.type == Room::Type::Study ||
         room.type == Room::Type::Storage ||
         room.type == Room::Type::DiningRoom ||
-        room.type == Room::Type::BallRoom ){
+        room.type == Room::Type::Hallway ){
 
         genHeight = mLevelRanges->rooms[ room.type ].floorHeight.gen( mRand );
 

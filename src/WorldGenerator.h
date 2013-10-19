@@ -99,7 +99,7 @@ public:
             Library,
             Storage,
             DiningRoom,
-            BallRoom
+            Hallway
         };
 
         Room() : type(Empty), 

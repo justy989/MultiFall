@@ -240,7 +240,7 @@ bool App::init( )
     mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Library ] = 0.7f;
     mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Storage ] = 0.84f;
     mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::DiningRoom ] = 1.0f;
-    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::BallRoom ] = 1.0f;
+    mLevelGenRanges.roomChances[ WorldGenerator::Room::Type::Hallway ] = 0.3f;
 
     //Empty Room
     WorldGenerator::RoomGenerationRanges& emptyRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Empty ];
@@ -320,13 +320,13 @@ bool App::init( )
     //Study Room
     WorldGenerator::RoomGenerationRanges& studyRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Study ];
 
-    studyRanges.dimensions.set( 2, 4 );
+    studyRanges.dimensions.set( 3, 6 );
     studyRanges.floorHeight.set( 0, 0 );
     studyRanges.floorSectionArea.set( 0, 0 );
     studyRanges.rampDensity.set( 0.0f, 0.0f );
-    studyRanges.wallDensity.set( 0.0f, 0.0f );
-    studyRanges.wallLength.set( 0, 0 );
-    studyRanges.furnitureDensity.set( 0.05f, 0.25f );
+    studyRanges.wallDensity.set( 0.0f, 0.1f );
+    studyRanges.wallLength.set( 1, 1 );
+    studyRanges.furnitureDensity.set( 0.05f, 0.2f );
     studyRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.5f;
     studyRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.5f;
@@ -338,7 +338,7 @@ bool App::init( )
     studyRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     studyRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     studyRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
-    studyRanges.containerDensity.set( 0.0f, 0.1f );
+    studyRanges.containerDensity.set( 0.0f, 0.0f );
     studyRanges.containerChances[ WorldContainer::Type::Crate ] = 0.0f;
     studyRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.0f;
 
@@ -349,9 +349,9 @@ bool App::init( )
     libraryRanges.floorHeight.set( 0, 0 );
     libraryRanges.floorSectionArea.set( 0, 0 );
     libraryRanges.rampDensity.set( 0.0f, 0.0f );
-    libraryRanges.wallDensity.set( 0.0f, 0.15f );
+    libraryRanges.wallDensity.set( 0.0f, 0.1f );
     libraryRanges.wallLength.set( 10, 20 );
-    libraryRanges.furnitureDensity.set( 0.15f, 0.35f );
+    libraryRanges.furnitureDensity.set( 0.15f, 0.25f );
     libraryRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.75f;
     libraryRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.1f;
@@ -363,7 +363,7 @@ bool App::init( )
     libraryRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     libraryRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     libraryRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
-    libraryRanges.containerDensity.set( 0.0f, 0.05f );
+    libraryRanges.containerDensity.set( 0.0f, 0.02f );
     libraryRanges.containerChances[ WorldContainer::Type::Crate ] = 1.0f;
     libraryRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.0f;
 
@@ -395,13 +395,13 @@ bool App::init( )
     //Dining Room
     WorldGenerator::RoomGenerationRanges& diningRoomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::DiningRoom ];
 
-    diningRoomRanges.dimensions.set( 5, 10 );
+    diningRoomRanges.dimensions.set( 6, 12 );
     diningRoomRanges.floorHeight.set( 0, 0 );
     diningRoomRanges.floorSectionArea.set( 0, 0 );
     diningRoomRanges.rampDensity.set( 0.0f, 0.0f );
-    diningRoomRanges.wallDensity.set( 0.1f, 0.25f );
+    diningRoomRanges.wallDensity.set( 0.1f, 0.15f );
     diningRoomRanges.wallLength.set( 1, 8 );
-    diningRoomRanges.furnitureDensity.set( 0.2f, 0.3f );
+    diningRoomRanges.furnitureDensity.set( 0.15f, 0.25f );
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 1.0f;
     diningRoomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
@@ -413,34 +413,34 @@ bool App::init( )
     diningRoomRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
     diningRoomRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
     diningRoomRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
-    diningRoomRanges.containerDensity.set( 0.0f, 0.2f );
-    diningRoomRanges.containerChances[ WorldContainer::Type::Crate ] = 0.0f;
-    diningRoomRanges.containerChances[ WorldContainer::Type::Barrel ] = 1.0f;
+    diningRoomRanges.containerDensity.set( 0.0f, 0.05f );
+    diningRoomRanges.containerChances[ WorldContainer::Type::Crate ] = 0.2f;
+    diningRoomRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.8f;
 
-    //BallRoom
-    WorldGenerator::RoomGenerationRanges& ballRoomRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::BallRoom ];
+    //Hallway
+    WorldGenerator::RoomGenerationRanges& hallwayRanges = mLevelGenRanges.rooms[ WorldGenerator::Room::Type::Hallway ];
 
-    ballRoomRanges.dimensions.set( 5, 10 );
-    ballRoomRanges.floorHeight.set( 0, 0 );
-    ballRoomRanges.floorSectionArea.set( 200, 300 );
-    ballRoomRanges.rampDensity.set( 0.0f, 0.0f );
-    ballRoomRanges.wallDensity.set( 0.0f, 0.1f );
-    ballRoomRanges.wallLength.set( 1, 1 );
-    ballRoomRanges.furnitureDensity.set( 0.05f, 0.2f );
-    ballRoomRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
-    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 1.0f;
-    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
-    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.9f;
-    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.1f;
-    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
-    ballRoomRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
-    ballRoomRanges.lightDensity.set( 0.05f, 0.15f );
-    ballRoomRanges.lightChances[ Level::Light::Type::Candle ] = 0.75f;
-    ballRoomRanges.lightChances[ Level::Light::Type::Torch ] = 0.25f;
-    ballRoomRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
-    ballRoomRanges.containerDensity.set( 0.0f, 0.0f );
-    ballRoomRanges.containerChances[ WorldContainer::Type::Crate ] = 0.0f;
-    ballRoomRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.0f;
+    hallwayRanges.dimensions.set( 3, 10 );
+    hallwayRanges.floorHeight.set( 0, 0 );
+    hallwayRanges.floorSectionArea.set( 00, 00 );
+    hallwayRanges.rampDensity.set( 0.0f, 0.0f );
+    hallwayRanges.wallDensity.set( 0.0f, 0.0f );
+    hallwayRanges.wallLength.set( 0, 0 );
+    hallwayRanges.furnitureDensity.set( 0.00f, 0.0f );
+    hallwayRanges.furnitureChances[ Level::Furniture::Type::None ] = 0.0f;
+    hallwayRanges.furnitureChances[ Level::Furniture::Type::Chair ] = 0.0f;
+    hallwayRanges.furnitureChances[ Level::Furniture::Type::Desk ] = 0.0f;
+    hallwayRanges.furnitureChances[ Level::Furniture::Type::Table ] = 0.0f;
+    hallwayRanges.furnitureChances[ Level::Furniture::Type::Bench ] = 0.0f;
+    hallwayRanges.furnitureChances[ Level::Furniture::Type::Bed_Frame ] = 0.0f;
+    hallwayRanges.furnitureChances[ Level::Furniture::Type::Book_Case ] = 0.0f;
+    hallwayRanges.lightDensity.set( 0.1f, 0.2f );
+    hallwayRanges.lightChances[ Level::Light::Type::Candle ] = 0.0f;
+    hallwayRanges.lightChances[ Level::Light::Type::Torch ] = 1.0f;
+    hallwayRanges.lightChances[ Level::Light::Type::Chandelier ] = 0.0f;
+    hallwayRanges.containerDensity.set( 0.0f, 0.0f );
+    hallwayRanges.containerChances[ WorldContainer::Type::Crate ] = 0.0f;
+    hallwayRanges.containerChances[ WorldContainer::Type::Barrel ] = 0.0f;
 
     mPopGenRanges.density.set( 0.01f, 0.03f );
     mPopGenRanges.enemyIDChance[ 0 ] = 1.0f;
