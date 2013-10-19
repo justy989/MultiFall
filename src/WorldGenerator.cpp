@@ -342,8 +342,7 @@ void WorldGenerator::genLevelBlueprint( Level& level, Room* rooms, short roomCou
                 rooms[i].doors[d].y *= 2;
 
                 if( !rooms[i].doors[d].essential ){
-                    int blah = 0;
-                    blah++;
+                    continue;
                 }
                 
                 if( d == 2 ){
@@ -354,7 +353,38 @@ void WorldGenerator::genLevelBlueprint( Level& level, Room* rooms, short roomCou
                     rooms[i].doors[d].x++;
                 }
 
-                level.getBlock( rooms[i].doors[d].x, rooms[i].doors[d].y ).setDoor( NULL, 0 );
+                //Create and add door
+                Level::Door door;
+                door.getPosition().x = ( static_cast<float>( rooms[i].doors[d].x ) * 0.3f ) + 0.15f;
+                door.getPosition().y = 0.0f;
+                door.getPosition().z = ( static_cast<float>( rooms[i].doors[d].y ) * 0.3f ) + 0.15f;
+                door.setYRotation( static_cast<float>( rooms[i].doors[d].side ) * 3.14159f * 0.5f );
+                door.state = Level::Door::State::Closed;
+                door.facing = (Level::Direction)( rooms[i].doors[d].side );
+
+                //Offset position by side
+                switch( rooms[i].doors[d].side ){
+                case 0:
+                    door.getPosition().z -= 0.15f;
+                    break;
+                case 1:
+                    door.getPosition().x -= 0.15f;
+                    break;
+                case 2:
+                    door.getPosition().z += 0.15f;
+                    break;
+                case 3:
+                    door.getPosition().x += 0.15f;
+                    break;
+                default:
+                    break;
+                }
+
+                ushort id = level.addDoor( door );
+                Level::Door& doorRef = level.getDoor( id );
+
+                //Set pointer to door
+                level.getBlock( rooms[i].doors[d].x, rooms[i].doors[d].y ).setDoor( &doorRef, 0 );
 
                 switch(d){
                 case 0:
@@ -414,6 +444,8 @@ void WorldGenerator::genDoors( Room* allRooms, int currentGeneratedRoomCount,
         prevRoom.doors[ Back ].y = prevRoom.bottom;
         prevRoom.doors[ Back ].essential = true;
 
+        prevRoom.doors[ Back ].side = Back;
+
         break;
 
     case Left:
@@ -433,6 +465,8 @@ void WorldGenerator::genDoors( Room* allRooms, int currentGeneratedRoomCount,
         prevRoom.doors[ Right ].x = prevRoom.right;
         prevRoom.doors[ Right ].y = room.doors[ attached ].y;
         prevRoom.doors[ Right ].essential = true;
+        
+        prevRoom.doors[ Right ].side = Right;
 
         break;
 
@@ -453,6 +487,8 @@ void WorldGenerator::genDoors( Room* allRooms, int currentGeneratedRoomCount,
         prevRoom.doors[ Front ].x = room.doors[ attached ].x;
         prevRoom.doors[ Front ].y = prevRoom.top;
         prevRoom.doors[ Front ].essential = true;
+        
+        prevRoom.doors[ Front ].side = Front;
 
         break;
 
@@ -473,78 +509,17 @@ void WorldGenerator::genDoors( Room* allRooms, int currentGeneratedRoomCount,
         prevRoom.doors[ Left ].x = prevRoom.left;
         prevRoom.doors[ Left ].y = room.doors[ attached ].y;
         prevRoom.doors[ Left ].essential = true;
+        
+        prevRoom.doors[ Left ].side = Left;
 
         break;
 
     default:
         break;
     }
-
+    
+    room.doors[ attached ].side = attached;
     room.doors[ attached ].essential = true;
-
-    /*
-    for(int p = 0; p < currentGeneratedRoomCount; p++){
-        //For each wall check along it to see if doors can be created
-        if( !room.doors[ Left ].essential ){
-            room.doors[ Left ].x = room.left;
-            room.doors[ Left ].y = mRand.gen( room.top, room.bottom + 1 );
-
-            if( room.doors[ Left ].x - 2 >= allRooms[p].left &&
-                room.doors[ Left ].x - 2 <= allRooms[p].right &&
-                room.doors[ Left ].y >= allRooms[p].top &&
-                room.doors[ Left ].y <= allRooms[p].bottom ){
-                //Success!
-            }else{
-                room.doors[ Left ].x = -1;
-                room.doors[ Left ].y = -1;
-            }
-        }
-
-        if( !room.doors[ Front ].essential ){
-            room.doors[ Front ].x = mRand.gen( room.left, room.right + 1 );
-            room.doors[ Front ].y = room.top;
-
-            if( room.doors[ Front ].x >= allRooms[p].left &&
-                room.doors[ Front ].x <= allRooms[p].right &&
-                room.doors[ Front ].y - 2 >= allRooms[p].top &&
-                room.doors[ Front ].y - 2<= allRooms[p].bottom ){
-                //Success!
-            }else{
-                room.doors[ Front ].x = -1;
-                room.doors[ Front ].y = -1;
-            }
-        }
-
-        if( !room.doors[ Right ].essential ){
-            room.doors[ Right ].x = room.right;
-            room.doors[ Right ].y = mRand.gen( room.top, room.bottom + 1 );
-
-            if( room.doors[ Right ].x + 2 >= allRooms[p].left &&
-                room.doors[ Right ].x + 2 <= allRooms[p].right &&
-                room.doors[ Right ].y >= allRooms[p].top &&
-                room.doors[ Right ].y <= allRooms[p].bottom ){
-                //Success!
-            }else{
-                room.doors[ Right ].x = -1;
-                room.doors[ Right ].y = -1;
-            }
-        }
-
-        if( !room.doors[ Back ].essential ){
-            room.doors[ Back ].x = mRand.gen( room.left, room.right + 1 );
-            room.doors[ Back ].y = room.bottom;
-
-            if( room.doors[ Back ].x >= allRooms[p].left &&
-                room.doors[ Back ].x <= allRooms[p].right &&
-                room.doors[ Back ].y + 2 >= allRooms[p].top &&
-                room.doors[ Back ].y + 2 <= allRooms[p].bottom ){
-                //Success!
-            }else{
-                room.doors[ Back ].x = -1;
-                room.doors[ Back ].y = -1;
-            }
-        }
-    }*/
 }
 
 

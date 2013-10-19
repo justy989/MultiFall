@@ -61,6 +61,9 @@ public:
     inline StaticMesh& getContainerMesh( Level::Container::Type type );
     inline float getContainerScale( Level::Container::Type type );
 
+    inline StaticMesh& getDoorMesh( );
+    inline float getDoorScale( );
+
 protected:
 
     bool createFloorMesh( ID3D11Device* device, Level& level, float blockDimension, float heightInterval );
@@ -116,10 +119,12 @@ protected:
     StaticMesh mLights[ LEVEL_LIGHT_TYPE_COUNT - 1];
     StaticMesh mFurniture[ LEVEL_FURNITURE_TYPE_COUNT - 1 ];
     StaticMesh mContainers[ WORLD_CONTAINER_TYPE_COUNT - 1 ];
+    StaticMesh mDoor;
     
     float mLightScale[ LEVEL_LIGHT_TYPE_COUNT ];
     float mFurnitureScale[ LEVEL_FURNITURE_TYPE_COUNT ];
     float mContainerScale[ WORLD_CONTAINER_TYPE_COUNT ];
+    float mDoorScale;
 
     //Draw Range
     float mDrawRange;
@@ -143,6 +148,15 @@ inline StaticMesh& LevelDisplay::getContainerMesh( Level::Container::Type type )
 inline float LevelDisplay::getContainerScale( Level::Container::Type type )
 {
     return mContainerScale[ type ];
+}
+
+inline StaticMesh& LevelDisplay::getDoorMesh( )
+{
+    return mDoor;
+}
+inline float LevelDisplay::getDoorScale( )
+{
+    return mDoorScale;
 }
 
 inline void LevelDisplay::setDrawRange( float drawRange )

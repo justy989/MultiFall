@@ -9,6 +9,7 @@
 #define LEVEL_MAX_LIGHTS 128
 #define LEVEL_MAX_FURNITURE 512
 #define LEVEL_MAX_CONTAINERS 512
+#define LEVEL_MAX_DOORS 128
 #define LEVEL_FURNITURE_TYPE_COUNT 7
 #define LEVEL_LIGHT_TYPE_COUNT 4
 
@@ -217,6 +218,12 @@ public:
     //Remove a container
     bool removeContainer( ushort index );
 
+    //Add a container
+    ushort addDoor( Door& door );
+
+    //Remove a container
+    bool removeDoor( ushort index );
+
     //clear the room's allocated memory
     void clear();
 
@@ -232,6 +239,9 @@ public:
     //From container passed in, get a bounding box
     void getContainerAABoundingSquare( Container& container , float& left, float& front, float& right, float& back );
 
+    //From a door passed in, get the bounding box
+    void getDoorAABoundingSquare( Door& door, float& left, float& front, float& right, float& back );
+
     inline ushort getWidth();
     inline ushort getDepth();
     inline byte getHeight();
@@ -245,11 +255,17 @@ public:
     inline ushort getNumContainer();
 	inline Container& getContainer( ushort index );
 
+    inline short getNumDoors();
+    inline Door& getDoor( ushort index );
+
     inline XMFLOAT3& getFurnitureDimensions( Furniture::Type type );
     inline void setFurnitureDimensions( Furniture::Type type, XMFLOAT3 dimensions );
 
     inline XMFLOAT3& getContainerDimensions( Container::Type type );
     inline void setContainerDimensions( Container::Type type, XMFLOAT3 dimensions );
+
+    inline XMFLOAT3& getDoorDimensions( );
+    inline void setDoorDimensions( XMFLOAT3 dimensions );
 
 protected:
 
@@ -272,9 +288,14 @@ protected:
     ushort mNumContainers;
     Level::Container mContainers[ LEVEL_MAX_CONTAINERS ];
 
+    //Doors
+    ushort mNumDoors;
+    Door mDoors[ LEVEL_MAX_DOORS ];
+
     //Dimensions of furniture by type
     XMFLOAT3 mFurnitureDimensions[ LEVEL_FURNITURE_TYPE_COUNT ];
     XMFLOAT3 mContainerDimensions[ WORLD_CONTAINER_TYPE_COUNT ];
+    XMFLOAT3 mDoorDimensions;
 };
 
 //Block Inline Functions
@@ -343,11 +364,17 @@ inline Level::Furniture& Level::getFurniture( ushort index ){return mFurniture[ 
 inline ushort Level::getNumContainer(){return mNumContainers;}
 inline Level::Container& Level::getContainer( ushort index ){return mContainers[ index ];}
 
+inline short Level::getNumDoors(){return mNumDoors;}
+inline Level::Door& Level::getDoor( ushort index ){return mDoors[index];}
+
 inline XMFLOAT3& Level::getFurnitureDimensions( Level::Furniture::Type type ){return mFurnitureDimensions[type];}
 inline void Level::setFurnitureDimensions( Level::Furniture::Type type, XMFLOAT3 dimensions ){mFurnitureDimensions[type] = dimensions;}
 
 inline XMFLOAT3& Level::getContainerDimensions( Level::Container::Type type ){return mContainerDimensions[type];}
 inline void Level::setContainerDimensions( Level::Container::Type type, XMFLOAT3 dimensions ){mContainerDimensions[type] = dimensions;}
+
+inline XMFLOAT3& Level::getDoorDimensions( ){return mDoorDimensions;}
+inline void Level::setDoorDimensions( XMFLOAT3 dimensions ){mDoorDimensions = dimensions;}
 
 //Furniture inline functiosn
 inline void Level::Furniture::setType( Type type ){mType = type;}

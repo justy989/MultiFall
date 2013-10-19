@@ -80,11 +80,12 @@ public:
     //Structure for holding a door as part of a room
     struct Door{
 
-        Door() : x(-1), y(-1), essential(false){}
+        Door() : x(-1), y(-1), essential(false), side(0){}
 
         int x;
         int y;
         bool essential;
+        int side;
     };
 
     //Structure holding a room 

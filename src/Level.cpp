@@ -19,7 +19,8 @@ Level::Level() :
     mBlocks(0),
     mNumLights(0),
     mNumFurniture(0),
-    mNumContainers(0)
+    mNumContainers(0),
+    mNumDoors(0)
 {
 
 }
@@ -130,6 +131,34 @@ bool Level::removeContainer( ushort index )
     return true;
 }
 
+ushort Level::addDoor( Door& door )
+{
+    if( mNumDoors >= LEVEL_MAX_DOORS ){
+        return false;
+    }
+
+    mDoors[ mNumDoors ] = door;
+
+    mNumDoors++;
+    
+    return mNumDoors - 1;
+}
+
+bool Level::removeDoor( ushort index )
+{
+    if( index >= mNumDoors ){
+        return false;
+    }
+
+    mNumDoors--;
+
+    for(ushort i = index; i < mNumDoors; i++){
+        mDoors[i] = mDoors[i+1];
+    }
+
+    return true;
+}
+
 void Level::clear()
 {
     if( mBlocks ){
@@ -145,6 +174,7 @@ void Level::clear()
     mNumLights = 0;
     mNumFurniture = 0;
     mNumContainers = 0;
+    mNumDoors = 0;
 }
 
 Level::Block& Level::getBlock( ushort i, ushort j )

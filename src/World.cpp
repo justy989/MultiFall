@@ -182,35 +182,10 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
     float blockHeight = 0.0f;
 
-    float left = 0.0f;
-    float front = 0.0f;
-    float right = 0.0f;
-    float back = 0.0f;
-
     XMVECTOR wallX = XMVectorZero();
     XMVECTOR wallZ = XMVectorZero();
 
     bool collided = false;
-
-    /* TODO: Corner collision so you can't go through walls
-    //Check the top Left Corner
-    i = bX + 1;
-    j = bZ + 1;
-    
-    if( i >= 0 && i < mLevel.getWidth() &&
-        j >= 0 && j < mLevel.getDepth() ){
-
-        blockHeight = static_cast<float>(mLevel.getBlockHeight(i, j)) * 0.3f;
-
-        if( blockHeight > pf ){
-            if( WorldEntity::circlePointIntersect( 
-                XMVectorSet(left, top, 0.0f, 1.0f),
-                XMVectorSet(px, 0.0f, pz, 1.0f),
-                entity->getSolidity().radius ) ){
-                return true;
-            }
-        }
-    }*/
 
     if( px - entity->getSolidity().radius < 0.0f ){
         wallX = XMVectorSet( -1.0f, 0.0f, 0.0f, 1.0f );
@@ -232,61 +207,90 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     i = bX - 1;
     j = bZ;
 
+    float bLeft;
+    float bRight;
+    float bFront;
+    float bBack;
+
     if( i >= 0 && i < mLevel.getWidth() &&
         j >= 0 && j < mLevel.getDepth() ){
 
         blockHeight = static_cast<float>( mLevel.getBlock(i, j).getHeight() ) * 0.3f;
 
         //Check wall
-        if( blockHeight > pf ||
-            ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
-            ( mLevel.getBlock(i,j).getRamp() == Level::Ramp::Front ||
-               mLevel.getBlock(i,j).getRamp() == Level::Ramp::Back ) ) ){
-            left = static_cast<float>(i) * 0.3f;
-            front = static_cast<float>(j) * 0.3f;
-            right = left + 0.3f;
-            back = front + 0.3f;
+        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ){
+            bLeft = static_cast<float>(i) * 0.3f;
+            bFront = static_cast<float>(j) * 0.3f;
+            bRight = bLeft + 0.3f;
+            bBack = bFront + 0.3f;
 
-            if( WorldEntity::circleAALineIntersect( 
-                            XMVectorSet(right, 0.0f, front, 1.0f),
-                            XMVectorSet(right, 0.0f, back, 1.0f),
+            if( WorldEntity::circleAALineIntersect(
+                            XMVectorSet(bRight, 0.0f, bFront, 1.0f),
+                            XMVectorSet(bRight, 0.0f, bBack, 1.0f),
                             XMVectorSet(px, 0.0f, pz, 1.0f),
                             entity->getSolidity().radius ) ){
                 wallX = XMVectorSet(-1.0f, 0.0f, 0.0f, 1.0f );
                 collided = true;
             }
         }
+        
+        //Check to see if solid objects are there
+        Level::SolidObject* so = NULL;
 
-        //Check furniture
-        if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+        switch( mLevel.getBlock(i, j).getCollidableType() ){
+        case Level::Block::Collidable::Furniture:
+            if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+                bFront = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+                bLeft = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+                bRight = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+                bBack = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+                so = f;
+            }
+            break;
+        case Level::Block::Collidable::Door:
+            if( Level::Door* f = mLevel.getBlock(i, j).getDoor() ){
+                bFront = -mLevel.getDoorDimensions( ).z / 2.0f;
+                bLeft = -mLevel.getDoorDimensions( ).x / 2.0f;
+                bRight = mLevel.getDoorDimensions( ).x / 2.0f;
+                bBack = mLevel.getDoorDimensions(  ).z / 2.0f;
+                //so = f;
+            }
+            break;
+        case Level::Block::Collidable::Container:
+            if( Level::Container* f = mLevel.getBlock(i, j).getContainer() ){
+                bFront = -mLevel.getContainerDimensions( f->getCType() ).z / 2.0f;
+                bLeft = -mLevel.getContainerDimensions( f->getCType() ).x / 2.0f;
+                bRight = mLevel.getContainerDimensions( f->getCType() ).x / 2.0f;
+                bBack = mLevel.getContainerDimensions( f->getCType() ).z / 2.0f;
+                so = f;
+            }
+            break;
+        default:
+            break;
+        }
 
-            float front = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
-            float left = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
-            float right = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
-            float back = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
-
+        if( so ){
             //If we have rotated 90 or 270 degrees, swap width and height
-            if( ( f->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
-                  f->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
-                ( f->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
-                  f->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
-                float tmpL = left;
-                float tmpR = right;
-                left = front;
-                right = back;
-                front = tmpL;
-                back = tmpR;
+            if( ( so->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
+                    so->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
+                ( so->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
+                    so->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
+                float tmpL = bLeft;
+                float tmpR = bRight;
+                bLeft = bFront;
+                bRight = bBack;
+                bFront = tmpL;
+                bBack = tmpR;
             }
 
-            front += f->getPosition().z;
-            back += f->getPosition().z;
-            left += f->getPosition().x;
-            right += f->getPosition().x;
+            bFront += so->getPosition().z;
+            bBack += so->getPosition().z;
+            bLeft += so->getPosition().x;
+            bRight += so->getPosition().x;
 
             if( WorldEntity::circleAALineIntersect( 
-                            XMVectorSet(right, 0.0f, front, 1.0f),
-                            XMVectorSet(right, 0.0f, back, 1.0f),
+                            XMVectorSet(bRight, 0.0f, bFront, 1.0f),
+                            XMVectorSet(bRight, 0.0f, bBack, 1.0f),
                             XMVectorSet(px, 0.0f, pz, 1.0f),
                             entity->getSolidity().radius ) ){
                 wallX = XMVectorSet(-1.0f, 0.0f, 0.0f, 1.0f );
@@ -304,19 +308,15 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
         blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight() ) * 0.3f;
 
-        if( blockHeight > pf ||
-            ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
-            ( mLevel.getBlock(i,j).getRamp() == Level::Ramp::Front ||
-               mLevel.getBlock(i,j).getRamp() == Level::Ramp::Back ) ) ){
-            left = static_cast<float>(i) * 0.3f;
-            front = static_cast<float>(j) * 0.3f;
-            right = left + 0.3f;
-            back = front + 0.3f;
+        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ){
+            bLeft = static_cast<float>(i) * 0.3f;
+            bFront = static_cast<float>(j) * 0.3f;
+            bRight = bLeft + 0.3f;
+            bBack = bFront + 0.3f;
 
             if( WorldEntity::circleAALineIntersect( 
-                            XMVectorSet(left, 0.0f, front, 1.0f),
-                            XMVectorSet(left, 0.0f, back, 1.0f),
+                            XMVectorSet(bLeft, 0.0f, bFront, 1.0f),
+                            XMVectorSet(bLeft, 0.0f, bBack, 1.0f),
                             XMVectorSet(px, 0.0f, pz, 1.0f),
                             entity->getSolidity().radius ) ){
                 wallX = XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f );
@@ -324,35 +324,62 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
             }
         }
 
-        //Check furniture
-        if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+        //Check to see if solid objects are there
+        Level::SolidObject* so = NULL;
 
-            float front = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
-            float left = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
-            float right = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
-            float back = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+        switch( mLevel.getBlock(i, j).getCollidableType() ){
+        case Level::Block::Collidable::Furniture:
+            if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+                bFront = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+                bLeft = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+                bRight = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+                bBack = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+                so = f;
+            }
+            break;
+        case Level::Block::Collidable::Door:
+            if( Level::Door* f = mLevel.getBlock(i, j).getDoor() ){
+                bFront = -mLevel.getDoorDimensions( ).z / 2.0f;
+                bLeft = -mLevel.getDoorDimensions( ).x / 2.0f;
+                bRight = mLevel.getDoorDimensions( ).x / 2.0f;
+                bBack = mLevel.getDoorDimensions(  ).z / 2.0f;
+                //so = f;
+            }
+            break;
+        case Level::Block::Collidable::Container:
+            if( Level::Container* f = mLevel.getBlock(i, j).getContainer() ){
+                bFront = -mLevel.getContainerDimensions( f->getCType() ).z / 2.0f;
+                bLeft = -mLevel.getContainerDimensions( f->getCType() ).x / 2.0f;
+                bRight = mLevel.getContainerDimensions( f->getCType() ).x / 2.0f;
+                bBack = mLevel.getContainerDimensions( f->getCType() ).z / 2.0f;
+                so = f;
+            }
+            break;
+        default:
+            break;
+        }
 
-            //If we have rotated 90 or 270 degrees, swap width and height
-            if( ( f->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
-                  f->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
-                ( f->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
-                  f->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
-                float tmpL = left;
-                float tmpR = right;
-                left = front;
-                right = back;
-                front = tmpL;
-                back = tmpR;
+        if( so ){
+            if( ( so->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
+                    so->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
+                ( so->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
+                    so->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
+                float tmpL = bLeft;
+                float tmpR = bRight;
+                bLeft = bFront;
+                bRight = bBack;
+                bFront = tmpL;
+                bBack = tmpR;
             }
 
-            front += f->getPosition().z;
-            back += f->getPosition().z;
-            left += f->getPosition().x;
-            right += f->getPosition().x;
+            bFront += so->getPosition().z;
+            bBack += so->getPosition().z;
+            bLeft += so->getPosition().x;
+            bRight += so->getPosition().x;
                 
             if( WorldEntity::circleAALineIntersect( 
-                            XMVectorSet(left, 0.0f, front, 1.0f),
-                            XMVectorSet(left, 0.0f, back, 1.0f),
+                            XMVectorSet(bLeft, 0.0f, bFront, 1.0f),
+                            XMVectorSet(bLeft, 0.0f, bBack, 1.0f),
                             XMVectorSet(px, 0.0f, pz, 1.0f),
                             entity->getSolidity().radius ) ){
                 wallX = XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f );
@@ -365,24 +392,20 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     i = bX;
     j = bZ - 1;
 
-    if( i >= 0 && i < mLevel.getWidth() &&
+    if( i >= 0 && i < mLevel.getWidth() &&    
         j >= 0 && j < mLevel.getDepth() ){
 
         blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight()) * 0.3f;
 
-        if( blockHeight > pf ||
-            ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
-            ( mLevel.getBlock(i,j).getRamp() == Level::Ramp::Left ||
-               mLevel.getBlock(i,j).getRamp() == Level::Ramp::Right ) )  ){
-            left = static_cast<float>(i) * 0.3f;
-            front = static_cast<float>(j) * 0.3f;
-            right = left + 0.3f;
-            back = front + 0.3f;
+        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ){
+            bLeft = static_cast<float>(i) * 0.3f;
+            bFront = static_cast<float>(j) * 0.3f;
+            bRight = bLeft + 0.3f;
+            bBack = bFront + 0.3f;
 
             if( WorldEntity::circleAALineIntersect( 
-                            XMVectorSet(left, 0.0f, back, 1.0f),
-                            XMVectorSet(right, 0.0f, back, 1.0f),
+                            XMVectorSet(bLeft, 0.0f, bBack, 1.0f),
+                            XMVectorSet(bRight, 0.0f, bBack, 1.0f),
                             XMVectorSet(px, 0.0f, pz, 1.0f),
                             entity->getSolidity().radius ) ){
                 wallZ = XMVectorSet(0.0f, 0.0f, -1.0f, 1.0f );
@@ -390,35 +413,63 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
             }
         }
 
-        //Check furniture
-        if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+        //Check to see if solid objects are there
+        Level::SolidObject* so = NULL;
 
-            float front = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
-            float left = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
-            float right = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
-            float back = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+        switch( mLevel.getBlock(i, j).getCollidableType() ){
+        case Level::Block::Collidable::Furniture:
+            if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+                bFront = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+                bLeft = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+                bRight = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+                bBack = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+                so = f;
+            }
+            break;
+        case Level::Block::Collidable::Door:
+            if( Level::Door* f = mLevel.getBlock(i, j).getDoor() ){
+                bFront = -mLevel.getDoorDimensions( ).z / 2.0f;
+                bLeft = -mLevel.getDoorDimensions( ).x / 2.0f;
+                bRight = mLevel.getDoorDimensions( ).x / 2.0f;
+                bBack = mLevel.getDoorDimensions(  ).z / 2.0f;
+                //so = f;
+            }
+            break;
+        case Level::Block::Collidable::Container:
+            if( Level::Container* f = mLevel.getBlock(i, j).getContainer() ){
+                bFront = -mLevel.getContainerDimensions( f->getCType() ).z / 2.0f;
+                bLeft = -mLevel.getContainerDimensions( f->getCType() ).x / 2.0f;
+                bRight = mLevel.getContainerDimensions( f->getCType() ).x / 2.0f;
+                bBack = mLevel.getContainerDimensions( f->getCType() ).z / 2.0f;
+                so = f;
+            }
+            break;
+        default:
+            break;
+        }
 
+        if( so ){
             //If we have rotated 90 or 270 degrees, swap width and height
-            if( ( f->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
-                  f->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
-                ( f->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
-                  f->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
-                float tmpL = left;
-                float tmpR = right;
-                left = front;
-                right = back;
-                front = tmpL;
-                back = tmpR;
+            if( ( so->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
+                    so->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
+                ( so->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
+                    so->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
+                float tmpL = bLeft;
+                float tmpR = bRight;
+                bLeft = bFront;
+                bRight = bBack;
+                bFront = tmpL;
+                bBack = tmpR;
             }
 
-            front += f->getPosition().z;
-            back += f->getPosition().z;
-            left += f->getPosition().x;
-            right += f->getPosition().x;
+            bFront += so->getPosition().z;
+            bBack += so->getPosition().z;
+            bLeft += so->getPosition().x;
+            bRight += so->getPosition().x;
 
             if( WorldEntity::circleAALineIntersect( 
-                            XMVectorSet(left, 0.0f, back, 1.0f),
-                            XMVectorSet(right, 0.0f, back, 1.0f),
+                            XMVectorSet(bLeft, 0.0f, bBack, 1.0f),
+                            XMVectorSet(bRight, 0.0f, bBack, 1.0f),
                             XMVectorSet(px, 0.0f, pz, 1.0f),
                             entity->getSolidity().radius ) ){
                 wallZ = XMVectorSet(0.0f, 0.0f, -1.0f, 1.0f );
@@ -436,19 +487,15 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
         blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight()) * 0.3f;
 
-        if( blockHeight > pf ||
-            ( fabs( (pf - 0.15f) - blockHeight ) < 0.05f &&
-            mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Ramp &&
-            ( mLevel.getBlock(i,j).getRamp() == Level::Ramp::Left ||
-               mLevel.getBlock(i,j).getRamp() == Level::Ramp::Right ) ) ){
-            left = static_cast<float>(i) * 0.3f;
-            front = static_cast<float>(j) * 0.3f;
-            right = left + 0.3f;
-            back = front + 0.3f;
+        if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ){
+            bLeft = static_cast<float>(i) * 0.3f;
+            bFront = static_cast<float>(j) * 0.3f;
+            bRight = bLeft + 0.3f;
+            bBack = bFront + 0.3f;
 
             if( WorldEntity::circleAALineIntersect( 
-                            XMVectorSet(left, 0.0f, front, 1.0f),
-                            XMVectorSet(right, 0.0f, front, 1.0f),
+                            XMVectorSet(bLeft, 0.0f, bFront, 1.0f),
+                            XMVectorSet(bRight, 0.0f, bFront, 1.0f),
                             XMVectorSet(px, 0.0f, pz, 1.0f),
                             entity->getSolidity().radius ) ){
                 wallZ = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f );
@@ -456,35 +503,63 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
             }
         }
 
-        //Check furniture
-        if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+        //Check to see if solid objects are there
+        Level::SolidObject* so = NULL;
 
-            float front = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
-            float left = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
-            float right = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
-            float back = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+        switch( mLevel.getBlock(i, j).getCollidableType() ){
+        case Level::Block::Collidable::Furniture:
+            if( Level::Furniture* f = mLevel.getBlock(i, j).getFurniture() ){
+                bFront = -mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+                bLeft = -mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+                bRight = mLevel.getFurnitureDimensions( f->getType() ).x / 2.0f;
+                bBack = mLevel.getFurnitureDimensions( f->getType() ).z / 2.0f;
+                so = f;
+            }
+            break;
+        case Level::Block::Collidable::Door:
+            if( Level::Door* f = mLevel.getBlock(i, j).getDoor() ){
+                bFront = -mLevel.getDoorDimensions( ).z / 2.0f;
+                bLeft = -mLevel.getDoorDimensions( ).x / 2.0f;
+                bRight = mLevel.getDoorDimensions( ).x / 2.0f;
+                bBack = mLevel.getDoorDimensions(  ).z / 2.0f;
+                //so = f;
+            }
+            break;
+        case Level::Block::Collidable::Container:
+            if( Level::Container* f = mLevel.getBlock(i, j).getContainer() ){
+                bFront = -mLevel.getContainerDimensions( f->getCType() ).z / 2.0f;
+                bLeft = -mLevel.getContainerDimensions( f->getCType() ).x / 2.0f;
+                bRight = mLevel.getContainerDimensions( f->getCType() ).x / 2.0f;
+                bBack = mLevel.getContainerDimensions( f->getCType() ).z / 2.0f;
+                so = f;
+            }
+            break;
+        default:
+            break;
+        }
 
+        if( so ){
             //If we have rotated 90 or 270 degrees, swap width and height
-            if( ( f->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
-                  f->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
-                ( f->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
-                  f->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
-                float tmpL = left;
-                float tmpR = right;
-                left = front;
-                right = back;
-                front = tmpL;
-                back = tmpR;
+            if( ( so->getYRotation() > (3.14159f * 0.5f) - 0.1f &&
+                    so->getYRotation() < (3.14159f * 0.5f) + 0.1f ) ||
+                ( so->getYRotation() > (3.14159f * 1.5f) - 0.1f &&
+                    so->getYRotation() < (3.14159f * 1.5f) + 0.1f ) ){
+                float tmpL = bLeft;
+                float tmpR = bRight;
+                bLeft = bFront;
+                bRight = bBack;
+                bFront = tmpL;
+                bBack = tmpR;
             }
 
-            front += f->getPosition().z;
-            back += f->getPosition().z;
-            left += f->getPosition().x;
-            right += f->getPosition().x;
+            bFront += so->getPosition().z;
+            bBack += so->getPosition().z;
+            bLeft += so->getPosition().x;
+            bRight += so->getPosition().x;
 
             if( WorldEntity::circleAALineIntersect( 
-                            XMVectorSet(left, 0.0f, front, 1.0f),
-                            XMVectorSet(right, 0.0f, front, 1.0f),
+                            XMVectorSet(bLeft, 0.0f, bFront, 1.0f),
+                            XMVectorSet(bRight, 0.0f, bFront, 1.0f),
                             XMVectorSet(px, 0.0f, pz, 1.0f),
                             entity->getSolidity().radius ) ){
                 wallZ = XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f );

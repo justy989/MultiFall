@@ -487,6 +487,23 @@ bool App::init( )
         mWorld.getLevel().setContainerDimensions( (Level::Container::Type)(i), dimensions );
     }
 
+    //Find and set the door dimensions
+    XMFLOAT3 dimensions;
+
+    dimensions.x = mWorldDisplay.getLevelDisplay().getDoorMesh(  ).getBoundingBoxMax().x - 
+                    mWorldDisplay.getLevelDisplay().getDoorMesh(  ).getBoundingBoxMin().x;
+    dimensions.y = mWorldDisplay.getLevelDisplay().getDoorMesh(  ).getBoundingBoxMax().y - 
+                    mWorldDisplay.getLevelDisplay().getDoorMesh(  ).getBoundingBoxMin().y;
+    dimensions.z = mWorldDisplay.getLevelDisplay().getDoorMesh(  ).getBoundingBoxMax().z - 
+                    mWorldDisplay.getLevelDisplay().getDoorMesh(  ).getBoundingBoxMin().z;
+
+    //Scale the dimensions
+    dimensions.x *= mWorldDisplay.getLevelDisplay().getDoorScale( );
+    dimensions.y *= mWorldDisplay.getLevelDisplay().getDoorScale( );
+    dimensions.z *= mWorldDisplay.getLevelDisplay().getDoorScale( );
+
+    mWorld.getLevel().setDoorDimensions( dimensions );
+
     mConsole.init( this );
 
     D3D11_BUFFER_DESC constDesc;

@@ -109,6 +109,10 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
         return false;
     }
 
+    if( !mDoor.loadFromObj(device, "content/meshes/door.obj", L"content/textures/furniture_wood.png") ){
+        return false;
+    }
+
     mLightScale[ Level::Light::Candle ] = 0.025f;
     mLightScale[ Level::Light::Torch ] = 0.075f;
     mLightScale[ Level::Light::Chandelier ] = 0.5f;
@@ -122,6 +126,8 @@ bool LevelDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* technique
 
     mContainerScale[ Level::Container::Type::Barrel ] = 0.14f;
     mContainerScale[ Level::Container::Type::Crate ] = 0.13f;
+
+    mDoorScale = 0.15f;
 
     LOG_INFO << "Created Input Description and Texture Sampler for Level" << LOG_ENDL;
     return true;
@@ -199,6 +205,8 @@ void LevelDisplay::clear()
     for(uint i = 1; i < WORLD_CONTAINER_TYPE_COUNT; i++){
         mContainers[i-1].clear();
     }
+
+    mDoor.clear();
 
     LOG_INFO << "Released Level Display Assets and buffers" << LOG_ENDL;
 }
@@ -377,6 +385,34 @@ void LevelDisplay::draw( ID3D11DeviceContext* device, ID3DX11Effect* fx, World& 
 		device->VSSetConstantBuffers( 1, 1, &mWorldCB );
 
         mContainers[ f.getCType() - 1 ].draw(device);
+	}
+
+    for(uint i = 0; i < level.getNumDoors(); i++)
+	{
+        Level::Door& f = level.getDoor(i);
+
+        float dx = (cameraPos.x - f.getPosition().x);
+        float dz = (cameraPos.z - f.getPosition().z);
+
+        float d = sqrt( (dx * dx) + (dz * dz) );
+
+        //If we are outside the draw range, skip drawing this one
+        if( d > mDrawRange ){
+            continue;
+        }
+
+        worldm = XMMatrixScaling( mDoorScale, 
+                                  mDoorScale, 
+                                  mDoorScale) * 
+                 XMMatrixRotationY( f.getYRotation() ) * 
+                 XMMatrixTranslation( f.getPosition().x, f.getPosition().y, f.getPosition().z );
+
+		worldm = XMMatrixTranspose( worldm );
+
+		device->UpdateSubresource( mWorldCB, 0, 0, &worldm, 0, 0 ); 
+		device->VSSetConstantBuffers( 1, 1, &mWorldCB );
+
+        mDoor.draw(device);
 	}
 }
 
