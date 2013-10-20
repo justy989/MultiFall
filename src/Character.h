@@ -23,7 +23,7 @@ public:
             Melee,
             Ranged,
             Cast,
-            Consume,
+            Consume
         };
 
         enum State{
@@ -45,6 +45,11 @@ public:
         Run
     };
 
+    enum Alliance{
+        Party,
+        Enemy
+    };
+
     Character();
 
     virtual void update( float dt );
@@ -52,11 +57,17 @@ public:
     inline XMFLOAT4& getFacingDirection();
     inline XMFLOAT4& getWalkingDirection();
 
+    inline void setAlliance( Alliance alliance );
+
     inline void setID( ushort id );
     inline ushort getID();
 
     bool move( MoveState state );
     bool action( Action::Type type );
+
+protected:
+
+
 
 protected:
 
@@ -75,7 +86,10 @@ protected:
     //Inventory
 
 
-    //AI 
+    //AI
+    uint mAIFlags;
+
+    Alliance mAlliance;
 };
 
 inline XMFLOAT4& Character::getFacingDirection(){return mFacingDirection;}
@@ -84,5 +98,10 @@ inline XMFLOAT4& Character::getWalkingDirection(){return mWalkingDirection;}
 inline void Character::setID( ushort id ){mID = id;}
 
 inline ushort Character::getID(){return mID;}
+
+inline void Character::setAlliance( Alliance alliance )
+{
+    mAlliance = alliance;
+}
 
 #endif 

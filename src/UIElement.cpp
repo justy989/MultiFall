@@ -402,3 +402,81 @@ int UITextBox::setText( char* text, uint len )
 
     return mLineCount;
 }
+
+UIOptionBox::UIOptionBox() :
+    mSelectedOption(0),
+    mHighlightedOption(0),
+    mScrollIndex(OPTION_MAX_OPTIONS),
+    mScrollLimit(OPTION_MAX_OPTIONS),
+    mNumOptions(0)
+{
+
+}
+
+UIElement::UserChange UIOptionBox::update( bool mouseClick, XMFLOAT2 mousePosition, 
+                                           bool keyPress, byte key )
+{
+    UserChange change;
+    change.action = UserChange::Action::None;
+    change.id = 0;
+
+    if( pointCheckInside( mousePosition ) ){
+        uint spot = 0;
+        for(uint i = mScrollIndex - mNumOptions; i <= mScrollIndex; i++){
+
+            float topY = ( static_cast<float>(spot) * ( FONTHEIGHT + 0.04f ) );
+            float bottomY = topY + FONTHEIGHT + 0.04f;
+            
+            if( mousePosition.y >= topY && mousePosition.y <= bottomY ){
+                if( mouseClick ){
+                    mSelectedOption = i - 1;
+                    mHighlightedOption = mScrollLimit + 1;
+                }else{
+                    mHighlightedOption = i - 1;
+                }
+
+                break;
+            }
+
+            spot++;
+        }
+    }else{
+        mHighlightedOption = mScrollLimit + 1;
+    }
+
+    return change;
+}
+
+void UIOptionBox::addOption( char* title )
+{
+    assert( mNumOptions < OPTION_MAX_OPTIONS );
+
+    strncpy( mOptions[ mNumOptions ], title, OPTION_MAX_TITLE_LEN );
+
+    mNumOptions++;
+}
+
+char* UIOptionBox::getOption( uint index )
+{
+    assert( index < mNumOptions );
+
+    return mOptions[ index ];
+}
+
+void UIOptionBox::clearOptions()
+{
+    mNumOptions = 0;
+}
+
+void UIOptionBox::scroll( bool up )
+{
+    if( up ){
+        if( mScrollIndex > mNumOptions ){
+            mScrollIndex--;
+        }
+    }else{
+        if( mScrollIndex <= mScrollLimit ){
+            mScrollIndex++;
+        }
+    }
+}

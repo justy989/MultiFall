@@ -236,6 +236,20 @@ void UIDisplay::drawWindowText( ID3D11DeviceContext* device, UIWindow& window, T
                         t.elements[i]->getPosition().y + text[l].offset.y + window.getPosition().y + (FONTHEIGHT / 2.0f),
                         colors[0] );
                 }
+            }else if( t.elements[i]->getElemType() == UIElement::ElemType::OptionBox ){
+
+                UIOptionBox* box = (UIOptionBox*)(t.elements[i]);
+
+                for(uint o = 0; o < box->getNumOptions(); o++){
+                    char* opt = box->getOption(o);
+
+                    uint optIndex = o + ( box->getScrollIndex() - box->getNumOptions() );
+
+                    tm.drawString( device, opt,
+                        t.elements[i]->getPosition().x + window.getPosition().x + 0.02f, 
+                        t.elements[i]->getPosition().y + window.getPosition().y + ( ( FONTHEIGHT + 0.04f ) * static_cast<float>(o) ),
+                        colors[ optIndex == box->getSelected() ? 2 : optIndex == box->getHighlighted() ? 1 : 0 ] );
+                }
             }else{
                 UIElement::Text* text;
                 uint tCount;

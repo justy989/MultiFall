@@ -31,6 +31,20 @@ public:
 
 protected:
 
+    struct EnemyDefinition{
+
+        EnemyDefinition() : AIFlags(0), SpellAccessFlags(0) {}
+
+        Stats stats;
+        uint AIFlags;
+        uint SpellAccessFlags;
+    };
+
+    EnemyDefinition getDefinitionFromMasterList( uint id );
+
+protected:
+    char* mEnemyMasterListPath;
+
     Character mCharacters[ POPULATION_MAX_CHARACTERS ];
 };
 

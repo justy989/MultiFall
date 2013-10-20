@@ -43,9 +43,11 @@ void WorldScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
     //UIElement::UserChange change = mWindow.update( mouseClick, mousePos, keyPress, key );
 
     if( keyPress ){
-        if( key == 'P' ){
+        if( key == 'L' ){
             mScreenManager->popScreen();
             return;
+        }else if( key == 'C' ){
+            mScreenManager->pushScreen( ScreenManager::Container );
         }
     }
 

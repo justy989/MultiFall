@@ -576,6 +576,8 @@ bool LevelDisplay::createCeilingMesh( ID3D11Device* device, Level& level, float 
 
     int v = 0;
 
+    mBlockCount = 0;
+
     //Generate floor blocks based on height
     for(int i = 0; i < level.getWidth(); i++){
         for(int j = 0; j < level.getDepth(); j++){
@@ -621,13 +623,14 @@ bool LevelDisplay::createCeilingMesh( ID3D11Device* device, Level& level, float 
 
             v++;
 
+            mBlockCount++;
+
             //Generate the normals
 			DungeonVertex::createSurfaceNormals(verts[v-4], verts[v-3], verts[v-2]);
 			DungeonVertex::createSurfaceNormals(verts[v-3], verts[v-1], verts[v-2]);
         }
     }
 
-    
     D3D11_BUFFER_DESC vbd;
     vbd.Usage = D3D11_USAGE_IMMUTABLE;
     vbd.ByteWidth = sizeof(DungeonVertex) * (mBlockCount * 4);
@@ -651,6 +654,11 @@ bool LevelDisplay::createCeilingMesh( ID3D11Device* device, Level& level, float 
     //Generate indices corresponding to generated verts
     for(int i = 0; i < level.getWidth(); i++){
         for(int j = 0; j < level.getDepth(); j++){
+            //Don't generate a ceiling over a wall
+            if( level.getBlock(i, j).getHeight() == level.getHeight() ){
+                continue;
+            }
+
             inds[v] = index;
             inds[v+1] = index + 1;
             inds[v+2] = index + 2;

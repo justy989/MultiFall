@@ -3,7 +3,7 @@
 
 #include "Utils.h"
 
-#define STATS_MAX_ACTIVE_EFFECTS 16
+#define STATS_MAX_ACTIVE_EFFECTS 64
 
 class Stats{
 public:
@@ -82,8 +82,8 @@ public:
         uint mMax; //Base doesn't exceed max
         uint mRegenPerTick; //Amount Regened per tick
 
-        uint mRegenModFromEffect; //Regen modded from effect
-        uint mMaxModFromEffect; //Max modded from effect
+        int mRegenModFromEffect; //Regen modded from effect
+        int mMaxModFromEffect; //Max modded from effect
     };
 
     //Attribute
@@ -100,7 +100,7 @@ public:
     protected:
 
         ushort mBase;
-        ushort mModFromEffect;
+        short mModFromEffect;
     };
 
     //Update: pass in time and character x and z
@@ -142,5 +142,17 @@ protected:
     //Current applied effects
     Effect mActiveEffects[ STATS_MAX_ACTIVE_EFFECTS ];
 };
+
+inline Stats::Resource& Stats::getHealth(){return mHealth;}
+inline Stats::Resource& Stats::getMagic(){return mMagic;}
+inline Stats::Resource& Stats::getStamina(){return mStamina;}
+
+inline Stats::Attribute& Stats::getStrength(){return mStrength;}
+inline Stats::Attribute& Stats::getEndurance(){return mEndurance;}
+inline Stats::Attribute& Stats::getIntelligence(){return mIntelligence;}
+inline Stats::Attribute& Stats::getWisdom(){return mWisdom;}
+inline Stats::Attribute& Stats::getDexterity(){return mDexterity;}
+inline Stats::Attribute& Stats::getAgility(){return mAgility;}
+inline Stats::Attribute& Stats::getSpeed(){return mSpeed;}
 
 #endif

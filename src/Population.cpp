@@ -2,6 +2,7 @@
 
 #include "Party.h"
 
+#include <fstream>
 #include <assert.h>
 
 Population::Population()
@@ -26,6 +27,7 @@ ushort Population::spawn( ushort id, XMFLOAT4 position )
             mCharacters[i].setExistence( WorldEntity::Existence::Alive );
             mCharacters[i].getPosition() = position;
             mCharacters[i].setID( id );
+            mCharacters[i].setAlliance( Character::Alliance::Enemy );
             return i;
         }
     }
@@ -40,6 +42,7 @@ ushort Population::spawnMember( ushort id, XMFLOAT4 position )
             mCharacters[i].setExistence( WorldEntity::Existence::Alive );
             mCharacters[i].getPosition() = position;
             mCharacters[i].setID( id );
+            mCharacters[i].setAlliance( Character::Alliance::Party );
             return i;
         }
     }
@@ -67,4 +70,11 @@ void Population::clear()
     for(int i = 0; i < POPULATION_MAX_CHARACTERS; i++){
         mCharacters[i].setExistence( WorldEntity::Existence::Dead );
     }
+}
+
+Population::EnemyDefinition Population::getDefinitionFromMasterList( uint id )
+{
+    EnemyDefinition stats;
+
+    return stats;
 }

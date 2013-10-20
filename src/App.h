@@ -89,7 +89,6 @@ protected:
 
     Timer mTimer;
 
-
     WorldDisplay mWorldDisplay;
 	TextManager mTextManager;
 

@@ -1114,7 +1114,28 @@ void App::clear( )
     mUIDisplay.clear();
 
     mWindow.clear();
+    
+    mEmitterManager.clear();
 
+    ReleaseCOM( mFX );
+    ReleaseCOM( mInputLayout );
+    ReleaseCOM( mFSQuadVB );
+    ReleaseCOM( mFSQuadIB );
+    ReleaseCOM( mPerObjectCB );
+
+    ReleaseCOM( mGBufferRTVs[ 0 ] );
+    ReleaseCOM( mGBufferRTVs[ 1 ] );
+
+    ReleaseCOM( mDepthStencilView );
+
+    ReleaseCOM( mGBufferTextures[ 0 ] );
+    ReleaseCOM( mGBufferTextures[ 1 ] );
+    ReleaseCOM( mGBufferTextures[ 2 ] );
+
+    ReleaseCOM( mGBufferSRVs[ 0 ] );
+    ReleaseCOM( mGBufferSRVs[ 1 ] );
+    ReleaseCOM( mGBufferSRVs[ 2 ] );
+    
     NetSocket::clearSocketAPI();
 
     EventManager::destroyEventManager();

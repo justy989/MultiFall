@@ -1,6 +1,6 @@
 #include "Character.h"
 
-Character::Character()
+Character::Character() : mAlliance( Party )
 {
     mFacingDirection.x = 1.0f;
     mFacingDirection.y = 0.0f;

@@ -67,7 +67,8 @@ public:
         Connection,
         Lobby,
         Worldy, //added a y at the end so it won't collide with World
-        Pause
+        Pause,
+        Container
     };
 
     virtual void handleEvent( Event& e ){ if( mScreens.size() ){ mScreens.top()->handleEvent( e ); }}

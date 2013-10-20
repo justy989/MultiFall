@@ -3,7 +3,6 @@
 
 #include "Utils.h"
 
-
 class UIElement{
 public:
     
@@ -46,6 +45,7 @@ public:
         DropMenu,
         InputBox,
         TextBox,
+        OptionBox,
         Window
     };
 
@@ -259,5 +259,59 @@ protected:
     Text mTextLines[TEXTBOX_MAX_LINES];
     uint mLineCount;
 };
+
+#define OPTION_MAX_TITLE_LEN 64
+#define OPTION_MAX_OPTIONS 32
+
+class UIOptionBox : public UIElement{
+public:
+
+    UIOptionBox();
+
+    virtual UserChange update( bool mouseClick, XMFLOAT2 mousePosition, 
+                               bool keyPress, byte key );
+
+    void addOption( char* title );
+    char* getOption( uint index );
+
+    inline void setScrollLimit( uint scrollLimit );
+
+    void clearOptions();
+
+    inline void setScrollIndex( uint index );
+    inline uint getScrollIndex();
+
+    inline uint getHighlighted();
+    inline uint getSelected();
+
+    inline uint getNumOptions();
+
+    void scroll( bool up );
+
+    virtual ElemType getElemType(){return OptionBox;}
+
+protected:
+
+    char mOptions[ OPTION_MAX_OPTIONS ][ OPTION_MAX_TITLE_LEN ];
+    uint mNumOptions;
+
+    uint mSelectedOption; //Which option is selected
+    uint mHighlightedOption; //Which option is highlighted
+
+    uint mScrollIndex; //How far down have we scrolled?
+
+    uint mScrollLimit; //How far down can we scroll?
+};
+
+inline void UIOptionBox::setScrollLimit( uint scrollLimit ){mScrollLimit = scrollLimit;}
+
+inline uint UIOptionBox::getScrollIndex(){return mScrollIndex;}
+
+inline uint UIOptionBox::getHighlighted(){return mHighlightedOption;}
+inline uint UIOptionBox::getSelected(){return mSelectedOption;}
+
+inline uint UIOptionBox::getNumOptions(){return mNumOptions;}
+
+inline void UIOptionBox::setScrollIndex( uint index ){mScrollIndex = mNumOptions + index;}
 
 #endif

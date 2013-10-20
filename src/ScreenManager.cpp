@@ -2,6 +2,7 @@
 #include "MenuScreen.h"
 #include "LobbyScreen.h"
 #include "WorldScreen.h"
+#include "ContainerScreen.h"
 #include "ConnectionScreen.h"
 
 ScreenManager::ScreenManager( World* world, Party* party )
@@ -38,6 +39,9 @@ void ScreenManager::pushScreen( Type type )
         mScreens.push( new WorldScreen( this, mWorld, mParty ) );
         break;
     case Pause:
+        break;
+    case Container:
+        mScreens.push( new ContainerScreen( this, mWorld, mParty ) );
         break;
     default:
         break;
