@@ -93,9 +93,6 @@ protected:
     ID3D11Buffer* mCeilingVB;
     ID3D11Buffer* mCeilingIB;
 
-    //Ramp Walls have to be separate because they are annoying...
-    ID3D11Buffer* mRampWallsVB;
-
     //Textures
 	ID3D11ShaderResourceView* mFloorTexture;
 	ID3D11ShaderResourceView* mWallTexture;

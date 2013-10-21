@@ -68,11 +68,6 @@ bool LightDisplay::init(ID3D11Device* device)
         return false;
     }
 
-    //Point light settings, should be moved to dungeon theme
-    mPointLights[ Level::Light::Candle - 1 ].set( XMFLOAT3(), 0.6f, 1.5f, XMFLOAT3( 1.0f, 0.5f, 0.0f ) );
-    mPointLights[ Level::Light::Torch - 1 ].set( XMFLOAT3(), 1.2f, 0.85f, XMFLOAT3( 1.0f, 0.75f, 0.2f ) );
-    mPointLights[ Level::Light::Chandelier - 1 ].set( XMFLOAT3(), 3.0f, 1.0f, XMFLOAT3( 1.0f, 1.0f, 0.2f ) );
-
 	return true;
 }
 

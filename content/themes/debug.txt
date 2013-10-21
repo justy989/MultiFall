@@ -1,19 +1,19 @@
-#Stone Theme
+#Debug Theme
 
 #Textures and clipping
-WallTexture = stonewall1.png 
+WallTexture = wall_debug.png 
 WallClip = 1.0
-FloorTexture = stonefloorsheet1.png 
+FloorTexture = floor_debug.png 
 FloorClip = 0.25
-CeilingTexture = stonefloorsheet1.png
-CeilingClip = 0.25
+CeilingTexture = ceiling_debug.png
+CeilingClip = 1.0
 
-#Fog Settings
+#Fog
 FogStart = 0.0
-FogEnd = 9.0
-FogColorRed = 0.0
-FogColorBlue = 0.0
-FogColorGreen = 0.0
+FogEnd = 4.0
+FogColorRed = 0.15
+FogColorBlue = 0.15
+FogColorGreen = 0.15
 
 #Draw Distances
 ObjectDrawDistance = 8.0

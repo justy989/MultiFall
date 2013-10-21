@@ -1,11 +1,34 @@
+#Brick/Wood theme
+
+#Textures and clipping
 WallTexture = brick_wall.png 
 WallClip = 1.0
 FloorTexture = wood_floor.png
 FloorClip = 0.5
 CeilingTexture = wood_floor.png
 CeilingClip = 0.5
+
+#Fog Settings
 FogStart = 2.0
 FogEnd = 10.0
 FogColorRed = 0.25
 FogColorBlue = 0.25
 FogColorGreen = 0.25
+
+#Draw Distances
+ObjectDrawDistance = 8.0
+LightDrawDistance = 10.0
+CharacterDrawDistance = 8.0
+
+#Light Settings
+CandleRadius = 0.6
+CandleIntensity = 2.0
+CandleColorRed = 1.0
+CandleColorGreen = 0.6
+CandleColorBlue = 0.0
+
+TorchRadius = 1.0
+TorchIntensity = 0.9
+TorchColorRed = 1.0
+TorchColorGreen = 0.75
+TorchColorBlue = 0.2

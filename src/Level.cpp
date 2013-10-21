@@ -4,10 +4,9 @@
 
 Level::Block::Block() : 
     mCollidable(Collidable::None),
-    mHeight(0),
     mTileID(0),
-    mWallID(0),
-    mRamp(Ramp::None)
+    mPadding(0),
+    mDoor(NULL)
 {
 
 }
@@ -185,23 +184,16 @@ Level::Block& Level::getBlock( ushort i, ushort j )
     return mBlocks[i][j];
 }
 
-bool Level::isRectOfBlocksLevelAndOpen( short l, short r, short t, short b )
+bool Level::isRectOfBlocksOpen( short l, short r, short t, short b )
 {
     assert( l < mWidth );
     assert( t < mDepth );    
     assert( r < mWidth );
     assert( b < mDepth );
 
-    byte height = mBlocks[l][t].getHeight();
-
+    //Loop through area, checking for objects
     for(short j = t; j <= b; j++){
         for(short i = l; i <= r; i++){
-
-            //If there is a height change fail
-            if( mBlocks[i][j].getHeight() != height ){
-                return false;
-            }
-
             //If there is a collidable object fail
             if( mBlocks[i][j].getCollidableType() != Level::Block::Collidable::None ){
                 return false;

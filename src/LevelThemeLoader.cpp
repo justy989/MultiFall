@@ -1,6 +1,6 @@
 #include "LevelThemeLoader.h"
 #include "WorldGenerator.h"
-#include "LevelDisplay.h"
+#include "WorldDisplay.h"
 
 #include "Log.h"
 
@@ -11,7 +11,7 @@ LevelThemeLoader::LevelThemeLoader()
 
 }
 
-bool LevelThemeLoader::loadTheme( char* themePath, ID3D11Device* device, WorldGenerator* worldGen, LevelDisplay* levelDisplay )
+bool LevelThemeLoader::loadTheme( char* themePath, ID3D11Device* device, WorldGenerator* worldGen, WorldDisplay* worldDisplay )
 {
     std::ifstream file( themePath );
     char buffer[128];
@@ -28,6 +28,13 @@ bool LevelThemeLoader::loadTheme( char* themePath, ID3D11Device* device, WorldGe
     float wallTextureClip = 1.0f;
     float floorTextureClip = 1.0f;
     float ceilingTextureClip = 1.0f;
+    float objectDrawDistance = 1.0f;
+    float lightDrawDistance = 1.0f;
+    float characterDrawDistance = 1.0f;
+
+    PointLight candle;
+    PointLight torch;
+    PointLight chandelier;
 
     while( !file.eof() ){
         file.getline( buffer, 128 );
@@ -74,6 +81,32 @@ bool LevelThemeLoader::loadTheme( char* themePath, ID3D11Device* device, WorldGe
             fog.color.y = static_cast<float>(atof( value ));
         }else if( strcmp( setting, "FogColorBlue" ) == 0  ){
             fog.color.z = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "ObjectDrawDistance" ) == 0  ){
+            objectDrawDistance = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "LightDrawDistance" ) == 0  ){
+            lightDrawDistance = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "CharacterDrawDistance" ) == 0  ){
+            characterDrawDistance = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "CandleRadius" ) == 0  ){
+            candle.set( static_cast<float>(atof( value ) ), candle.getIntensity(), candle.getColor() );
+        }else if( strcmp( setting, "CandleIntensity" ) == 0  ){
+            candle.set( candle.getRadius(), static_cast<float>(atof( value ) ), candle.getColor() );
+        }else if( strcmp( setting, "CandleColorRed" ) == 0  ){
+            candle.getColor().x = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "CandleColorGreen" ) == 0  ){
+            candle.getColor().y = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "CandleColorBlue" ) == 0  ){
+            candle.getColor().z = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "TorchRadius" ) == 0  ){
+            torch.set( static_cast<float>(atof( value ) ), torch.getIntensity(), torch.getColor() );
+        }else if( strcmp( setting, "TorchIntensity" ) == 0  ){
+            torch.set( torch.getRadius(), static_cast<float>(atof( value ) ), torch.getColor() );
+        }else if( strcmp( setting, "TorchColorRed" ) == 0  ){
+            torch.getColor().x = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "TorchColorGreen" ) == 0  ){
+            torch.getColor().y = static_cast<float>(atof( value ));
+        }else if( strcmp( setting, "TorchColorBlue" ) == 0  ){
+            torch.getColor().z = static_cast<float>(atof( value ));
         }else{
             LOG_ERRO << "Unknown Theme Configuration Setting: " << setting << LOG_ENDL;
         }
@@ -91,8 +124,20 @@ bool LevelThemeLoader::loadTheme( char* themePath, ID3D11Device* device, WorldGe
     fog.diff = fog.end - fog.start;
     fog.color.w = 1.0f;
 
+    LevelDisplay* levelDisplay = &worldDisplay->getLevelDisplay();
+
     //Setup the level display fog
-	levelDisplay->setFog( fog );
+	worldDisplay->getLevelDisplay().setFog( fog );
+
+    //Setup the draw distances for things
+    worldDisplay->getLevelDisplay().setDrawRange( objectDrawDistance );
+    worldDisplay->getLightDisplay().setDrawRange( lightDrawDistance );
+    worldDisplay->getPopulationDisplay().setDrawRange( characterDrawDistance );
+
+    //Set the light values
+    worldDisplay->getLightDisplay().setPointLight( Level::Light::Candle, candle );
+    worldDisplay->getLightDisplay().setPointLight( Level::Light::Torch, torch );
+    //worldDisplay->getLightDisplay().setPointLight( Level::Light::Chandelier, chandelier );
 
     //Set the level display textures and clipping info
     return levelDisplay->setTextures( device, floorTexturePath, floorTextureClip, 

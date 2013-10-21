@@ -30,6 +30,8 @@ public:
 
     inline void setDrawRange( float drawRange );
 
+    inline void setPointLight( Level::Light::Type type, PointLight light );
+
 protected:
 
     //Point Light Constant Buffer
@@ -57,5 +59,6 @@ protected:
 };
 
 inline void LightDisplay::setDrawRange( float drawRange ){mDrawRange = drawRange;}
+inline void LightDisplay::setPointLight( Level::Light::Type type, PointLight light ){ mPointLights[ type - 1 ] = light; }
 
 #endif

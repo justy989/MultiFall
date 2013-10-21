@@ -21,15 +21,6 @@ public:
     ~Level();
 
     enum Direction{
-        D_Front,
-        D_Left,
-        D_Back,
-        D_Right
-    };
-
-    //Direction ramp is pointing and the height is the bottom of the ramp, is none if not a ramp
-    enum Ramp{
-        None,
         Front,
         Left,
         Back,
@@ -99,61 +90,7 @@ public:
         float startAngle;
     };
 
-    //Holds a block of floor in the level
-    class Block{
-    public:
-
-        //Stores what type of collidable object might be on top of the floor
-        enum Collidable{
-            None,
-            Ramp,
-            Door,
-            Wall,
-            Furniture,
-            Container,
-        };
-
-        Block();
-
-        inline void setHeight( byte height );
-
-        inline void setTileID( byte id );
-        inline void setWallID( byte id );
-
-        inline void setOpen( );
-        inline void setRamp( Level::Ramp ramp );
-        inline void setWall( byte height );
-        inline void setDoor( Level::Door* door, byte height );
-        inline void setFurniture( Level::Furniture* furniture );
-        inline void setContainer( Level::Container* container );
-
-        inline byte getHeight();
-        inline byte getTileID();
-        inline byte getWallID();
-
-        inline Collidable getCollidableType();
-
-        inline Level::Ramp getRamp();
-        inline Level::Door* getDoor();
-        inline Level::Furniture* getFurniture();
-        inline Level::Container* getContainer();
-
-    protected:
-
-        byte mCollidable; //is there a collidable thing on this block? If so, what is it?
-        byte mHeight; //Height of the floor at this block
-        byte mTileID; //ID for tile texture clipping
-        byte mWallID; //ID for wall texture
-
-        //Based on the collidable, use the union to access the type of thing to check collision with
-        union{
-            Level::Furniture* mFurniture;
-            Level::Door* mDoor;
-            Level::Container* mContainer;
-            Level::Ramp mRamp;
-        };
-    };
-
+    //Lights in a level
     class Light{
     public:
 
@@ -198,12 +135,52 @@ public:
         AttachedWall mAttachedWall;
     };
 
-	struct TorchInfo
-	{
-		XMMATRIX world;
-		ushort mesh;
-		//potentially other stuff like texture maybe
-	};
+    //Holds a block of floor in the level
+    class Block{
+    public:
+
+        //Stores what type of collidable object might be on top of the floor
+        enum Collidable{
+            None,
+            Door,
+            Wall,
+            Furniture,
+            Container,
+        };
+
+        Block();
+
+        inline void setTileID( byte id );
+        inline void setWallID( byte id );
+
+        inline void setOpen( );
+        inline void setWall( );
+        inline void setDoor( Level::Door* door );
+        inline void setFurniture( Level::Furniture* furniture );
+        inline void setContainer( Level::Container* container );
+
+        inline byte getTileID();
+        inline byte getWallID();
+
+        inline Collidable getCollidableType();
+
+        inline Level::Door* getDoor();
+        inline Level::Furniture* getFurniture();
+        inline Level::Container* getContainer();
+
+    protected:
+
+        byte mCollidable; //is there a collidable thing on this block? If so, what is it?
+        byte mTileID; //ID for tile texture clipping
+        ushort mPadding; //Not used for anything atm
+
+        //Based on the collidable, use the union to access the type of thing to check collision with
+        union{
+            Level::Furniture* mFurniture;
+            Level::Door* mDoor;
+            Level::Container* mContainer;
+        };
+    };
 
     //initialize a room to certain dimensions
     bool init( short width, short depth, byte height );
@@ -237,7 +214,7 @@ public:
     Block& getBlock( ushort i, ushort j );
 
     //Is a rectangle of blocks the same height?
-    bool isRectOfBlocksLevelAndOpen( short l, short r, short t, short b );
+    bool isRectOfBlocksOpen( short l, short r, short t, short b );
 
     //From furniture passed in, get a bounding box
     void getFurnitureAABoundingSquare( Furniture& furniture , float& left, float& front, float& right, float& back );
@@ -280,6 +257,7 @@ protected:
     ushort mDepth;
     byte mHeight;
 
+    //2 dimensional array of blocks
     Block** mBlocks;
 
     //Lights
@@ -305,28 +283,23 @@ protected:
 };
 
 //Block Inline Functions
-inline void Level::Block::setHeight( byte height ){mHeight = height;}
-
 inline void Level::Block::setTileID( byte id ){mTileID = id;}
-inline void Level::Block::setWallID( byte id ){mWallID = id;}
+//inline void Level::Block::setWallID( byte id ){mWallID = id;}
 
 inline void Level::Block::setOpen( ){mCollidable = Level::Block::Collidable::None; mFurniture = NULL;}
-inline void Level::Block::setRamp( Level::Ramp ramp ){mCollidable = Level::Block::Collidable::Ramp; mRamp = ramp;}
-inline void Level::Block::setWall( byte height ){mCollidable = Level::Block::Collidable::Wall; mHeight = height;}
-inline void Level::Block::setDoor( Level::Door* door, byte height ){mCollidable = Level::Block::Collidable::Door; mDoor = door; mHeight = height;}
+inline void Level::Block::setWall( ){mCollidable = Level::Block::Collidable::Wall;}
+inline void Level::Block::setDoor( Level::Door* door ){mCollidable = Level::Block::Collidable::Door; mDoor = door; }
 inline void Level::Block::setFurniture( Level::Furniture* furniture ){mCollidable = Level::Block::Collidable::Furniture; mFurniture = furniture;}
 inline void Level::Block::setContainer( Level::Container* container ){mCollidable = Level::Block::Collidable::Container; mContainer = container;}
 
 inline Level::Block::Collidable Level::Block::getCollidableType(){return (Level::Block::Collidable)(mCollidable);}
 
-inline Level::Ramp Level::Block::getRamp(){return mRamp;}
 inline Level::Door* Level::Block::getDoor(){return mDoor;}
 inline Level::Furniture* Level::Block::getFurniture(){return mFurniture;}
 inline Level::Container* Level::Block::getContainer(){return mContainer;}
 
-inline byte Level::Block::getHeight(){return mHeight;}
 inline byte Level::Block::getTileID(){return mTileID;}
-inline byte Level::Block::getWallID(){return mWallID;}
+//inline byte Level::Block::getWallID(){return mWallID;}
 
 //Light Inline Functions
 inline void Level::Light::set( ushort i, ushort j, float height, Type type, Level::Light::AttachedWall attachedWall )

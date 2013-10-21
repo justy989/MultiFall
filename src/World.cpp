@@ -33,39 +33,6 @@ void World::update( float dt )
             CLAMP( bx, 0, getLevel().getWidth() - 1 );
             CLAMP( bz, 0, getLevel().getDepth() - 1 );
 
-            if( getLevel().getBlock(bx, bz).getCollidableType() == Level::Block::Collidable::None ){
-                //Make sure we are on the floor, otherwise bring us down through gravity
-                float distFromGround = ( character.getPosition().y - character.getSolidity().height ) - static_cast<float>(getLevel().getBlock(bx, bz).getHeight()) * mBlockDimensions;
-
-                if( distFromGround > 0.05f ){
-                    dir.y = 1.0f;
-                }else if(distFromGround < -0.05f ){
-                    dir.y = 1.0f;
-                }
-            }else if( getLevel().getBlock(bx, bz).getCollidableType() == Level::Block::Collidable::Ramp ){
-                if( getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Front ){
-                    float blockHeight = static_cast<float>(getLevel().getBlock(bx, bz).getHeight()) * mBlockDimensions;
-                    float rampUp = fmod(character.getPosition().z, mBlockDimensions);
-                    rampUp *= 1.25f;
-                    character.getPosition().y = blockHeight + rampUp + character.getSolidity().height;
-                }else if( getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Back ){
-                    float blockHeight = static_cast<float>(getLevel().getBlock(bx, bz).getHeight()) * mBlockDimensions;
-                    float rampUp = fmod(character.getPosition().z, mBlockDimensions);
-                    rampUp = (mBlockDimensions - rampUp) * 1.25f;
-                    character.getPosition().y = blockHeight + rampUp + character.getSolidity().height;
-                }else if( getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Left ){
-                    float blockHeight = static_cast<float>(getLevel().getBlock(bx, bz).getHeight()) * mBlockDimensions;
-                    float rampUp = fmod(character.getPosition().x, mBlockDimensions);
-                    rampUp *= 1.25f;
-                    character.getPosition().y = blockHeight + rampUp + character.getSolidity().height;
-                }else if( getLevel().getBlock(bx, bz).getRamp() == Level::Ramp::Right ){
-                    float blockHeight = static_cast<float>(getLevel().getBlock(bx, bz).getHeight()) * mBlockDimensions;
-                    float rampUp = fmod(character.getPosition().x, mBlockDimensions);
-                    rampUp = (mBlockDimensions - rampUp) * 1.25f;
-                    character.getPosition().y = blockHeight + rampUp + character.getSolidity().height;
-                }
-            }
-
             XMVECTOR moveVec = XMLoadFloat4( &dir );
 
             moveVec = XMVector3Normalize( moveVec );
@@ -115,7 +82,7 @@ void World::handleEvent( Event& e )
 
             if( tix < mLevel.getWidth() &&
                 tiz < mLevel.getDepth() ){
-                ty = static_cast<float>( mLevel.getBlock(tix, tiz).getHeight() ) * 0.3f + 0.25f;
+                ty = 0.25f;
             }
 
             mPop.spawn( e.characterSpawnInfo.id, 
@@ -205,8 +172,6 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     //Check the left block's right side
     int i = bX - 1;
     int j = bZ;
-
-    float blockHeight = 0.0f;
 
     XMVECTOR wallX = XMVectorZero();
     XMVECTOR wallZ = XMVectorZero();
@@ -300,8 +265,6 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     if( i >= 0 && i < mLevel.getWidth() &&
         j >= 0 && j < mLevel.getDepth() ){
 
-        blockHeight = static_cast<float>( mLevel.getBlock(i, j).getHeight() ) * 0.3f;
-
         //Check wall
         if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ||
             ( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Door &&
@@ -385,8 +348,6 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
     if( i >= 0 && i < mLevel.getWidth() &&
         j >= 0 && j < mLevel.getDepth() ){
 
-        blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight() ) * 0.3f;
-
         if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ||
             ( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Door &&
               mLevel.getBlock(i,j).getDoor()->state == Level::Door::Closed &&
@@ -467,8 +428,6 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
     if( i >= 0 && i < mLevel.getWidth() &&    
         j >= 0 && j < mLevel.getDepth() ){
-
-        blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight()) * 0.3f;
 
         if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ||
             ( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Door &&
@@ -551,8 +510,6 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
     if( i >= 0 && i < mLevel.getWidth() &&
         j >= 0 && j < mLevel.getDepth() ){
-
-        blockHeight = static_cast<float>(mLevel.getBlock(i, j).getHeight()) * 0.3f;
 
         if( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Wall ||
             ( mLevel.getBlock(i,j).getCollidableType() == Level::Block::Collidable::Door &&

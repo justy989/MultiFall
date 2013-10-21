@@ -519,14 +519,9 @@ bool App::init( )
 
     LevelThemeLoader ltl;
 
-	ltl.loadTheme("content/themes/stone.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay.getLevelDisplay());
+	ltl.loadTheme("content/themes/debug.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay);
 
 	mEmitterManager.init(mWindow.getDevice(), mLightParticleTech);
-
-    //Set draw ranges
-    mWorldDisplay.getLevelDisplay().setDrawRange( 10.0f ); // 10.0f / 0.3f = 90 block range
-    mWorldDisplay.getLightDisplay().setDrawRange( 15.0f ); //180 block range
-    mWorldDisplay.getPopulationDisplay().setDrawRange( 10.0f ); // 10.0f / 0.3f = 90 block range
 
     genLevel( time(0) );
 
