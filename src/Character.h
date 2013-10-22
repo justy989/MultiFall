@@ -2,7 +2,7 @@
 #define CHARACTER_H
 
 #include "WorldEntity.h"
-#include "Item.h"
+#include "WorldContainer.h"
 
 #define CHARACTER_MOVE_SPEED 1.25f
 
@@ -12,7 +12,7 @@
 #define CHAR_AI_FLAG_RUN_AWAY_ON_LOW_HEALTH 8
 #define CHAR_AI_FLAG_SPRINT_TO_TARGET 16
 
-class Character : public WorldEntity{
+class Character : public WorldEntity, WorldContainer{
 public:
 
     //Action
@@ -33,8 +33,14 @@ public:
             CoolDown
         };
 
+        Action() :
+            type(TIdle),
+            state(SIdle),
+            progress(0.0f) {}
+
         Type type;
         State state;
+        float progress;
     };
 
     //Move state
@@ -54,6 +60,9 @@ public:
 
     virtual void update( float dt );
 
+    bool move( MoveState state );
+    bool action( Action::Type type );
+
     inline XMFLOAT4& getFacingDirection();
     inline XMFLOAT4& getWalkingDirection();
 
@@ -62,12 +71,9 @@ public:
     inline void setID( ushort id );
     inline ushort getID();
 
-    bool move( MoveState state );
-    bool action( Action::Type type );
-
-protected:
-
-
+    inline Action::Type getCurrentActionType();
+    inline Action::State getCurrentActionState();
+    inline float getActionProgress();
 
 protected:
 
@@ -79,12 +85,10 @@ protected:
     Action mCurrentAction;
 
     MoveState mCurrentMoveState;
+    float mMoveProgress;
 
     //Stats
     Stats mStats;
-
-    //Inventory
-
 
     //AI
     uint mAIFlags;
@@ -103,5 +107,9 @@ inline void Character::setAlliance( Alliance alliance )
 {
     mAlliance = alliance;
 }
+
+inline Character::Action::Type Character::getCurrentActionType(){return mCurrentAction.type;}
+inline Character::Action::State Character::getCurrentActionState(){return mCurrentAction.state;}
+inline float Character::getActionProgress(){return mCurrentAction.progress;}
 
 #endif 

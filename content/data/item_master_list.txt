@@ -1,0 +1,54 @@
+#Item Master List
+
+########
+#Dagger#
+########
+Name = Dagger
+Usage = Weapon
+Equipment = OneHanded
+Stackable = 0
+Consumable = 0
+Sellable = 1
+
+Value = 100
+Weight = 5
+MinDamage = 1
+MaxDamage = 3
+
+########
+#Mail  #
+########
+Name = Mail
+Usage = Armor
+Equipment = Chest
+Stackable = 0
+Consumable = 0
+Sellable = 1
+
+Value = 300
+Weight = 25
+ArmorValue = 15
+
+################
+#Empty Bottle  #
+################
+Name = Empty Bottle
+Usage = None
+Stackable = 1
+Consumable = 0
+Sellable = 1
+
+Value = 1
+Weight = 1
+
+################
+#Empty Bottle  #
+################
+Name = Empty Bottle
+Usage = None
+Stackable = 1
+Consumable = 0
+Sellable = 1
+
+Value = 1
+Weight = 1

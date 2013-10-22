@@ -23,7 +23,7 @@ bool PopulationDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tech
     {
 	    {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,  0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"DIMENSION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,  16, D3D11_INPUT_PER_VERTEX_DATA, 0},
-	    //{"VELOCITY", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"FRAME", 0, DXGI_FORMAT_R32G32_UINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	    //{"SIZE",     0, DXGI_FORMAT_R32G32_FLOAT,    0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	    //{"AGE",      0, DXGI_FORMAT_R32_FLOAT,       0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
 	    //{"TYPE",     0, DXGI_FORMAT_R32_UINT,        0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -33,7 +33,7 @@ bool PopulationDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tech
     D3DX11_PASS_DESC passDesc;
     technique->GetPassByIndex(0)->GetDesc( &passDesc );
 
-    if(FAILED(device->CreateInputLayout(billboardDesc, 2, passDesc.pIAInputSignature, 
+    if(FAILED(device->CreateInputLayout(billboardDesc, 3, passDesc.pIAInputSignature, 
 		passDesc.IAInputSignatureSize, &mInputLayout))){
             LOG_ERRO << "Failed to create Vertex Input Layout for Population" << LOG_ENDL;
             return false;
@@ -52,11 +52,31 @@ bool PopulationDisplay::init( ID3D11Device* device, ID3DX11EffectTechnique* tech
         return false;
     }
 
+    D3D11_BUFFER_DESC constDesc;
+    ZeroMemory( &constDesc, sizeof( constDesc ) );
+    constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    constDesc.ByteWidth = sizeof( FrameDimensions );
+    constDesc.Usage = D3D11_USAGE_DEFAULT;
+    
+    if( FAILED( device->CreateBuffer( &constDesc, 0, &mFrameDimensionsCB ) ) ){
+        LOG_ERRO << "Failed to create constant buffer for Population" << LOG_ENDL;
+        return false;
+    }
+
+    FrameDimensions frameDimensions;
+    frameDimensions.x = 0.25f;
+    frameDimensions.y = 0.1875;
+
+    ID3D11DeviceContext* context;
+    device->GetImmediateContext( &context );
+    
+    context->UpdateSubresource( mFrameDimensionsCB, 0, 0, &frameDimensions, 0, 0 ); 
+
     HRESULT hr = D3DX11CreateShaderResourceViewFromFile( device,
-        L"content/textures/skeleton.png", 0, 0, &mTextures[0], 0 );
+        L"content/textures/enemy_debug.png", 0, 0, &mTextures[0], 0 );
 
     if( FAILED(hr) ){
-        LOG_ERRO << "Unable to load Character texture: " << L"content/textures/skeleton.png" << LOG_ENDL;
+        LOG_ERRO << "Unable to load Character texture: " << L"content/textures/enemy_debug.png" << LOG_ENDL;
         return false;
     }
 
@@ -79,6 +99,8 @@ void PopulationDisplay::draw( ID3D11DeviceContext* device )
     device->IASetPrimitiveTopology( D3D11_PRIMITIVE_TOPOLOGY_POINTLIST );
     device->IASetInputLayout( mInputLayout );
     device->IASetVertexBuffers( 0, 1, &mBillboardBuffer, &stride, &offset );
+
+	device->GSSetConstantBuffers( 5, 1, &mFrameDimensionsCB );
 
     device->PSSetShaderResources( 0, 1, &mTextures[0] );
     device->Draw(mBillboardCount, 0);
@@ -115,6 +137,8 @@ void PopulationDisplay::updateBillboards( ID3D11DeviceContext* device, World& wo
             billboards[mBillboardCount].dimensions.y = 0.25f;
             billboards[mBillboardCount].dimensions.z = 0.0f;
             billboards[mBillboardCount].dimensions.w = 0.0f;
+            billboards[mBillboardCount].frameX = static_cast<int>( p.getCharacter(i).getActionProgress() / 0.25f );
+            billboards[mBillboardCount].frameY = 0;
             mBillboardCount++;
         }
     }

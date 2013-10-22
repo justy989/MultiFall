@@ -1492,7 +1492,7 @@ void WorldGenerator::genPopulation( Population& population, Level& level, Popula
         //Spawn an entity 0 to start
         population.spawn( 0, 
                           XMFLOAT4( static_cast<float>( opens[ genOpen ].i ) * blockDimension + halfBlockDimension,
-                                    0.25f,
+                                    0.32f,
                                     static_cast<float>( opens[ genOpen ].j ) * blockDimension + halfBlockDimension,
                                     1.0f ) );
 

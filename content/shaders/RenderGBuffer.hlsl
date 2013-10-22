@@ -86,16 +86,21 @@ cbuffer cbParticles : register( b4 )
 	ParticleInstanceData gParticles[100];
 };
 
-cbuffer cbBillboardFixed : register( b5 )
+cbuffer cbBillboardFrameDim : register ( b5 )
 {
-    float2 gBillboardTexCoord[6] =
+    float4 gBillboardFrameDimensions;
+};
+
+cbuffer cbBillboardFixed : register( b6 )
+{
+    float2 gBillboardTexOffset[6] =
     {
-        float2(0, 1),
-	    float2(1, 1),
-	    float2(0, 0),
-        float2(1, 1),
-	    float2(0, 0),
-	    float2(1, 0)
+        float2( 0.5f,  0.5f),
+	    float2(-0.5f,  0.5f),
+	    float2( 0.5f, -0.5f),
+        float2(-0.5f,  0.5f),
+	    float2( 0.5f, -0.5f),
+	    float2(-0.5f, -0.5f)
     };
 };
 
@@ -135,8 +140,7 @@ struct BillboardIn
 {
     float4 pos     : POSITION;
     float4 dim     : DIMENSION;
-    //float2 tex     : TEXCOORD;
-    //float2 texDim  : TEXDIM;
+    uint2  frame   : FRAME;
 };
 
 struct BillboardOut
@@ -369,13 +373,20 @@ void gs_billboard( point BillboardIn bb[1], inout TriangleStream<BillboardOut> o
     vert[4] = vert[2];
 	vert[5] = float4(bb[0].pos.xyz + hOffset + vOffset, 1.0f); // Get top right vertex
 
+    //Calculate the texture center
+    float2 texCenter = float2( (float)(bb[0].frame.x) * gBillboardFrameDimensions.x + ( gBillboardFrameDimensions.x * 0.5f ),
+                                (float)(bb[0].frame.y) * gBillboardFrameDimensions.y + ( gBillboardFrameDimensions.y * 0.5f ));
+
 	// Now we "append" or add the vertices to the outgoing stream list
 	BillboardOut outputVert;
 	for(int i = 0; i < 6; i++)
 	{
 		outputVert.pos = mul(vert[i], gViewProj);
 		outputVert.screenPos = outputVert.pos;
-		outputVert.tex = gBillboardTexCoord[i];
+
+        //Offset the text coordinates from the texture center
+		outputVert.tex.x = ( gBillboardTexOffset[i].x * gBillboardFrameDimensions.x ) + texCenter.x;
+        outputVert.tex.y = ( gBillboardTexOffset[i].y * gBillboardFrameDimensions.y ) + texCenter.y;
 
 		output.Append(outputVert);
 	}

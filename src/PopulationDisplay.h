@@ -12,9 +12,17 @@
 struct CharacterBillboard{
     XMFLOAT4 pos; //Position
     XMFLOAT4 dimensions; //World Dimensions, and Texture dimensions
-    //XMFLOAT2 texClipDimensions; //Texture Clipping dimensions
-    //int frameX; //Frame X of animation
-    //int frameY; //Frame Y of animation
+    uint frameX; //Frame X of animation
+    uint frameY; //Frame Y of animation
+};
+
+struct FrameDimensions{
+    float x;
+    float y;
+
+    //padding
+    float p1;
+    float p2;
 };
 
 class PopulationDisplay{
@@ -46,6 +54,8 @@ protected:
 
 	ID3D11Buffer* mBillboardBuffer;
 	ID3D11Buffer* mInstanceDataCB;
+
+	ID3D11Buffer* mFrameDimensionsCB;	
 
     ID3D11ShaderResourceView* mTextures[ 1 ];
 

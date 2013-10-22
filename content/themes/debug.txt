@@ -22,13 +22,13 @@ CharacterDrawDistance = 8.0
 
 #Light Settings
 CandleRadius = 0.6
-CandleIntensity = 2.0
+CandleIntensity = 3.0
 CandleColorRed = 1.0
 CandleColorGreen = 0.6
 CandleColorBlue = 0.0
 
-TorchRadius = 1.0
-TorchIntensity = 0.9
+TorchRadius = 1.2
+TorchIntensity = 2.0
 TorchColorRed = 1.0
 TorchColorGreen = 0.75
 TorchColorBlue = 0.2
