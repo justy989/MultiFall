@@ -5,7 +5,6 @@
 #include "Stats.h"
 
 #define ITEM_NAME_LEN 32
-#define ITEM_MAX_TIERS 8
 #define ITEM_MAX_MAGIC_PROPERTIES 8
 #define ITEM_USAGE_TYPE_COUNT 5
 #define ITEM_EQUIPMENT_TYPE_COUNT 9
@@ -16,20 +15,31 @@ struct ItemDefinition{
         UNone,
         Weapon,
         Armor,
-        Ingredient,
+        Consumable,
         Quest
     };
 
-    enum Equipment{
-        ENone,
+    enum WeaponType{
+        WNone,
         OneHanded,
         TwoHanded,
+        Ranged
+    };
+
+    enum ArmorType{
+        ANone,
         Head,
         Neck,
         Chest,
         Hands,
         Legs,
         Feet
+    };
+
+    enum ConsumableType{
+        CNone,
+        Ingredient,
+        Potion
     };
 
     struct Weight{
@@ -48,11 +58,8 @@ struct ItemDefinition{
 
     ItemDefinition() :
         usage( Usage::UNone ),
-        equipment( Equipment::ENone ),
         stackable(false),
-        sellable(false),
-        consumable(false),
-        numTiers(0)
+        sellable(false)
     {
         name[0] = '\0';
     }
@@ -61,37 +68,34 @@ struct ItemDefinition{
     char name[ ITEM_NAME_LEN ];
 
     Usage usage; //How is the item used?
-    Equipment equipment; //How is the item equipped? If eligible
 
-    bool stackable; //Is the item able to be stacked
-    bool consumable; //Is the item able to be used
-    bool sellable; //Is the item able to be sold
-    bool padding;
-
-    struct TierInfo{
-        union{
-            WeaponDamage weaponDamage;
-            ArmorValue armorValue;
-        };
-
-        char prefix[ ITEM_NAME_LEN ]; //Prefix
-        uint value; //value of this tier
-        Weight weight; //Weight of this tier
-
-        //Magic properties
+    union{
+        WeaponType weaponType;
+        ArmorType armorType;
+        ConsumableType consumableType;
     };
 
-    TierInfo tierInfo[ ITEM_MAX_TIERS ];
-    uint numTiers;
+    bool stackable; //Is the item able to be stacked
+    bool sellable; //Is the item able to be sold
+
+    union{
+        WeaponDamage weaponDamage; //Damage a weapon does
+        ArmorValue armorValue; //Armor value
+    };
+
+    uint value; //value of this tier
+    Weight weight; //Weight of this tier
 };
 
-struct Item{
+class Item{
+public:
     uint id; //Id to point to definition
     uint stack; //how many items are stacked if stackable
-    uint tier; //tier representing which stats are used
 
     //Unique Magic properties
     Stats::Effect mEffects[ ITEM_MAX_STAT_EFFECTS ];
+
+    bool operator==(Item item){return id == item.id && stack == item.stack;}
 };
 
 #endif

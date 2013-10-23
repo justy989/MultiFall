@@ -12,7 +12,7 @@
 #define CHAR_AI_FLAG_RUN_AWAY_ON_LOW_HEALTH 8
 #define CHAR_AI_FLAG_SPRINT_TO_TARGET 16
 
-class Character : public WorldEntity, WorldContainer{
+class Character : public WorldEntity, public WorldContainer{
 public:
 
     //Action

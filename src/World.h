@@ -4,6 +4,7 @@
 #include "Level.h"
 #include "Population.h"
 #include "EventManager.h"
+#include "ItemMaster.h"
 
 class World : public EventHandler{
 public:
@@ -19,6 +20,7 @@ public:
     //Get the world's dungeon
     inline Level& getLevel();
     inline Population& getPopulation();
+    inline ItemMaster& getItemMaster();
 
     //Get the block dimensions
     inline float getBlockDimension();
@@ -36,12 +38,15 @@ protected:
     //MagicFields mMagicFields;
     //Activatables mActivatables;
 
+    ItemMaster mItemMaster;
+
     //Block settings
     float mBlockDimension;
 };
 
-Level& World::getLevel(){return mLevel;}
+inline Level& World::getLevel(){return mLevel;}
 inline Population& World::getPopulation(){return mPop;}
+inline ItemMaster& World::getItemMaster(){return mItemMaster;}
 
 inline float World::getBlockDimension(){return mBlockDimension;}
 inline void World::setBlockDimension( float d ){mBlockDimension = d;}

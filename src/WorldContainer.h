@@ -38,14 +38,14 @@ public:
     inline State getCState();
 
     //Leaving these undefined for now
-    uint getNumItems(){}
-    Item* getItem( uint index ){}
+    uint getNumItems();
+    Item* getItem( uint index );
 
-    void addItem( Item& item ){}
-    Item* takeItem( uint index ){}
+    void addItem( Item& item );
+    void takeItem( uint index );
 
-    void addGold( uint gold ){}
-    bool takeGold( uint gold ){}
+    void addGold( uint gold );
+    bool takeGold( uint gold );
 
 protected:
 

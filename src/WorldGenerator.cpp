@@ -1510,3 +1510,31 @@ void WorldGenerator::genPopulation( Population& population, Level& level, Popula
 
     delete[] opens;
 }
+
+void genItem( Item& item, ItemMaster& itemMaster, Random& random ){
+    item.id = random.gen(0, itemMaster.getNumIDs() );
+
+    ItemDefinition* def = itemMaster.getDefinitionFromID( item.id );
+
+    if( def->stackable ){
+        item.stack = random.gen(1, 20);
+    }
+}
+
+void WorldGenerator::genItemsInContainers( Level& level, Population& population, ItemMaster& itemMaster )
+{
+    for(uint i = 0; i < level.getNumContainer(); i++){
+        Item item;
+        //genItem( item, itemMaster, mRand );
+        //level.getContainer(i).addItem(item);
+    }
+
+    for(uint i = 0; i < POPULATION_MAX_CHARACTERS; i++){
+        if( population.getCharacter(i).getExistence() ==
+            Character::Existence::Alive ){
+            Item item;
+            //genItem( item, itemMaster, mRand );
+            //population.getCharacter(i).addItem( item );
+        }
+    }
+}

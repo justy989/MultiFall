@@ -15,12 +15,13 @@ public:
 
     ItemDefinition* getDefinitionFromID( uint id );
 
+    inline uint getNumIDs();
+
 protected:
 
     std::vector< ItemDefinition > mDefinitions;
-
-    char* mUsageStrings[ ITEM_USAGE_TYPE_COUNT ];
-    char* mEquipStrings[ ITEM_EQUIPMENT_TYPE_COUNT ];
 };
+
+inline uint ItemMaster::getNumIDs(){return mDefinitions.size();}
 
 #endif

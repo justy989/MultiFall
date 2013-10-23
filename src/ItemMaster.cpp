@@ -6,21 +6,7 @@
 
 ItemMaster::ItemMaster()
 {
-    mUsageStrings[ 0 ] = "None";
-    mUsageStrings[ 1 ] = "Weapon";
-    mUsageStrings[ 2 ] = "Armor";
-    mUsageStrings[ 3 ] = "Ingredient";
-    mUsageStrings[ 4 ] = "Quest";
 
-    mEquipStrings[ 0 ] = "None";
-    mEquipStrings[ 1 ] = "OneHanded";
-    mEquipStrings[ 2 ] = "TwoHanded";
-    mEquipStrings[ 3 ] = "Head";
-    mEquipStrings[ 5 ] = "Neck";
-    mEquipStrings[ 6 ] = "Chest";
-    mEquipStrings[ 7 ] = "Hands";
-    mEquipStrings[ 8 ] = "Legs";
-    mEquipStrings[ 9 ] = "Feet";
 }
 
 bool ItemMaster::init( char* masterFilePath )
@@ -28,14 +14,14 @@ bool ItemMaster::init( char* masterFilePath )
     //
     std::ifstream checkFile( masterFilePath );
     char buffer[ 128 ];
-    uint id;
-    uint tier;
     ItemDefinition definition;
 
     if( !checkFile.is_open() ){
         LOG_ERRO << "Unable to open item master file: " << masterFilePath << LOG_ENDL;
         return false;
     }
+
+    LOG_INFO << "Loading Item Master List" << LOG_ENDL;
 
     while( !checkFile.eof() ){
         checkFile.getline( buffer, 128 );
@@ -53,77 +39,136 @@ bool ItemMaster::init( char* masterFilePath )
             continue;
         }
 
-        char* setting = strtok(buffer, " ");
-        char* equals = strtok(NULL, " ");
-        char* value = strtok(NULL, " ");
+        int len = strlen( buffer );
 
-        if( strcmp( setting, "Name" ) == 0 ){
-            if( id > 0 ){
-                mDefinitions.push_back( definition );
-            }
+        if( buffer[0] != '[' && buffer[ len - 1 ] != ']' ){
+            LOG_ERRO << "Expected new item instead of line: " << buffer << LOG_ENDL;
+            return false;
+        }
 
-            definition = ItemDefinition();
+        if( strlen( definition.name ) ){
+            mDefinitions.push_back( definition );
+        }
 
-            strncpy(definition.name, value, ITEM_NAME_LEN );
-            id++;
-            continue;
-        }else if( strcmp( setting, "Usage" ) == 0 ){
-            for(int i = 0; i < ITEM_USAGE_TYPE_COUNT; i++){
-                if( strcmp( value, mUsageStrings[i] ) == 0 ){
-                    definition.usage = (ItemDefinition::Usage)(i);
+        int endChar = len - 2 < ITEM_NAME_LEN ? len - 2: ITEM_NAME_LEN;
+
+        //Copy the item name
+        strncpy( definition.name, buffer + 1, endChar ); 
+
+        definition.name[ endChar ] = '\0';
+
+        //Read Type
+        checkFile.getline( buffer, 128 );
+
+        switch( buffer[0] ){
+        case 'W':
+            {
+                definition.usage = ItemDefinition::Usage::Weapon;
+
+                if( buffer[1] == '1' ){
+                    definition.weaponType = ItemDefinition::WeaponType::OneHanded;
+                }else if( buffer[1] == '2' ){
+                    definition.weaponType = ItemDefinition::WeaponType::TwoHanded;
+                }else if( buffer[1] == 'R' ){
+                    definition.weaponType = ItemDefinition::WeaponType::Ranged;
+                }else{
+                    LOG_ERRO << "Invalid weapon type: " << buffer[2] << LOG_ENDL;
+                    return false;
+                }
+
+                //Read damage
+                checkFile.getline( buffer, 128 );
+
+                int rc = sscanf( buffer, "%d-%d", &definition.weaponDamage.min, &definition.weaponDamage.max );
+
+                if( rc != 2 ){
+                    LOG_ERRO << "Didn't see expected line for weapon damage formatted: Min-Max" << LOG_ENDL;
+                    return false;
                 }
             }
-            continue;
-        }else if( strcmp( setting, "Equipment" ) == 0 ){
-            for(int i = 0; i < ITEM_EQUIPMENT_TYPE_COUNT; i++){
-                if( strcmp( value, mEquipStrings[i] ) == 0 ){
-                    definition.equipment = (ItemDefinition::Equipment)(i);
+            break;
+        case 'A':
+            {
+                definition.usage = ItemDefinition::Usage::Armor;
+
+                if( buffer[1] == 'C' ){
+                    definition.armorType = ItemDefinition::ArmorType::Chest;
+                }else if( buffer[1] == 'F' ){
+                    definition.armorType = ItemDefinition::ArmorType::Feet;
+                }else if( buffer[1] == 'H' ){
+                    definition.armorType = ItemDefinition::ArmorType::Head;
+                }else if( buffer[1] == 'A' ){
+                    definition.armorType = ItemDefinition::ArmorType::Hands;
+                }else if( buffer[1] == 'L' ){
+                    definition.armorType = ItemDefinition::ArmorType::Legs;
+                }else if( buffer[1] == 'N' ){
+                    definition.armorType = ItemDefinition::ArmorType::Neck;
+                }else{
+                    LOG_ERRO << "Invalid armor type: " << buffer[2] << LOG_ENDL;
+                    return false;
+                }
+
+                //Read damage
+                checkFile.getline( buffer, 128 );
+
+                int rc = sscanf( buffer, "%d", &definition.armorValue.armor );
+
+                if( rc != 1 ){
+                    LOG_ERRO << "Didn't see expected line for Armor Value formatted: Value" << LOG_ENDL;
+                    return false;
                 }
             }
-            continue;
-        }else if( strcmp( setting, "Stackable" ) == 0 ){
-            definition.stackable = static_cast<bool>( atoi( value ) );
-            continue;
-        }else if( strcmp( setting, "Consumable" ) == 0 ){
-            definition.consumable = static_cast<bool>( atoi( value ) );
-            continue;
-        }else if( strcmp( setting, "Sellable" ) == 0 ){
-            definition.sellable = static_cast<bool>( atoi( value ) );
-            continue;
-        }else if( strcmp( setting, "TierCount" ) == 0 ){
-            definition.numTiers = atoi( value );
-            assert( definition.numTiers < ITEM_MAX_TIERS );
-            tier = 0;
-            continue;
-        }else if( strcmp( setting, "TierPrefix" ) == 0 ){
-            strncpy( definition.tierInfo[ tier ].prefix, value, ITEM_NAME_LEN );
-            continue;
-        }else if( strcmp( setting, "TierMinDamage" ) == 0 ){
-            definition.tierInfo[ tier ].weaponDamage.min = atoi( value );
-            continue;
-        }else if( strcmp( setting, "TierMaxDamage" ) == 0 ){
-            definition.tierInfo[ tier ].weaponDamage.max = atoi( value );
-            tier++;
-            assert( tier <= definition.numTiers );
-            continue;
-        }else if( strcmp( setting, "TierValue" ) == 0 ){
-            definition.tierInfo[ tier ].value = atoi( value );
-            continue;
-        }else if( strcmp( setting, "TierWeightWhole" ) == 0 ){
-            definition.tierInfo[ tier ].weight.whole = atoi( value );
-            continue;
-        }else if( strcmp( setting, "TierWeightFraction" ) == 0 ){
-            definition.tierInfo[ tier ].weight.fraction = atoi( value );
-            continue;
-        }else if( strcmp( setting, "TierArmorValue" ) == 0 ){
-            definition.tierInfo[ tier ].armorValue.armor = atoi( value );
-            tier++;
-            assert( tier <= definition.numTiers );
-            continue;
+            break;
+        case 'C':
+            {
+                definition.usage = ItemDefinition::Usage::Consumable;
+
+                if( buffer[1] == 'I' ){
+                    definition.consumableType = ItemDefinition::ConsumableType::Ingredient;
+                }else if( buffer[1] == 'P' ){
+                    definition.consumableType = ItemDefinition::ConsumableType::Potion;
+                }else{
+                    LOG_ERRO << "Invalid consumable type: " << buffer[2] << LOG_ENDL;
+                    return false;
+                }
+            }
+            break;
+        case 'Q':
+            break;
+        default:
+            break;
+        }
+
+        //Read value and weight
+        checkFile.getline( buffer, 128 );
+
+        int rc = sscanf( buffer, "%dg %dlbs", &definition.value, &definition.weight.whole );
+
+        if( rc != 2 ){
+            LOG_ERRO << "Didn't see expected line for value and weight formatted: Ng Nlbs" << LOG_ENDL;
+            return false;
+        }
+
+        //Get the flags
+        checkFile.getline( buffer, 128 );
+
+        for(uint i = 0; i < strlen(buffer); i++){
+            switch( buffer[i] ){
+            case 'T':
+                definition.sellable = true;
+                break;
+            case 'S':
+                definition.stackable = true;
+                break;
+            default:
+                break;
+            }
         }
     }
 
-    mDefinitions.push_back( definition );
+    if( strlen( definition.name ) ){
+        mDefinitions.push_back( definition );
+    }
 
     checkFile.close();
 

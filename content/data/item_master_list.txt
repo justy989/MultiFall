@@ -1,54 +1,21 @@
 #Item Master List
 
-########
-#Dagger#
-########
-Name = Dagger
-Usage = Weapon
-Equipment = OneHanded
-Stackable = 0
-Consumable = 0
-Sellable = 1
+#Iron Dagger Weapon 1-Handed, 1-3 damage, 3gold 4pounds, Tradable
+[Iron Dagger]
+W1
+1-3
+3g 4lbs
+T
 
-Value = 100
-Weight = 5
-MinDamage = 1
-MaxDamage = 3
+#Iron Mail Armor Chest, 3 Armor, 10gold 15pounds, Tradable
+[Iron Mail]
+AC
+8
+10g 15lbs
+T
 
-########
-#Mail  #
-########
-Name = Mail
-Usage = Armor
-Equipment = Chest
-Stackable = 0
-Consumable = 0
-Sellable = 1
-
-Value = 300
-Weight = 25
-ArmorValue = 15
-
-################
-#Empty Bottle  #
-################
-Name = Empty Bottle
-Usage = None
-Stackable = 1
-Consumable = 0
-Sellable = 1
-
-Value = 1
-Weight = 1
-
-################
-#Empty Bottle  #
-################
-Name = Empty Bottle
-Usage = None
-Stackable = 1
-Consumable = 0
-Sellable = 1
-
-Value = 1
-Weight = 1
+#Apple Consumable Ingredient 3gold 4pounds, Stackable Tradable
+[Apple]
+CI
+2g 1lbs
+ST

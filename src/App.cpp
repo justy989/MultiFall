@@ -517,6 +517,10 @@ bool App::init( )
         return false;
     }
 
+    if( !mWorld.getItemMaster().init( "content/data/item_master_list.txt" ) ){
+        return false;
+    }
+
     LevelThemeLoader ltl;
 
 	ltl.loadTheme("content/themes/debug.txt", mWindow.getDevice(), &mWorldGen, &mWorldDisplay);

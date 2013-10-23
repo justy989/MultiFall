@@ -2,8 +2,7 @@
 #define WORLD_GENERATOR_H
 
 #include "Random.h"
-#include "Level.h"
-#include "Population.h"
+#include "World.h"
 
 #define ROOM_MAX_DIMENSION 16
 #define ROOM_TYPE_COUNT 8
@@ -128,6 +127,7 @@ public:
     //Generate a room's exits and floor layout
     void genLevel( Level& level, LevelGenerationRanges& ranges, uint seed, float blockDimension, XMFLOAT3& spawn );
     void genPopulation( Population& population, Level& level, PopulationGenerationRanges& ranges, float blockDimension );
+    void genItemsInContainers( Level& level, Population& population, ItemMaster& itemMaster );
 
     inline void setTileIDMax( uint tileIDMax );
 
