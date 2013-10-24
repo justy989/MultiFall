@@ -1,5 +1,17 @@
 #Item Master List
 
+#Apple Consumable Ingredient 3gold 4pounds, Stackable Tradable
+[Apple]
+CI
+2g 1lbs
+ST
+
+#Potion Consumable Potion 0gold 1pounds, Stackable Tradable
+[Potion of Nothing]
+CP
+0g 1lbs
+ST
+
 #Iron Dagger Weapon 1-Handed, 1-3 damage, 3gold 4pounds, Tradable
 [Iron Dagger]
 W1
@@ -7,15 +19,59 @@ W1
 3g 4lbs
 T
 
-#Iron Mail Armor Chest, 3 Armor, 10gold 15pounds, Tradable
+#Iron Mallet Weapon 2-Handed, 4-6 damage, 15gold 30pounds, Tradable
+[Iron Mallet]
+W2
+4-6
+15g 30lbs
+T
+
+#Iron Bow Weapon 1-Handed, 1-6 damage, 10gold 7pounds, Tradable
+[Iron Bow]
+WR
+1-6
+10g 7lbs
+T
+
+
+#Iron Mail Armor Chest, 8 Armor, 10gold 15pounds, Tradable
 [Iron Mail]
 AC
 8
 10g 15lbs
 T
 
-#Apple Consumable Ingredient 3gold 4pounds, Stackable Tradable
-[Apple]
-CI
-2g 1lbs
-ST
+#Iron Helm Armor Helm, 3 Armor, 8gold 8pounds, Tradable
+[Iron Helm]
+AH
+3
+8g 8lbs
+T
+
+#Iron Leggings Armor Legs, 6 Armor, 10gold 12pounds, Tradable
+[Iron Leggings]
+AL
+6
+10g 12lbs
+T
+
+#Iron Boots Armor Feet, 4 Armor, 6gold 7pounds, Tradable
+[Iron Boots]
+AF
+4
+6g 7lbs
+T
+
+#Iron Gloves Armor Hands, 4 Armor, 6gold 7pounds, Tradable
+[Iron Gloves]
+AA
+3
+6g 4lbs
+T
+
+#Iron Armor Neck, 1 Armor, 10gold 1pounds, Tradable
+[Bronze Necklace]
+AF
+1
+10g 1lbs
+T
