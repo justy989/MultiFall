@@ -69,6 +69,7 @@ void Population::clear()
 {
     for(int i = 0; i < POPULATION_MAX_CHARACTERS; i++){
         mCharacters[i].setExistence( WorldEntity::Existence::Dead );
+        mCharacters[i].clearItems();
     }
 }
 

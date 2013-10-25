@@ -173,6 +173,11 @@ void Level::clear()
     mNumLights = 0;
     mNumFurniture = 0;
     mNumContainers = 0;
+
+    for(int i = 0; i < mNumContainers; i++){
+        mContainers[i].clearItems();
+    }
+
     mNumDoors = 0;
 }
 

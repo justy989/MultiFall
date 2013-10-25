@@ -22,7 +22,8 @@ public:
 
     Screen( ScreenManager* screenManager, World* world, Party* party ) : 
         mScreenManager(screenManager),
-        mParty(party) {}
+        mParty(party),
+        mWorld(world){}
 
     //Update screen
     virtual void update( float dt, UIDisplay* uiDisplay, float aspectRatio,
@@ -47,6 +48,7 @@ protected:
     EventManager* mEventManager;
     ScreenManager* mScreenManager;
     Party* mParty;
+    World* mWorld;
 
     Transition mTransition;
 };

@@ -55,3 +55,11 @@ bool Character::action( Character::Action::Type type )
 
     return true;
 }
+
+float Character::getDistanceToCharacter( Character& c )
+{
+    float dx = c.mPosition.x - mPosition.x;
+    float dz = c.mPosition.z - mPosition.z;
+
+    return sqrt( ( dx * dx ) + ( dz * dz ) );
+}

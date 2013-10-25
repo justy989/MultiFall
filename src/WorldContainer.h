@@ -47,6 +47,11 @@ public:
     void addGold( uint gold );
     bool takeGold( uint gold );
 
+    inline void clearItems();
+
+    bool open();
+    void close();
+
 protected:
 
     Type mCType;
@@ -63,5 +68,7 @@ inline WorldContainer::Type WorldContainer::getCType(){return mCType;}
 
 inline void WorldContainer::setCState( WorldContainer::State State ){mCState = State;}
 inline WorldContainer::State WorldContainer::getCState(){return mCState;}
+
+inline void WorldContainer::clearItems(){mItems.clear();}
 
 #endif

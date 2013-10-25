@@ -16,6 +16,8 @@ public:
 
     virtual void draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager );
 
+    virtual void handleEvent( Event& e );
+
 protected:
 
     UIWindow mWindow;

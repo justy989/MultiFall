@@ -1524,17 +1524,39 @@ void genItem( Item& item, ItemMaster& itemMaster, Random& random ){
 void WorldGenerator::genItemsInContainers( Level& level, Population& population, ItemMaster& itemMaster )
 {
     for(uint i = 0; i < level.getNumContainer(); i++){
-        Item item;
-        //genItem( item, itemMaster, mRand );
-        //level.getContainer(i).addItem(item);
+
+        /*
+        //20 percent chance to be emtpy
+        if( mRand.gen(1, 11) > 8 ){
+            continue;
+        }*/
+
+        int count = mRand.gen(1, 9);
+
+        while( count ){
+            Item item;
+            genItem( item, itemMaster, mRand );
+            level.getContainer(i).addItem(item);
+            count--; 
+        }
     }
 
-    for(uint i = 0; i < POPULATION_MAX_CHARACTERS; i++){
+    for(uint i = 4; i < POPULATION_MAX_CHARACTERS; i++){
         if( population.getCharacter(i).getExistence() ==
             Character::Existence::Alive ){
-            Item item;
-            //genItem( item, itemMaster, mRand );
-            //population.getCharacter(i).addItem( item );
+            //20 percent chance to be emtpy
+            /*if( mRand.gen(1, 11) > 8 ){
+                continue;
+            }*/
+
+            int count = mRand.gen(1, 9);
+
+            while( count ){
+                Item item;
+                genItem( item, itemMaster, mRand );
+                population.getCharacter(i).addItem( item );
+                count--;
+            }
         }
     }
 }

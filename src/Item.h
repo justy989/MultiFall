@@ -85,7 +85,14 @@ struct ItemDefinition{
 
     uint value; //value of this tier
     Weight weight; //Weight of this tier
-};
+
+    static void buildStringFromItem(char* buffer, ItemDefinition* item, uint stack);
+
+    static char* usageStrings[ 5 ];
+    static char* armorTypeStrings[ 7 ];
+    static char* weaponTypeStrings[ 4 ];
+    static char* consumableTypeStrings[ 3 ]; 
+}; 
 
 class Item{
 public:

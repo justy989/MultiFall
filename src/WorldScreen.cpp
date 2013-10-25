@@ -46,9 +46,9 @@ void WorldScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
         if( key == 'L' ){
             mScreenManager->popScreen();
             return;
-        }else if( key == 'C' ){
+        }/*else if( key == 'C' ){
             mScreenManager->pushScreen( ScreenManager::Container );
-        }
+        }*/
     }
 
     uiDisplay->buildWindowVB( mWindow, aspectRatio );
@@ -57,4 +57,13 @@ void WorldScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
 void WorldScreen::draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager )
 {
     uiDisplay->drawWindowText( device, mWindow, *textManager );
+}
+
+void WorldScreen::handleEvent( Event& e )
+{
+    if( e.type == Event::ContainerOpen ){
+        if( mWorld->getOpenedContainer() ){
+            mScreenManager->pushScreen( ScreenManager::Container );
+        }
+    }
 }

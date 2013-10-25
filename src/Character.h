@@ -75,6 +75,8 @@ public:
     inline Action::State getCurrentActionState();
     inline float getActionProgress();
 
+    float getDistanceToCharacter( Character& c );
+
 protected:
 
     XMFLOAT4 mFacingDirection;

@@ -544,6 +544,8 @@ void App::genLevel( uint seed )
     if( mParty.getMember(0).doesExist() ){
         //Gen the population
         mWorldGen.genPopulation( mWorld.getPopulation(), mWorld.getLevel(), mPopGenRanges, mBlockDimenions );
+
+        mWorldGen.genItemsInContainers( mWorld.getLevel(), mWorld.getPopulation(), mWorld.getItemMaster() );
     }
 
     //Create a mesh from the level
@@ -787,105 +789,114 @@ void App::update( float dt )
         }
     }
 
-    if( collisionMode ){
+    if( !mWorld.getOpenedContainer() ){
+        if( collisionMode ){
 
-        XMVECTOR rotVec;
-        XMMATRIX rotMat;
-        XMVECTOR moveVec;
+            XMVECTOR rotVec;
+            XMMATRIX rotMat;
+            XMVECTOR moveVec;
 
-        moveVec = XMVectorZero();
-        rotMat = XMMatrixRotationAxis( XMVectorSet( 0.0f, 1.0f, 0.0f, 1.0f), mCamera.getPitch() );
-             
-        if( mBinds.isBindDown( UserBinds::Action::Player_Move_Left ) ){
-             rotVec = XMVectorSet( 0.0f, 0.0f, 1.0f, 0.0f );
-             rotVec = XMVector4Transform( rotVec, rotMat );
-             moveVec += rotVec;
-        }
+            moveVec = XMVectorZero();
+            rotMat = XMMatrixRotationAxis( XMVectorSet( 0.0f, 1.0f, 0.0f, 1.0f), mCamera.getPitch() );
         
-        if( mBinds.isBindDown( UserBinds::Action::Player_Move_Right ) ){
-             rotVec = XMVectorSet( 0.0f, 0.0f, -1.0f, 0.0f );
-             rotVec = XMVector4Transform( rotVec, rotMat );
-             moveVec += rotVec;
-        }
+            if( mBinds.isBindDown( UserBinds::Action::Player_Move_Left ) ){
+                 rotVec = XMVectorSet( 0.0f, 0.0f, 1.0f, 0.0f );
+                 rotVec = XMVector4Transform( rotVec, rotMat );
+                 moveVec += rotVec;
+            }
         
-        if( mBinds.isBindDown( UserBinds::Action::Player_Move_Forward ) ){
-             rotVec = XMVectorSet( 1.0f, 0.0f, 0.0f, 0.0f );
-             rotVec = XMVector4Transform( rotVec, rotMat );
-             moveVec += rotVec;
-        }
+            if( mBinds.isBindDown( UserBinds::Action::Player_Move_Right ) ){
+                 rotVec = XMVectorSet( 0.0f, 0.0f, -1.0f, 0.0f );
+                 rotVec = XMVector4Transform( rotVec, rotMat );
+                 moveVec += rotVec;
+            }
         
-        if( mBinds.isBindDown( UserBinds::Action::Player_Move_Backward ) ){
-             rotVec = XMVectorSet( -1.0f, 0.0f, 0.0f, 0.0f );
-             rotVec = XMVector4Transform( rotVec, rotMat );
-             moveVec += rotVec;
-        }
+            if( mBinds.isBindDown( UserBinds::Action::Player_Move_Forward ) ){
+                 rotVec = XMVectorSet( 1.0f, 0.0f, 0.0f, 0.0f );
+                 rotVec = XMVector4Transform( rotVec, rotMat );
+                 moveVec += rotVec;
+            }
+        
+            if( mBinds.isBindDown( UserBinds::Action::Player_Move_Backward ) ){
+                 rotVec = XMVectorSet( -1.0f, 0.0f, 0.0f, 0.0f );
+                 rotVec = XMVector4Transform( rotVec, rotMat );
+                 moveVec += rotVec;
+            }
 
-        if( mBinds.isBindDown( UserBinds::Action::Player_Activate ) ){
-            //Get the player position
-            XMFLOAT4& playerPos = mWorld.getPopulation().getCharacter( mParty.getMyIndex() ).getPosition();
+            if( mBinds.isBindDown( UserBinds::Action::Player_Activate ) ){
+                //Get the player position
+                XMFLOAT4& playerPos = mWorld.getPopulation().getCharacter( mParty.getMyIndex() ).getPosition();
+                Level& level = mWorld.getLevel();
+                bool foundDoor = false;
 
-            Level& level = mWorld.getLevel();
+                //See if there are any doors withing a radius
+                for(ushort i = 0; i < level.getNumDoors(); i++){
+                    Level::Door& d = level.getDoor( i );
 
-            //See if there are any doors withing a radius
-            for(ushort i = 0; i < level.getNumDoors(); i++){
-                Level::Door& d = level.getDoor( i );
+                    float dx = ( d.getPosition().x - playerPos.x );
+                    float dz = ( d.getPosition().z - playerPos.z );
 
-                float dx = ( d.getPosition().x - playerPos.x );
-                float dz = ( d.getPosition().z - playerPos.z );
+                    float dist = sqrt( ( dx * dx ) + ( dz * dz ) );
 
-                float dist = sqrt( ( dx * dx ) + ( dz * dz ) );
-
-                if( dist < 0.35f ){
-                    //Send an even to open it
-                    Event e;
+                    if( dist < 0.35f ){
+                        //Send an even to open it
+                        Event e;
                     
-                    if( d.state == Level::Door::Opened ){
-                        e.type = Event::DoorClose;
-                        e.doorCloseInfo.id = i;
-                    }else if( d.state == Level::Door::Closed ){
-                        e.type = Event::DoorOpen;
-                        e.doorOpenInfo.id = i;
-                    }else{ //It is in the process of opening, do not send any event
-                        continue;
-                    }
+                        if( d.state == Level::Door::Opened ){
+                            e.type = Event::DoorClose;
+                            e.doorCloseInfo.id = i;
+                        }else if( d.state == Level::Door::Closed ){
+                            e.type = Event::DoorOpen;
+                            e.doorOpenInfo.id = i;
+                        }else{ //It is in the process of opening, do not send any event
+                            continue;
+                        }
 
+                        EVENTMANAGER->queueEvent( e );
+                        foundDoor = true;
+                    }
+                }
+
+                //See if there are any containers
+                if( !foundDoor ){
+                    Event e;
+                    e.type = Event::ContainerOpen;
+                    e.containerOpenInfo.memberIndex = mParty.getMyIndex();
                     EVENTMANAGER->queueEvent( e );
                 }
             }
 
-            //See if there are any containers
-        }
+            //If myIndex is valid
+            if( mParty.getMyIndex() < PARTY_SIZE ){
+                //Store the movement vector
+                XMStoreFloat4( &mWorld.getPopulation().getCharacter( mParty.getMyIndex() ).getWalkingDirection(), moveVec );
 
-        //If myIndex is valid
-        if( mParty.getMyIndex() < PARTY_SIZE ){
-            //Store the movement vector
-            XMStoreFloat4( &mWorld.getPopulation().getCharacter( mParty.getMyIndex() ).getWalkingDirection(), moveVec );
+                //Update the world
+                mWorld.update( dt );
+
+                //Set the camera to that position
+                mCamera.getPosition() = mWorld.getPopulation().getCharacter( mParty.getMyIndex() ).getPosition();
+            }
+        }else{
+            if( camKeyDown[0] ){
+                mCamera.moveForwardBack( 2.0f * dt ); 
+            }
+        
+            if( camKeyDown[1] ){
+                mCamera.moveForwardBack( -2.0f * dt ); 
+            }
+        
+            if( camKeyDown[2] ){
+                mCamera.moveLeftRight( 2.0f * dt ); 
+            }
+        
+            if( camKeyDown[3] ){
+                mCamera.moveLeftRight( -2.0f * dt ); 
+            }
 
             //Update the world
             mWorld.update( dt );
-
-            //Set the camera to that position
-            mCamera.getPosition() = mWorld.getPopulation().getCharacter( mParty.getMyIndex() ).getPosition();
         }
-    }else{
-        if( camKeyDown[0] ){
-            mCamera.moveForwardBack( 2.0f * dt ); 
-        }
-        
-        if( camKeyDown[1] ){
-            mCamera.moveForwardBack( -2.0f * dt ); 
-        }
-        
-        if( camKeyDown[2] ){
-            mCamera.moveLeftRight( 2.0f * dt ); 
-        }
-        
-        if( camKeyDown[3] ){
-            mCamera.moveLeftRight( -2.0f * dt ); 
-        }
-
-        //Update the world
-        mWorld.update( dt );
     }
 
     //Get the Cursor position on the window 

@@ -4,7 +4,7 @@
 
 WorldContainer::WorldContainer() :
     mCType(TNone),
-    mCState(SNone),
+    mCState(Closed),
     mGold(0)
 {
 
@@ -28,6 +28,17 @@ Item* WorldContainer::getItem( uint index )
 
 void WorldContainer::addItem( Item& item )
 {
+    //Iterate through the list
+
+    //If IDs match, add to the stack
+    for (std::list<Item>::iterator it = mItems.begin(); it != mItems.end(); ++it){
+        if( (*it).id == item.id ){
+            (*it).stack++;
+            return;
+        }
+    }
+
+    item.stack = 1;
     mItems.push_back( item );
 }
 
@@ -56,4 +67,20 @@ bool WorldContainer::takeGold( uint gold )
     }
 
     return false;
+}
+
+bool WorldContainer::open()
+{
+    if( getNumItems() &&
+        mCState == WorldContainer::State::Closed ){
+        mCState = WorldContainer::State::Open;
+        return true;
+    }
+
+    return false;
+}
+
+void WorldContainer::close()
+{
+    mCState = WorldContainer::State::Closed;
 }

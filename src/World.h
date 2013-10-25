@@ -28,9 +28,15 @@ public:
     //Set the block dimensions
     inline void setBlockDimension( float d );
 
+    inline WorldContainer* getOpenedContainer();
+
 protected:
 
     bool checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition, XMVECTOR* outWallVector);
+
+    WorldContainer* findCloseContainer( uint memberIndex );
+
+protected:
 
     Level mLevel;
     Population mPop;
@@ -39,6 +45,8 @@ protected:
     //Activatables mActivatables;
 
     ItemMaster mItemMaster;
+
+    WorldContainer* mOpenedContainer;
 
     //Block settings
     float mBlockDimension;
@@ -50,5 +58,7 @@ inline ItemMaster& World::getItemMaster(){return mItemMaster;}
 
 inline float World::getBlockDimension(){return mBlockDimension;}
 inline void World::setBlockDimension( float d ){mBlockDimension = d;}
+
+inline WorldContainer* World::getOpenedContainer(){return mOpenedContainer;}
 
 #endif

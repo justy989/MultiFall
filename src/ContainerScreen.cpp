@@ -4,27 +4,53 @@ ContainerScreen::ContainerScreen( ScreenManager* screenManager, World* world, Pa
     Screen( screenManager, world, party )
 {
     mWindow.init(1);
-    mWindow.initTab( 0, "", 5 );
-    mWindow.setPosition( XMFLOAT2( -0.5f, -0.75f ) );
-    mWindow.setDimension( XMFLOAT2( 1.0f, 1.5f ) );
+    mWindow.initTab( 0, "", 6 );
+    mWindow.setPosition( XMFLOAT2( -0.75f, -0.75f ) );
+    mWindow.setDimension( XMFLOAT2( 1.5f, 1.5f ) );
     mWindow.setText( UIElement::Text( "Container" ) );
 
     mItemBox = new UIOptionBox();
 
-    char buffer[ 32 ];
 
-    for(int i = 0; i < 13; i++){
+    char buffer[256];
+
+    /*
+    for(int i = 0; i < 12; i++){
         sprintf(buffer, "%d", i ); 
         mItemBox->addOption(buffer);
+    }*/
+
+    WorldContainer* container = world->getOpenedContainer();
+
+    if( container ){
+        for(uint i = 0; i < container->getNumItems(); i++){
+            ItemDefinition* item = world->getItemMaster().getDefinitionFromID( container->getItem(i)->id );
+            mItemBox->addOption( item->name );
+        }
     }
 
-    mItemBox->setText( UIElement::Text("32 Items", XMFLOAT2( 0.0f, -FONTHEIGHT - 0.04f ) ) );
+    sprintf(buffer, "%d Items", container->getNumItems() );
 
-    mItemBox->setPosition( XMFLOAT2( 0.05f, 0.15f ) );
-    mItemBox->setDimension( XMFLOAT2( 0.75f, 1.1f ) );
+    mItemBox->setText( UIElement::Text(buffer, XMFLOAT2( 0.0f, -FONTHEIGHT - 0.04f ) ) );
+
+    mItemBox->setPosition( XMFLOAT2( 0.05f, 0.225f ) );
+    mItemBox->setDimension( XMFLOAT2( 0.75f, 1.05f ) );
 
     mItemBox->setScrollLimit( 48 );
     mItemBox->setScrollIndex( 0 );
+
+    mTextBox = new UITextBox();
+
+    mTextBox->setPosition( XMFLOAT2( 0.825f, 0.325f ) );
+    mTextBox->setDimension( XMFLOAT2( 0.65f, 0.875f ) );
+
+    container = mWorld->getOpenedContainer();
+    if( container ){
+        ItemDefinition* item = mWorld->getItemMaster().getDefinitionFromID( container->getItem(mItemBox->getSelected())->id );
+        ItemDefinition::buildStringFromItem(buffer, item, container->getItem(mItemBox->getSelected())->stack); 
+    }
+
+    mTextBox->setText( buffer, strlen(buffer) );
 
     mTakeButton = new UIButton();
 
@@ -41,7 +67,7 @@ ContainerScreen::ContainerScreen( ScreenManager* screenManager, World* world, Pa
     mScrollUpBtn = new UIButton();
 
     mScrollUpBtn->setText( UIElement::Text("Up") );
-    mScrollUpBtn->setPosition( XMFLOAT2( 0.825f, 0.15f ) );
+    mScrollUpBtn->setPosition( XMFLOAT2( 0.825f, 0.225f ) );
     mScrollUpBtn->setDimension( XMFLOAT2( 0.15f, 0.08f ) );
 
     mScrollDownBtn = new UIButton();
@@ -55,6 +81,7 @@ ContainerScreen::ContainerScreen( ScreenManager* screenManager, World* world, Pa
     mWindow.addElem( mTakeButton );
     mWindow.addElem( mScrollUpBtn );
     mWindow.addElem( mScrollDownBtn );
+    mWindow.addElem( mTextBox );
 }
 
 ContainerScreen::~ContainerScreen()
@@ -69,35 +96,49 @@ void ContainerScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
 
     if( change.action == UIElement::UserChange::ClickButton ){
         if( change.id == 1 ){
+            Event e;
+            e.type = Event::ContainerClose;
+            e.containerCloseInfo.memberIndex = mParty->getMyIndex();
+            EVENTMANAGER->queueEvent(e);
             mScreenManager->popScreen();
             return;
         }else if( change.id == 2 ){
 
         }else if( change.id == 3 ){
+            /*
             mItemBox->scroll( true );
 
             mItemBox->clearOptions();
 
             char buffer[ 32 ];
 
-            for(int i = 0; i < 13; i++){
-                sprintf(buffer, "%d", i + ( mItemBox->getScrollIndex() - 13 ) ); 
+            for(int i = 0; i < 12; i++){
+                sprintf(buffer, "%d", i + ( mItemBox->getScrollIndex() - 12 ) ); 
                 mItemBox->addOption(buffer);
-            }
+            }*/
 
         }else if( change.id == 4 ){
+            /*
             mItemBox->scroll( false );
 
             char buffer[ 32 ];
 
             mItemBox->clearOptions();
 
-            for(int i = 0; i < 13; i++){
-                sprintf(buffer, "%d", i + ( mItemBox->getScrollIndex() - 13 ) ); 
+            for(int i = 0; i < 12; i++){
+                sprintf(buffer, "%d", i + ( mItemBox->getScrollIndex() - 12 ) ); 
                 mItemBox->addOption(buffer);
-            }
+            }*/
         }
     }
+
+    char buffer[256];
+
+    WorldContainer* container = mWorld->getOpenedContainer();
+    ItemDefinition* item = mWorld->getItemMaster().getDefinitionFromID( container->getItem(mItemBox->getSelected())->id );
+    ItemDefinition::buildStringFromItem(buffer, item, container->getItem(mItemBox->getSelected())->stack);
+
+    mTextBox->setText( buffer, strlen(buffer) );
 
     uiDisplay->buildWindowVB( mWindow, aspectRatio );
 }
@@ -105,4 +146,9 @@ void ContainerScreen::update( float dt, UIDisplay* uiDisplay, float aspectRatio,
 void ContainerScreen::draw( ID3D11DeviceContext* device, UIDisplay* uiDisplay, TextManager* textManager )
 {
     uiDisplay->drawWindowText( device, mWindow, *textManager );
+}
+
+void ContainerScreen::handleEvent( Event& e )
+{
+    
 }

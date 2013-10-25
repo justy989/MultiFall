@@ -424,7 +424,7 @@ UIElement::UserChange UIOptionBox::update( bool mouseClick, XMFLOAT2 mousePositi
         uint spot = 0;
         for(uint i = mScrollIndex - mNumOptions; i <= mScrollIndex; i++){
 
-            float topY = ( static_cast<float>(spot) * ( FONTHEIGHT + 0.04f ) );
+            float topY = ( static_cast<float>(spot+1) * ( FONTHEIGHT + 0.04f ) );
             float bottomY = topY + FONTHEIGHT + 0.04f;
             
             if( mousePosition.y >= topY && mousePosition.y <= bottomY ){

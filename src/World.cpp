@@ -1,6 +1,9 @@
 #include "World.h"
 
-World::World()
+#include "Log.h"
+
+World::World() :
+    mOpenedContainer(NULL)
 {
 
 }
@@ -102,6 +105,31 @@ void World::handleEvent( Event& e )
         break;
     case Event::Type::DoorClose:
         mLevel.getDoor( e.doorCloseInfo.id ).close();
+        break;
+    case Event::Type::ContainerOpen:
+        {
+            WorldContainer* container = findCloseContainer(e.containerOpenInfo.memberIndex);
+
+            if( container ){
+                //If the container exists try and open it
+                if( container->open() ){
+                    mOpenedContainer = container;
+                }else{
+                    LOG_INFO << "Unable to open container. Perhaps occupied by someone else?" << LOG_ENDL;
+                }
+            }
+        }
+        break;
+    case Event::Type::ContainerClose:
+        {
+            WorldContainer* container = findCloseContainer(e.containerCloseInfo.memberIndex);
+
+            if( container ){
+                container->close();
+            }
+
+            mOpenedContainer = NULL;
+        }
         break;
     default:
         break;
@@ -588,4 +616,39 @@ bool World::checkEntityCollision( WorldEntity* entity, XMVECTOR desiredPosition,
 
     *outWallVector = wallX + wallZ;
     return collided;
+}
+
+WorldContainer* World::findCloseContainer( uint memberIndex )
+{
+    //Check containers
+    int px = static_cast<int>(mPop.getCharacter( memberIndex ).getPosition().x / 0.3f);//mBlockDimension);
+    int pz = static_cast<int>(mPop.getCharacter( memberIndex ).getPosition().z / 0.3f);//mBlockDimension);
+
+    //Calc range
+    int sx = px - 1;
+    int ex = px + 1;
+    int sz = pz - 1;
+    int ez = pz + 1;
+
+    CLAMP(sx, 0, mLevel.getWidth() - 1);
+    CLAMP(sz, 0, mLevel.getDepth() - 1);
+    CLAMP(ex, 0, mLevel.getWidth() - 1);
+    CLAMP(ez, 0, mLevel.getDepth() - 1);
+
+    for(int x = sx; x <= ex; x++){
+        for(int z = sz; z <= ez; z++){
+            if( mLevel.getBlock(x, z).getCollidableType() == Level::Block::Collidable::Container ){
+                return mLevel.getBlock(x, z).getContainer();
+            }
+        }
+    }
+
+    //Check dead ppl
+    for(int i = 4; i < POPULATION_MAX_CHARACTERS; i++){
+        if( mPop.getCharacter(i).getDistanceToCharacter( mPop.getCharacter( memberIndex ) ) < 0.2f ){
+            return &mPop.getCharacter(i);
+        }
+    }
+
+    return NULL;
 }
